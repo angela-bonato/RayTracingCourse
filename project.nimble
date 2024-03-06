@@ -1,8 +1,8 @@
 # Package
 
 version       = "0.1.0"
-author        = "Angela Bonato"
-description   = "RayTracingCourseProject"
+author        = "Angela Bonato and Tommaso Rovelli"
+description   = "Ray Tracing Course Project (a.y. 2023-2024)"
 license       = "MIT"
 srcDir        = "src"
 bin           = @["project"]
