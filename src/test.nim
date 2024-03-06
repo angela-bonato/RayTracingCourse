@@ -1,5 +1,5 @@
 #tests on is_close function
-var col=Color(1.0, 2.0, 3.0)
+var col=newColor(1.0, 2.0, 3.0)
 
 assert col.is_close(Color(1.0, 2.0, 3.0))
 assert not col.is_close(Color(3.0, 4.0, 5.0))
