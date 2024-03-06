@@ -1,7 +1,6 @@
 #[Some useful procs ]#
 
 import Types
-import std/math
 
 ### Color type constructors ###
 
@@ -60,10 +59,10 @@ func `*`*(a: float32, c : Color) : Color =
 
 ### Usefull for tests ###
 
-proc is_colse*(float32 scal1, float32 scal2) : bool =
+proc is_close*(scal1, scal2: float32) : bool =
     return ( abs(scal1-scal2)<=1e-5 )
 
-proc is_colse*(Color col1, Color col2) : bool =
+proc is_close*(col1, col2: Color) : bool =
     return ( is_close(col1.r, col2.r) ) and
             ( is_close(col1.g, col2.g) ) and
             ( is_close(col1.b, col2.b) )
