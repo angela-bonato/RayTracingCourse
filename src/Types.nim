@@ -1,6 +1,4 @@
-#[
-    Definition of type Color and HdrImage
-]#
+#[ Definition of type Color and HdrImage ]#
 
 type
     #Color class definition, it contains RGB definition of a color

@@ -57,16 +57,6 @@ func `*`*(a: float32, c : Color) : Color =
     result.b = a * c.b 
     return result
 
-### Usefull for tests ###
-
-proc is_close*(scal1, scal2: float32) : bool =
-    return ( abs(scal1-scal2)<=1e-5 )
-
-proc is_close*(col1, col2: Color) : bool =
-    return ( is_close(col1.r, col2.r) ) and
-            ( is_close(col1.g, col2.g) ) and
-            ( is_close(col1.b, col2.b) )
-
 ### HdrImage pixel access ###
 
 proc valid_coordinates*(img: HdrImage, x,y: int) : bool = 
@@ -87,3 +77,5 @@ proc setPixel*(img: HdrImage, x,y: int, new_color : Color) : void =
     #[Set the color of the pixel at the coordinates x,y]#
     assert img.valid_coordinates(x,y)
     img.pixels[img.pixel_offset(x,y)] = new_color
+
+    
