@@ -1,5 +1,8 @@
+import ../src/Types
+import ../src/Procs
+
 #tests on is_close function
-var col=Color(1.0, 2.0, 3.0)
+var col = newColor(1.0, 2.0, 3.0)
 
 assert col.is_close(Color(1.0, 2.0, 3.0))
 assert not col.is_close(Color(3.0, 4.0, 5.0))
@@ -14,8 +17,8 @@ proc test_color_creation():void=
 
 #tests on the overloaded operators on Color elements
 var
-    col1=Color(1.0, 2.0, 3.0)
-    col2=Color(5.0, 7.0, 9.0)
+    col1 = newColor(1.0, 2.0, 3.0)
+    col2 = newColor(5.0, 7.0, 9.0)
     scalar:float32
 scalar=2.0
 
@@ -25,14 +28,14 @@ assert (col1 * scalar).is_close(Color(2.0, 4.0, 6.0))
 
 #tests on HdrImage creation
 proc test_image_creation():void=
-    var img=HdrImage(7, 4)
+    var img = newHdrImage(7, 4)
 
-    assert img.width==7
-    assert img.height==4
+    assert img.width == 7
+    assert img.height == 4
 
 #tests on HdrImage coordinates
 proc test_coordinates():void=
-    var img=HdrImage(7, 4)
+    var img = newHdrImage(7, 4)
 
     assert img.valid_coordinates(0, 0)
     assert img.valid_coordinates(6, 3)
@@ -43,7 +46,7 @@ proc test_coordinates():void=
 
 #tests on HdrImage pixels conversion from array to matrix
 proc test_pixel_offset():void=
-    var img=HdrImage(7, 4)
+    var img = newHdrImage(7, 4)
 
     assert img.pixel_offset(0, 0,)==0
     assert img.pixel_offset(3, 2,)==17
@@ -52,8 +55,8 @@ proc test_pixel_offset():void=
 #tests on HdrImage pixels methods
 proc test_get_set_pixel():void=
     var
-        img=HdrImage(7, 4)
-        col=Color(1.0, 2.0, 3.0)
+        img = newHdrImage(7, 4)
+        col = newColor(1.0, 2.0, 3.0)
 
     img.setPixel(3, 2, col)
 
