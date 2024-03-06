@@ -27,7 +27,7 @@ proc newHdrImage*(): HdrImage =
     result.pixels = newSeq[Color](0)
     return result
 
-proc newHdrImage*(height,width : int): HdrImage = 
+proc newHdrImage*(width,height : int): HdrImage = 
     #[Constructor with elements, initialize the variables to given values]#
     result.height = height
     result.width = width
@@ -78,4 +78,20 @@ proc setPixel*(img: HdrImage, x,y: int, new_color : Color) : void =
     assert img.valid_coordinates(x,y)
     img.pixels[img.pixel_offset(x,y)] = new_color
 
-    
+### Print methods ###
+
+proc print*(col: Color): void =
+    echo "Color(r=", col.r, ", g=", col.g, ", b=", col.b, ")"
+
+proc print*(img: HdrImage): void =
+    echo "HdrImage(width=", img.width, ", height=", img.height, ")"
+
+### Usefull for tests ###
+
+proc is_close*(scal1, scal2: float32) : bool =
+    return ( abs(scal1-scal2)<=1e-5 )
+
+proc is_close*(col1, col2: Color) : bool =
+    return ( is_close(col1.r, col2.r) ) and
+            ( is_close(col1.g, col2.g) ) and
+            ( is_close(col1.b, col2.b) )
