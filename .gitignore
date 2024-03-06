@@ -6,7 +6,9 @@ nimcache/
 nimblecache/
 htmldocs/
 
+### Executables Nim ###
 project
+test
 
 ### VisualStudioCode ###
 .vscode/*
