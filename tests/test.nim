@@ -37,7 +37,7 @@ proc test_overload(): void =
 
 
 proc test_image_creation(): void =
-    var img = newHdrImage(7, 4)
+    var img = newHdrImage(7,4)
 
     assert img.width == 7
     assert img.height == 4
@@ -70,3 +70,13 @@ proc test_get_set_pixel(): void =
     img.setPixel(3, 2, col)
 
     assert col.is_close(img.getPixel(3, 2))
+
+#doing all the tests
+
+test_is_close()
+test_color_creation()
+test_overload()
+test_image_creation()
+test_coordinates()
+test_pixel_offset()
+test_get_set_pixel()

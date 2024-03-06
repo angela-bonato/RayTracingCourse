@@ -22,17 +22,21 @@ proc newColor*(r,g,b : float32): Color =
 
 proc newHdrImage*(): HdrImage = 
     #[Empty constructor, initialize all the variables to zero]#
-    result.height = 0
-    result.width = 0
-    result.pixels = newSeq[Color](0)
-    return result
+    var img: HdrImage
+    new(img)
+    img.height = 0
+    img.width = 0
+    img.pixels = newSeq[Color](0)
+    return img
 
 proc newHdrImage*(width,height : int): HdrImage = 
     #[Constructor with elements, initialize the variables to given values]#
-    result.height = height
-    result.width = width
-    result.pixels = newSeq[Color](height*width)
-    return result
+    var img: HdrImage
+    new(img)
+    img.height = height
+    img.width = width
+    img.pixels = newSeq[Color](height*width)
+    return img
 
 ### Color algebra ###
 
@@ -61,8 +65,8 @@ func `*`*(a: float32, c : Color) : Color =
 
 proc valid_coordinates*(img: HdrImage, x,y: int) : bool = 
     #[Check if the given coordinates are inside the image]#
-    return ( (x >= 0) and (x <= img.width) ) and
-           ( (y >= 0) and (y <= img.height) ) 
+    return ( (x >= 0) and (x < img.width) ) and
+           ( (y >= 0) and (y < img.height) ) 
 
 proc pixel_offset*(img: HdrImage, x,y: int) : int = 
     #[Give the linear position of a pixel, given its x,y]#
