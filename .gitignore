@@ -6,6 +6,8 @@ nimcache/
 nimblecache/
 htmldocs/
 
+project
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
