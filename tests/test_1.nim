@@ -19,8 +19,6 @@ proc test_color_creation(): void =
     assert col.g.is_close(2.0)
     assert col.b.is_close(3.0)
 
-#tests on HdrImage creation
-
 #tests on the overloaded operators on Color elements
 proc test_overload(): void =
     var
@@ -35,7 +33,7 @@ proc test_overload(): void =
     assert (col1 * col2).is_close(col4)
     assert (scalar * col1).is_close(col5)
 
-
+#tests on HdrImage creation
 proc test_image_creation(): void =
     var img = newHdrImage(7,4)
 
