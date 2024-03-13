@@ -3,6 +3,7 @@
 import Types
 import std/streams
 import std/endians
+import std/strutils
 
 ### Color type constructors ###
 
@@ -103,12 +104,39 @@ proc is_close*(col1, col2: Color) : bool =
 ### Write PFM file ###
 
 proc write_float*( stream : Stream, num : float32, endianness : Endianness ) : void =
-    var tmp : int32
+    #[write a float on a stream, with a specified endianness]#
+    var tmp : int32 #int32 is to force to write the bytes on the stream
     if endianness == bigEndian :
-        bigEndian32(addr tmp, addr num)
+        bigEndian32(addr tmp, addr num)     #functions to adjust the endianness
     elif endianness == littleEndian :
         littleEndian32(addr tmp, addr num)
-        
     stream.write(tmp)
 
+proc write_pfm*( img : HdrImage, stream : Stream, endianness = littleEndian ) : void =
+    #[write the HdrImage on a file using the PFM format]#
+    var 
+        endianness_str : string
+        header : string
 
+    #set the endianness string 
+    if endianness == littleEndian :
+        endianness_str = "-1.0"
+    elif endianness == bigEndian :
+        endianness_str = "1.0"
+
+    #a PFM file must have at the beginning the following lines:
+
+    #PF
+    #width height
+    #endianness (positive value for bigEndian and nevative for littleEndia)
+
+    header = "PF\n" & intToStr(img.width) & " " & intToStr(img.height) & "\n" & endianness_str & "\n"
+    stream.write(header)
+
+    #Writing the colors on the file, the PFM format is read from the bottom to the top and from the left to the right
+    for y in countdown( img.height-1 , 0 ):
+        for x in 0 ..< img.width: 
+            var color = img.getPixel(x,y)
+            write_float(stream, color.r, endianness)
+            write_float(stream, color.g, endianness)
+            write_float(stream, color.b, endianness)
