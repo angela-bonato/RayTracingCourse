@@ -22,21 +22,19 @@ proc newColor*(r,g,b : float32): Color =
 
 proc newHdrImage*(): HdrImage = 
     #[Empty constructor, initialize all the variables to zero]#
-    var img: HdrImage
-    new(img)
-    img.height = 0
-    img.width = 0
-    img.pixels = newSeq[Color](0)
-    return img
+    new(result)
+    result.height = 0
+    result.width = 0
+    result.pixels = newSeq[Color](0)
+    return result
 
 proc newHdrImage*(width,height : int): HdrImage = 
     #[Constructor with elements, initialize the variables to given values]#
-    var img: HdrImage
-    new(img)
-    img.height = height
-    img.width = width
-    img.pixels = newSeq[Color](height*width)
-    return img
+    new(result)
+    result.height = height
+    result.width = width
+    result.pixels = newSeq[Color](height*width)
+    return result
 
 ### Color algebra ###
 
