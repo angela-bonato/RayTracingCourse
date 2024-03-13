@@ -1,6 +1,8 @@
 #[Some useful procs ]#
 
 import Types
+import std/streams
+import std/endians
 
 ### Color type constructors ###
 
@@ -97,3 +99,16 @@ proc is_close*(col1, col2: Color) : bool =
     return ( is_close(col1.r, col2.r) ) and
             ( is_close(col1.g, col2.g) ) and
             ( is_close(col1.b, col2.b) )
+
+### Write PFM file ###
+
+proc write_float*( stream : Stream, num : float32, endianness : Endianness ) : void =
+    var tmp : int32
+    if endianness == bigEndian :
+        bigEndian32(addr tmp, addr num)
+    elif endianness == littleEndian :
+        littleEndian32(addr tmp, addr num)
+        
+    stream.write(tmp)
+
+
