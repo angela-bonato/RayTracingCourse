@@ -9,6 +9,7 @@ htmldocs/
 ### Executables Nim ###
 project
 test
+test_2
 
 ### VisualStudioCode ###
 .vscode/*
