@@ -128,7 +128,7 @@ proc write_pfm*( img : HdrImage, stream : Stream, endianness = littleEndian ) : 
 
     #PF
     #width height
-    #endianness (positive value for bigEndian and nevative for littleEndia)
+    #endianness (positive value for bigEndian and nevative for littleEndian)
 
     header = "PF\n" & intToStr(img.width) & " " & intToStr(img.height) & "\n" & endianness_str & "\n"
     stream.write(header)
