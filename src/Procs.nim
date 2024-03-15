@@ -140,3 +140,20 @@ proc write_pfm*( img : HdrImage, stream : Stream, endianness = littleEndian ) : 
             write_float(stream, color.r, endianness)
             write_float(stream, color.g, endianness)
             write_float(stream, color.b, endianness)
+
+### Read PFM files ###
+
+proc read_float*(stream : Stream, endianness : Endianness) : float =
+    #[to read a float32 from a stream of byte, given an endianness]#
+    var 
+        num : float32
+        tmp : float32
+
+    if endianness == littleEndian: 
+        if stream.readData(addr(num),4) == 4:   
+            return num
+    if endianness == bigEndian:
+        if stream.readData(addr(tmp),4) == 4:
+            bigEndian32(addr(num),addr(tmp))    #use of bigEndian32 to revese the byte order and to obtain the right littleEndian order
+            return num
+    
