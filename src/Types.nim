@@ -9,3 +9,6 @@ type
     HdrImage* = ref object
         width*, height*: int    #dimensions of the matrix
         pixels*: seq[Color]    #1D array with all the Colors in the image
+
+    #Exception definition, used in functions for reading and writing pfm files
+    InvalidPfmFileFormat* = object of Exception

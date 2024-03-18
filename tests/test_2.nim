@@ -3,7 +3,7 @@ import ../src/Procs
 import std/streams
 import std/memfiles
 
-##Tests on write_pfm##
+##Tests on functions to write pfm files##
 
 proc test_write_pfm() : void =
     var 
@@ -41,6 +41,8 @@ proc test_write_pfm() : void =
 
     mystream.close()
 
+##Tests on functions to read pfm files##
+
 proc test_readLine(): void =
     var 
         stream = newStringStream("hello\nworld")
@@ -51,11 +53,16 @@ proc test_readLine(): void =
     assert stream.readLine(line)
     assert line == "world"
 
+proc test_parse_img_size(): void =
+    assert parse_img_size("3 2") == (3, 2)
+
+    #per i test che sollevano eccezioni devo ancora capire come fare :/
+
 ##Execute all tests##
 
 #test_write_pfm()
 #test_readLine()
-
+#test_parse_img_size()
 
 
 

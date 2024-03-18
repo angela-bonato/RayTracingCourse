@@ -156,4 +156,21 @@ proc read_float*(stream : Stream, endianness : Endianness) : float =
         if stream.readData(addr(tmp),4) == 4:
             bigEndian32(addr(num),addr(tmp))    #use of bigEndian32 to revese the byte order and to obtain the right littleEndian order
             return num
+
+proc parse_img_size*(line : string) : (int, int) =   #in the main you should write let (w, h)=parse_img_size(line) 
+    #[reads the line with width and height contained in the header of a PFM file and returns them as ints]#
+    var elements = split(line, " ")
+    if elements.len != 2:
+       raise InvalidPfmFileFormat.newException("invalid image size specification")
     
+    try:
+        var 
+            width = parseInt(elements[0])
+            height = parseInt(elements[1])
+        if width<0 or height>0 :
+            raise ValueError.newException(" ")    #senza " " mi dà errore mentre così funziona ergo penso sia corretto
+        
+        return (width, height)
+    
+    except ValueError :
+        raise InvalidPfmFileFormat.newException("invalid width/heignt")
