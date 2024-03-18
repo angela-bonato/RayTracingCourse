@@ -1,7 +1,6 @@
 import ../src/Types
 import ../src/Procs
 import std/streams
-import std/memfiles
 
 ##Tests on write_pfm##
 
@@ -51,10 +50,16 @@ proc test_readLine(): void =
     assert stream.readLine(line)
     assert line == "world"
 
+proc text_parse_endianness(): void =
+    assert parse_endianness("1.0") == bigEndian
+    assert parse_endianness("-1.0") == littleEndian
+
+
 ##Execute all tests##
 
 #test_write_pfm()
 #test_readLine()
+#text_parse_endianness()
 
 
 

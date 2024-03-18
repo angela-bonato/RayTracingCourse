@@ -143,6 +143,8 @@ proc write_pfm*( img : HdrImage, stream : Stream, endianness = littleEndian ) : 
 
 ### Read PFM files ###
 
+type InvalidPfmFileFormat* = object of IOError  #error raised if something wrong happen in reading the PFM file
+
 proc read_float*(stream : Stream, endianness : Endianness) : float =
     #[to read a float32 from a stream of byte, given an endianness]#
     var 
@@ -151,9 +153,25 @@ proc read_float*(stream : Stream, endianness : Endianness) : float =
 
     if endianness == littleEndian: 
         if stream.readData(addr(num),4) == 4:   
+            littleEndian32(addr(num), addr(tmp))
             return num
     if endianness == bigEndian:
         if stream.readData(addr(tmp),4) == 4:
             bigEndian32(addr(num),addr(tmp))    #use of bigEndian32 to revese the byte order and to obtain the right littleEndian order
             return num
-    
+
+proc parse_endianness*(line : string) : Endianness = 
+    #[to understand which is the endianness of the file, it mus be a positive or negative number]#
+    var value : float
+
+    try: 
+        value = parseFloat(line)
+    except ValueError as e:
+        raise InvalidPfmFileFormat.newException("Invalid endianness format: " & e.msg)  #error raised if it fails converting string to float
+
+    if value > 0: 
+        return bigEndian
+    elif value < 0:
+        return littleEndian
+    else :
+        raise InvalidPfmFileFormat.newException("Invalid endianness specification: it cannot be zero") # error raised if the value is zero
