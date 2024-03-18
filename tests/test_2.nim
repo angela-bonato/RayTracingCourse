@@ -1,6 +1,7 @@
 import ../src/Types
 import ../src/Procs
 import std/streams
+import std/unittest
 
 ##Tests on write_pfm##
 
@@ -54,12 +55,18 @@ proc text_parse_endianness(): void =
     assert parse_endianness("1.0") == bigEndian
     assert parse_endianness("-1.0") == littleEndian
 
+    expect InvalidPfmFileFormat:
+        var a = parse_endianness("abc")
+    
+    expect InvalidPfmFileFormat:
+        var a = parse_endianness("0")
+
 
 ##Execute all tests##
 
 #test_write_pfm()
 #test_readLine()
-#text_parse_endianness()
+text_parse_endianness()
 
 
 
