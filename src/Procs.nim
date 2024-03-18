@@ -151,6 +151,7 @@ proc read_float*(stream : Stream, endianness : Endianness) : float =
 
     if endianness == littleEndian: 
         if stream.readData(addr(num),4) == 4:   
+            littleEndian32(addr(num), addr(tmp))
             return num
     if endianness == bigEndian:
         if stream.readData(addr(tmp),4) == 4:
@@ -161,16 +162,35 @@ proc parse_img_size*(line : string) : (int, int) =   #in the main you should wri
     #[reads the line with width and height contained in the header of a PFM file and returns them as ints]#
     var elements = split(line, " ")
     if elements.len != 2:
-       raise InvalidPfmFileFormat.newException("invalid image size specification")
+       raise InvalidPfmFileFormat.newException("Invalid image size specification")  #the dimension of the image must be two
     
     try:
         var 
             width = parseInt(elements[0])
             height = parseInt(elements[1])
-        if width<0 or height>0 :
-            raise ValueError.newException(" ")    #senza " " mi dà errore mentre così funziona ergo penso sia corretto
+
+        if width>=0 and height>=0 :
+            return (width, height)
+            
+        else:
+            except ValueError as e:
+                raise InvalidPfmFileFormat.newException("Invalid width/heignt: " & e.msg)   #the dimension of the image must be non negative
+
         
-        return (width, height)
     
-    except ValueError :
-        raise InvalidPfmFileFormat.newException("invalid width/heignt")
+    
+proc parse_endianness*(line : string) : Endianness = 
+    #[to understand which is the endianness of the file, it mus be a positive or negative number]#
+    var value : float
+
+    try: 
+        value = parseFloat(line)
+    except ValueError as e:
+        raise InvalidPfmFileFormat.newException("Invalid endianness format: " & e.msg)  #error raised if it fails converting string to float
+
+    if value > 0: 
+        return bigEndian
+    elif value < 0:
+        return littleEndian
+    else :
+        raise InvalidPfmFileFormat.newException("Invalid endianness specification: it cannot be zero") # error raised if the value is zero

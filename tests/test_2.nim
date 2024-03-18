@@ -1,7 +1,7 @@
 import ../src/Types
 import ../src/Procs
 import std/streams
-import std/memfiles
+import std/unittest
 
 ##Tests on functions to write pfm files##
 
@@ -56,13 +56,32 @@ proc test_readLine(): void =
 proc test_parse_img_size(): void =
     assert parse_img_size("3 2") == (3, 2)
 
-    #per i test che sollevano eccezioni devo ancora capire come fare :/
+    expect InvalidPfmFileFormat:
+        var a = parse_endianness("3 2 1")
+    
+    expect InvalidPfmFileFormat:
+        var b = parse_endianness("-1 3")
+
+    
+
+proc text_parse_endianness(): void =
+    assert parse_endianness("1.0") == bigEndian
+    assert parse_endianness("-1.0") == littleEndian
+
+    expect InvalidPfmFileFormat:
+        var a = parse_endianness("abc")
+    
+    expect InvalidPfmFileFormat:
+        var a = parse_endianness("0")
+
 
 ##Execute all tests##
 
 #test_write_pfm()
 #test_readLine()
-#test_parse_img_size()
+test_parse_img_size()
+
+text_parse_endianness()
 
 
 
