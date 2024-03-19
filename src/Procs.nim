@@ -169,13 +169,14 @@ proc parse_img_size*(line : string) : (int, int) =   #in the main you should wri
             width = parseInt(elements[0])
             height = parseInt(elements[1])
 
-        if width>=0 and height>=0 :
-            return (width, height)
-            
-        else:
-            except ValueError as e:
-                raise InvalidPfmFileFormat.newException("Invalid width/heignt: " & e.msg)   #the dimension of the image must be non negative
+    if width<0 or height<0 :
+        except ValueError as e:
+            raise InvalidPfmFileFormat.newException("Invalid width/heignt: " & e.msg)   #the dimension of the image must be non negative
 
+    else:
+        return (width, height)
+
+        
         
     
     
