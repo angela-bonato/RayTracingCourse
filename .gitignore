@@ -8,7 +8,7 @@ htmldocs/
 
 ### Executables Nim ###
 project
-test
+test_1
 test_2
 
 ### Test files  ###
