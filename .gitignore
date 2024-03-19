@@ -11,6 +11,9 @@ project
 test
 test_2
 
+### Test files  ###
+*.pfm
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json

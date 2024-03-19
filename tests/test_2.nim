@@ -1,49 +1,40 @@
 import ../src/Types
-import ../src/Procs
+import ../src/Procs_methods
+import ../src/Procs_pfm
 import std/streams
 import std/unittest
 
-##Tests on functions to write pfm files##
+##Tests on functions related to pfm files##
 
 proc test_write_pfm() : void =
+    #[tests on write_pfm()]#
     var 
-        img = newHdrImage(3, 2)
-        col1 = newColor(1.0e1, 2.0e1, 3.0e1)
-        col2 = newColor(4.0e1, 5.0e1, 6.0e1)
-        col3 = newColor(7.0e1, 8.0e1, 9.0e1)
-        col4 = newColor(1.0e2, 2.0e2, 3.0e2)
-        col5 = newColor(4.0e2, 5.0e2, 6.0e2)
-        col6 = newColor(7.0e2, 8.0e2, 9.0e2)
-        mystream = newFileStream("prova.pfm", fmWrite)
-    
-    #[This is the correct binary version of img]#
-    var refbytes=[
-    0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x2d, 0x31, 0x2e, 0x30, 0x0a,
-    0x00, 0x00, 0xc8, 0x42, 0x00, 0x00, 0x48, 0x43, 0x00, 0x00, 0x96, 0x43,
-    0x00, 0x00, 0xc8, 0x43, 0x00, 0x00, 0xfa, 0x43, 0x00, 0x00, 0x16, 0x44,
-    0x00, 0x00, 0x2f, 0x44, 0x00, 0x00, 0x48, 0x44, 0x00, 0x00, 0x61, 0x44,
-    0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0xa0, 0x41, 0x00, 0x00, 0xf0, 0x41,
-    0x00, 0x00, 0x20, 0x42, 0x00, 0x00, 0x48, 0x42, 0x00, 0x00, 0x70, 0x42,
-    0x00, 0x00, 0x8c, 0x42, 0x00, 0x00, 0xa0, 0x42, 0x00, 0x00, 0xb4, 0x42
-    ]
-    
-    img.setPixel(0, 0, col1) 
-    img.setPixel(1, 0, col2) 
-    img.setPixel(2, 0, col3) 
-    img.setPixel(0, 1, col4) 
-    img.setPixel(1, 1, col5)
-    img.setPixel(2, 1, col6)
+        img_w = newHdrImage(3, 2)
+        img_r : HdrImage
+        mystream_write = newFileStream("tests/test_ReadWrite.pfm", fmWrite)
 
-    img.write_pfm(mystream)
+    img_w.setPixel(0, 0, newColor(1.0e1, 2.0e1, 3.0e1)) 
+    img_w.setPixel(1, 0, newColor(4.0e1, 5.0e1, 6.0e1)) 
+    img_w.setPixel(2, 0, newColor(7.0e1, 8.0e1, 9.0e1)) 
+    img_w.setPixel(0, 1, newColor(1.0e2, 2.0e2, 3.0e2)) 
+    img_w.setPixel(1, 1, newColor(4.0e2, 5.0e2, 6.0e2))
+    img_w.setPixel(2, 1, newColor(7.0e2, 8.0e2, 9.0e2))
 
-    #assert mystream.read() == refbytes
-    #echo refbytes
+    img_w.write_pfm(mystream_write)
 
-    mystream.close()
+    mystream_write.close()
 
-##Tests on functions to read pfm files##
+    var mystream_read = newFileStream("tests/test_ReadWrite.pfm", fmRead)
+    img_r = mystream_read.read_pfm_image()
+
+    assert img_r.is_close(img_w)
+
+    mystream_read.close()
+
+##Tests related to the reading of a pfm file##
 
 proc test_readLine(): void =
+    #[test on readline function]#
     var 
         stream = newStringStream("hello\nworld")
         line = ""
@@ -54,17 +45,17 @@ proc test_readLine(): void =
     assert line == "world"
 
 proc test_parse_img_size(): void =
+    #[test on parse_img_size()]#
     assert parse_img_size("3 2") == (3, 2)
 
     expect InvalidPfmFileFormat:
-        var a = parse_endianness("3 2 1")
+        var a = parse_img_size("3 2 1")
     
     expect InvalidPfmFileFormat:
-        var b = parse_endianness("-1 3")
+        var b = parse_img_size("-1 3")
 
-    
-
-proc text_parse_endianness(): void =
+proc test_parse_endianness(): void =
+    #[test on parse_endianness()]#
     assert parse_endianness("1.0") == bigEndian
     assert parse_endianness("-1.0") == littleEndian
 
@@ -74,14 +65,33 @@ proc text_parse_endianness(): void =
     expect InvalidPfmFileFormat:
         var a = parse_endianness("0")
 
+proc test_read_pfm_image() : void =
+    #[test on read_pfm_image()]#
+    let references = ["tests/reference_le.pfm", "tests/reference_be.pfm"]
+
+    for filename in references.items :
+        let 
+            stream = newFileStream(filename, fmRead)
+            img = stream.read_pfm_image()
+        assert img.width == 3
+        assert img.height == 2
+
+        assert img.getPixel(0,0).is_close(newColor(1.0e1, 2.0e1, 3.0e1))
+        assert img.getPixel(1,0).is_close(newColor(4.0e1, 5.0e1, 6.0e1))
+        assert img.getPixel(2,0).is_close(newColor(7.0e1, 8.0e1, 9.0e1))
+        assert img.getPixel(0,1).is_close(newColor(1.0e2, 2.0e2, 3.0e2))
+        assert img.getPixel(1,1).is_close(newColor(4.0e2, 5.0e2, 6.0e2))
+        assert img.getPixel(2,1).is_close(newColor(7.0e2, 8.0e2, 9.0e2))
+
+        stream.close()
 
 ##Execute all tests##
 
 #test_write_pfm()
 #test_readLine()
-test_parse_img_size()
-
-text_parse_endianness()
+#test_parse_img_size()
+#test_parse_endianness()
+#test_read_pfm_image()
 
 
 
