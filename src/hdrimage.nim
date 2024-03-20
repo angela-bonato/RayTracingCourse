@@ -186,24 +186,24 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
 ### sRGB conversion methods ###
 
 proc average_luminosity*(img: HdrImage, delta = 1e-10) : float =
-
+    #[compute the average luminosity of the whole image]#
     var sum = 0.0
     for pixel in img.pixels.items :
-        sum += log10(delta + pixel.luminosity())
+        sum += log10(delta + pixel.luminosity())    #it is a logaritmic average because our senses work in this way
     
     return pow(10, sum / len(img.pixels).float )
 
-proc normalize_image*(img: HdrImage, factor : float, lum = -1.0 ) : void =
+proc normalize_image*(img: HdrImage, factor : float, luminosity = -1.0 ) : void =
+    #[normalize image luminosity]#
+    var true_luminosity : float
 
-    var luminosity : float
-
-    if lum == -1.0:
-        luminosity = img.average_luminosity()
+    if luminosity == -1.0:
+        true_luminosity = img.average_luminosity()   #lum is setted at -1.0 by defaul because is useful for tests
     else:
-        luminosity = lum
+        true_luminosity = luminosity
     
     for i in 0 ..< len(img.pixels) :
-        img.pixels[i] = (factor / luminosity) * img.pixels[i]
+        img.pixels[i] = (factor / true_luminosity) * img.pixels[i]
 
 proc clamp*(x: float32) : float32 =
     #[usefull function for clamp_image]#
