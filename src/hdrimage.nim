@@ -205,6 +205,19 @@ proc normalize_image*(img: HdrImage, factor : float, lum = -1.0 ) : void =
     for i in 0 ..< len(img.pixels) :
         img.pixels[i] = (factor / luminosity) * img.pixels[i]
 
+proc clamp*(x: float32) : float32 =
+    #[usefull function for clamp_image]#
+    return x/(1+x)
+
+proc clamp_image*(img: HdrImage) : void =
+    #[Makes sure that all colors of all pixels are defined in [0, 1] usimg clamp(x)]#
+    for x in 0..<img.width :
+        for y in 0..<img.height :
+            var col = newColor(clamp(getPixel(img, x, y).r), clamp(getPixel(img, x, y).g), clamp(getPixel(img, x, y).b))
+            setPixel(img, x, y, col)
+
+proc write_ldr_image(img: HdrImage)
+
 ### Print method ###
 
 proc print*(img: HdrImage): void =
