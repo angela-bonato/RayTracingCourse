@@ -216,7 +216,7 @@ proc clamp_image*(img: HdrImage) : void =
             var col = newColor(clamp(getPixel(img, x, y).r), clamp(getPixel(img, x, y).g), clamp(getPixel(img, x, y).b))
             setPixel(img, x, y, col)
 
-proc write_png_image*(imgHdr: HdrImage, filepath: string, gamma = 0.1) : void =
+proc write_png_image*(imgHdr: HdrImage, filepath: string, gamma = 1.0) : void =
     #[Writes the hdr image in a png file (ldr format)]#
     var imgPng = initPixels(imgHdr.width, imgHdr.height)  #creates a png empty image
 
