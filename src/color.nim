@@ -1,6 +1,4 @@
-#[
-    Implementation of the type Color and its methods
-]#
+#[Implementation of the type Color and its methods]#
 
 ### Color type declaration ###
 
@@ -22,6 +20,12 @@ proc newColor*(r,g,b : float32): Color =
     result.g = g
     result.b = b
     return result
+
+## Color methods for sRGB conversion ##
+
+proc luminosity*(col : Color): float =
+    #[Evaluates the luminosity of a pixel using Shirley&Morley method]#
+    return (max(max(col.r, col.g), col.b) + min(min(col.r, col.g), col.b)) / 2.0
 
 ### Color algebra ###
 
