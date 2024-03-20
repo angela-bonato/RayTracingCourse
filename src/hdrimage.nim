@@ -8,6 +8,7 @@ import std/streams
 import std/endians
 import std/strutils
 import std/math
+import std/options
 
 ### HdrImage type declaration ###
 
@@ -190,14 +191,18 @@ proc average_luminosity*(img: HdrImage, delta = 1e-10) : float =
     for pixel in img.pixels.items :
         sum += log10(delta + pixel.luminosity())
     
-    return pow(10, sum / len(img.pixels) )
+    return pow(10, sum / len(img.pixels).float )
 
-proc normalize_image*(img: HdrImage, factor, luminosity : float) : void =
+proc normalize_image*(img: HdrImage, factor : float, lum = -1.0 ) : void =
 
-    if luminosity == nil :
+    var luminosity : float
+
+    if lum == -1.0:
         luminosity = img.average_luminosity()
-
-    for i in range(len(img.pixels)):
+    else:
+        luminosity = lum
+    
+    for i in 0 ..< len(img.pixels) :
         img.pixels[i] = (factor / luminosity) * img.pixels[i]
 
 ### Print method ###
