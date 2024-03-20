@@ -31,7 +31,7 @@ when isMainModule:
   img.normalize_image(params.a_factor)
   img.clamp_image()
 
-  img.write_png_image(params.output_png_filename)
+  img.write_png_image(params.output_png_filename, params.gamma)
 
   echo "File ", params.output_png_filename, " has been written to disk"
 
