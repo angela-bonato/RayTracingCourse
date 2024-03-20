@@ -7,6 +7,7 @@ import color
 import std/streams
 import std/endians
 import std/strutils
+import std/math
 
 ### HdrImage type declaration ###
 
@@ -180,6 +181,24 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
             image.setPixel(x,y,col)                         # Set the pixel value in the HDR image
 
     return image                                             # Return the populated HDR image
+
+### sRGB conversion methods ###
+
+proc average_luminosity*(img: HdrImage, delta = 1e-10) : float =
+
+    var sum = 0.0
+    for pixel in img.pixels.items :
+        sum += log10(delta + pixel.luminosity())
+    
+    return pow(10, sum / len(img.pixels) )
+
+proc normalize_image*(img: HdrImage, factor, luminosity : float) : void =
+
+    if luminosity == nil :
+        luminosity = img.average_luminosity()
+
+    for i in range(len(img.pixels)):
+        img.pixels[i] = (factor / luminosity) * img.pixels[i]
 
 ### Print method ###
 
