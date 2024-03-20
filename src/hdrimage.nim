@@ -216,8 +216,6 @@ proc clamp_image*(img: HdrImage) : void =
             var col = newColor(clamp(getPixel(img, x, y).r), clamp(getPixel(img, x, y).g), clamp(getPixel(img, x, y).b))
             setPixel(img, x, y, col)
 
-proc write_ldr_image(img: HdrImage)
-
 ### Print method ###
 
 proc print*(img: HdrImage): void =

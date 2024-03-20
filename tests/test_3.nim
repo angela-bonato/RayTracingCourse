@@ -36,3 +36,4 @@ proc test_clamp_image(): void =
 ##Doing all the tests##
 
 test_luminosity()
+test_clamp_image()
