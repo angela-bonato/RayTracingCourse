@@ -57,4 +57,3 @@ test_luminosity()
 test_clamp_image()
 test_average_luminosity()
 test_normalize_image()
-

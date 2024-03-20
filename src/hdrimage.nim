@@ -9,6 +9,7 @@ import std/endians
 import std/strutils
 import std/math
 import std/options
+import simplepng
 
 ### HdrImage type declaration ###
 
@@ -183,7 +184,7 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
 
     return image                                             # Return the populated HDR image
 
-### sRGB conversion methods ###
+### hdr to ldr conversion methods ###
 
 proc average_luminosity*(img: HdrImage, delta = 1e-10) : float =
     #[compute the average luminosity of the whole image]#
@@ -215,6 +216,23 @@ proc clamp_image*(img: HdrImage) : void =
         for y in 0..<img.height :
             var col = newColor(clamp(getPixel(img, x, y).r), clamp(getPixel(img, x, y).g), clamp(getPixel(img, x, y).b))
             setPixel(img, x, y, col)
+
+proc write_png_image*(imgHdr: HdrImage, filepath: string, gamma = 0.1) : void =
+    #[Writes the hdr image in a png file (ldr format)]#
+    var imgPng = initPixels(imgHdr.width, imgHdr.height)  #creates a png empty image
+
+    #fill the image here
+    for x in 0..<imgHdr.width :
+        for y in 0..<imgHdr.height :
+            var 
+                r = int(255 * pow(getPixel(imgHdr, x, y).r, (1/gamma)))
+                g = int(255 * pow(getPixel(imgHdr, x, y).g, (1/gamma)))
+                b = int(255 * pow(getPixel(imgHdr, x, y).b, (1/gamma)))
+            #simplepng works with RGBA colors i.e., red-green-blue-alpha where alpha=255=max opacity
+            setColor(imgPng.getPixel(x,y), r, g, b, 255)  #n.b. simplepng has its own getPixel but it's similar to ours
+
+    simplePNG(filepath, imgPng)     #save the png image
+    echo "Saved input HdrImage in ", filepath
 
 ### Print method ###
 
