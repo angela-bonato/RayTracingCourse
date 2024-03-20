@@ -1,5 +1,15 @@
 
 import hdrimage
+import parameters
+import std/os
 
 when isMainModule:
-  echo("Hello, World!")
+
+  var params : Parameters
+
+  try:
+    params = newParameters(commandLineParams())
+  except ValueError as e:
+    echo "Error: ", e.msg
+
+  
