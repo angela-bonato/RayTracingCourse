@@ -1,6 +1,5 @@
-import Types
-import Procs_methods
-import Procs_pfm
+
+import hdrimage
 
 when isMainModule:
   echo("Hello, World!")

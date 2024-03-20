@@ -1,5 +1,5 @@
-import ../src/Types
-import ../src/Procs_methods
+import ../src/color
+import ../src/hdrimage
 
 ##Tests on Color and HRDImage classes##
 

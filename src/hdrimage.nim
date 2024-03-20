@@ -1,12 +1,63 @@
-#[Some useful procs related to PFM format files]#
+#[
+    Implementation of the type HdrImage and its methods
+    This code support the conversion to the pfm format 
+]#
 
-import Types
-import Procs_methods
+import color
 import std/streams
 import std/endians
 import std/strutils
 
-### Write PFM file ###
+### HdrImage type declaration ###
+
+type HdrImage* = ref object
+        width*, height*: int    # Dimensions of the matrix
+        pixels*: seq[Color]    # 1D array with all the Colors in the image
+
+### Exceptions ###
+
+type InvalidPfmFileFormat* = object of IOError
+
+### HdrImage type constructors ###
+
+proc newHdrImage*(): HdrImage = 
+    #[Empty constructor, initialize all the variables to zero]#
+    new(result)
+    result.height = 0
+    result.width = 0
+    result.pixels = newSeq[Color](0)
+    return result
+
+proc newHdrImage*(width,height : int): HdrImage = 
+    #[Constructor with elements, initialize the variables to given values]#
+    new(result)
+    result.height = height
+    result.width = width
+    result.pixels = newSeq[Color](height*width)
+    return result
+
+### HdrImage pixel access ###
+
+proc valid_coordinates*(img: HdrImage, x,y: int) : bool = 
+    #[Check if the given coordinates are inside the image]#
+    return ( (x >= 0) and (x < img.width) ) and
+           ( (y >= 0) and (y < img.height) ) 
+
+proc pixel_offset*(img: HdrImage, x,y: int) : int = 
+    #[Give the linear position of a pixel, given its x,y]#
+    return y * img.width + x
+
+proc getPixel*(img: HdrImage, x,y: int) : Color = 
+    #[Get the color of the pixel at the coordinates x,y]#
+    assert img.valid_coordinates(x,y)
+    return img.pixels[img.pixel_offset(x,y)]
+
+proc setPixel*(img: HdrImage, x,y: int, new_color : Color) : void =
+    #[Set the color of the pixel at the coordinates x,y]#
+    assert img.valid_coordinates(x,y)
+    img.pixels[img.pixel_offset(x,y)] = new_color
+
+### Write pfm files ###
 
 proc write_float*(stream: Stream, num: float32, endianness: Endianness): void =
     #[Writes a float on a stream, with a specified endianness]#
@@ -43,7 +94,6 @@ proc write_pfm*(img: HdrImage, stream: Stream, endianness = littleEndian): void 
             write_float(stream, color.r, endianness)  # Write red channel
             write_float(stream, color.g, endianness)  # Write green channel
             write_float(stream, color.b, endianness)  # Write blue channel
-
 
 ### Read PFM files ###
 
@@ -130,3 +180,24 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
             image.setPixel(x,y,col)                         # Set the pixel value in the HDR image
 
     return image                                             # Return the populated HDR image
+
+### Print method ###
+
+proc print*(img: HdrImage): void =
+    #[Prints HDRImage elements in a more efficient way]#
+    echo "HdrImage(width=", img.width, ", height=", img.height, ")"
+
+### Useful for tests ###
+
+proc is_close*(img1, img2: HdrImage) : bool =
+    #[is_close version specialized for HDRImage elements]#
+    if (is_close(img1.width, img2.width) == false) or (is_close(img1.height, img2.height) == false) :   #first I check width and height
+        return false
+
+    for i in 0..<img1.width :
+        for j in 0..<img1.height :
+            if (is_close(img1.getPixel(i, j), img2.getPixel(i, j)) == false) :    #then I check all the pixels 
+                return false
+
+    return true     #if nothing's wrong img1 and img2 are close
+

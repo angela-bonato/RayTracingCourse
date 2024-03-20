@@ -1,6 +1,6 @@
-import ../src/Types
-import ../src/Procs_methods
-import ../src/Procs_pfm
+
+import ../src/hdrimage
+import ../src/color
 import std/streams
 import std/unittest
 
