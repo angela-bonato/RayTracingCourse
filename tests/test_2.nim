@@ -1,4 +1,3 @@
-
 import ../src/hdrimage
 import ../src/color
 import std/streams
