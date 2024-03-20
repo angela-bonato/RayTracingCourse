@@ -32,7 +32,28 @@ proc test_clamp_image(): void =
         assert (i.g >= 0.0) and (i.g <= 1.0)
         assert (i.b >= 0.0) and (i.b <= 1.0)
 
+proc test_average_luminosity() : void =
+            
+    let img = newHdrImage(2,1)
+    img.setPixel(0,0,newColor(5.0, 10.0, 15.0))
+    img.setPixel(1,0,newColor(500.0, 1000.0, 1500.0))
+
+    assert img.average_luminosity(delta=0.0).is_close(100.0)
+
+proc test_normalize_image() : void =
+
+    let img = newHdrImage(2,1)
+    img.setPixel(0,0,newColor(5.0, 10.0, 15.0))
+    img.setPixel(1,0,newColor(500.0, 1000.0, 1500.0))
+
+    img.normalize_image(factor = 1000.0, luminosity = 100.0)
+    assert img.get_pixel(0, 0).is_close(newColor(0.5e2, 1.0e2, 1.5e2))
+    assert img.get_pixel(1, 0).is_close(newColor(0.5e4, 1.0e4, 1.5e4))
+
 
 ##Doing all the tests##
 
 test_luminosity()
+test_clamp_image()
+test_average_luminosity()
+test_normalize_image()
