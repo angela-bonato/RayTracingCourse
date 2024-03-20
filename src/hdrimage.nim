@@ -8,7 +8,6 @@ import std/streams
 import std/endians
 import std/strutils
 import std/math
-import std/options
 import simplepng
 
 ### HdrImage type declaration ###
@@ -161,7 +160,7 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
         assert stream.readLine(magic)           # Read the magic string from the header
         assert stream.readLine(img_size)        # Read the image size from the header
         assert stream.readLine(endianness_line) # Read the endianness information from the header
-    except ValueError as e:
+    except CatchableError as e:
         raise InvalidPfmFileFormat.newException("Impossible to read from file: " & e.msg)
 
     if magic != "PF":

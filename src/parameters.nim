@@ -35,7 +35,7 @@ proc newParameters*(input_pfm_filename, output_png_filename : string, a_factor, 
 proc newParameters*(argv : seq[string]) : Parameters =   
 
     if len(argv) != 4:
-        raise newException(IOError,"Usage: nimble run project INPUT_PFM_FILE A_FACTOR GAMMA OUTPUT_PNG_FILE")
+        raise newException(IOError,"Usage: nimble run project <INPUT_PFM_FILE> <A_FACTOR> <GAMMA> <OUTPUT_PNG_FILE>")
 
     result.input_pfm_filename = argv[0]
 

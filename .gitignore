@@ -13,6 +13,7 @@ test_2
 
 ### Test files  ###
 *.pfm
+*.png
 
 ### VisualStudioCode ###
 .vscode/*
