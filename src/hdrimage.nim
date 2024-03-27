@@ -239,6 +239,10 @@ proc print*(img: HdrImage): void =
 
 # Useful for tests
 
+proc is_close*(scal1, scal2: int) : bool =
+    ## same as is_close but for int scalars
+    return ( abs(float(scal1-scal2))<=1e-5 )
+
 proc is_close*(img1, img2: HdrImage) : bool =
     ## To check if two HdrImage are the same, despite machine float truncation
     if (is_close(img1.width, img2.width) == false) or (is_close(img1.height, img2.height) == false) :   #first I check width and height
