@@ -1,7 +1,5 @@
-#[
-    Implementation of the type HdrImage and its methods
-    This code support the conversion to the pfm format 
-]#
+## Implementation of the type HdrImage and its methods. This code support the conversion to the pfm format and permits to save the image in a png file
+
 
 import color
 import std/streams
@@ -10,20 +8,20 @@ import std/strutils
 import std/math
 import simplepng
 
-### HdrImage type declaration ###
+# HdrImage type declaration
 
-type HdrImage* = ref object
+type HdrImage* = ref object     ##  Describe an image in the Hdr format
         width*, height*: int    # Dimensions of the matrix
-        pixels*: seq[Color]    # 1D array with all the Colors in the image
+        pixels*: seq[Color]     # 1D array with all the Colors in the image
 
-### Exceptions ###
+# Exceptions
 
-type InvalidPfmFileFormat* = object of IOError
+type InvalidPfmFileFormat* = object of IOError ## Exception that can be thrown reading an invalid Pfm file
 
-### HdrImage type constructors ###
+# HdrImage type constructors
 
 proc newHdrImage*(): HdrImage = 
-    #[Empty constructor, initialize all the variables to zero]#
+    ## Empty constructor, initialize all the variables to zero
     new(result)
     result.height = 0
     result.width = 0
@@ -31,38 +29,38 @@ proc newHdrImage*(): HdrImage =
     return result
 
 proc newHdrImage*(width,height : int): HdrImage = 
-    #[Constructor with elements, initialize the variables to given values]#
+    ## Constructor with elements, initialize the variables to given values
     new(result)
     result.height = height
     result.width = width
     result.pixels = newSeq[Color](height*width)
     return result
 
-### HdrImage pixel access ###
+# HdrImage pixel access
 
 proc valid_coordinates*(img: HdrImage, x,y: int) : bool = 
-    #[Check if the given coordinates are inside the image]#
+    ## Check if the given coordinates are inside the image
     return ( (x >= 0) and (x < img.width) ) and
            ( (y >= 0) and (y < img.height) ) 
 
 proc pixel_offset*(img: HdrImage, x,y: int) : int = 
-    #[Give the linear position of a pixel, given its x,y]#
+    ## Give the linear position of a pixel, given its x,y
     return y * img.width + x
 
 proc getPixel*(img: HdrImage, x,y: int) : Color = 
-    #[Get the color of the pixel at the coordinates x,y]#
+    ## Get the color of the pixel at the coordinates x,y
     assert img.valid_coordinates(x,y)
     return img.pixels[img.pixel_offset(x,y)]
 
 proc setPixel*(img: HdrImage, x,y: int, new_color : Color) : void =
-    #[Set the color of the pixel at the coordinates x,y]#
+    ## Set the color of the pixel at the coordinates x,y
     assert img.valid_coordinates(x,y)
     img.pixels[img.pixel_offset(x,y)] = new_color
 
-### Write pfm files ###
+# Write pfm files
 
 proc write_float*(stream: Stream, num: float32, endianness: Endianness): void =
-    #[Writes a float on a stream, with a specified endianness]#
+    ## Writes a float on a stream, with a specified endianness
     var tmp: int32  # int32 is used to ensure correct byte writing on the stream
     
     if endianness == bigEndian:
@@ -74,7 +72,7 @@ proc write_float*(stream: Stream, num: float32, endianness: Endianness): void =
 
 
 proc write_pfm*(img: HdrImage, stream: Stream, endianness = littleEndian): void =
-    #[write the HdrImage on a file using the PFM format]#
+    ## Write the HdrImage on a file using the PFM format
     var 
         endianness_str: string
         header: string
@@ -97,10 +95,10 @@ proc write_pfm*(img: HdrImage, stream: Stream, endianness = littleEndian): void 
             write_float(stream, color.g, endianness)  # Write green channel
             write_float(stream, color.b, endianness)  # Write blue channel
 
-### Read PFM files ###
+# Read PFM files 
 
 proc read_float*(stream : Stream, endianness : Endianness) : float =
-    #[to read a float32 from a stream of bytes, given an endianness]#
+    ## Read a float32 from a stream of bytes, given an endianness
     var 
         num : float32
         tmp : float32
@@ -115,7 +113,7 @@ proc read_float*(stream : Stream, endianness : Endianness) : float =
 
 
 proc parse_img_size*(line : string) : (int, int) =   # in the main you should write let (w, h) = parse_img_size(line) 
-    #[reads the line with width and height contained in the header of a PFM file and returns them as ints]#
+    ## Reads the line with width and height contained in the header of a PFM file and returns them as ints 
     var 
         elements = split(line, " ")      # Split the line into elements based on space
         width, height : int
@@ -135,7 +133,7 @@ proc parse_img_size*(line : string) : (int, int) =   # in the main you should wr
         raise InvalidPfmFileFormat.newException("Invalid width/height: width and height must be non-negative")   # The dimension of the image must be non-negative
 
 proc parse_endianness*(line : string) : Endianness = 
-    #[to understand which is the endianness of the file, it must be a positive or negative number]#
+    ## To understand which is the endianness of the file, it must be a positive or negative number
     var value : float
 
     try: 
@@ -152,7 +150,7 @@ proc parse_endianness*(line : string) : Endianness =
 
 
 proc read_pfm_image*(stream : Stream) : HdrImage =
-    #[to read a pfm file and save the data in a HdrImage variable]#
+    ## To read a pfm file and save the data in a HdrImage variable
     var 
         magic, img_size, endianness_line : string
         
@@ -183,10 +181,10 @@ proc read_pfm_image*(stream : Stream) : HdrImage =
 
     return image                                             # Return the populated HDR image
 
-### hdr to ldr conversion methods ###
+# hdr to ldr conversion methods 
 
 proc average_luminosity*(img: HdrImage, delta = 1e-10) : float =
-    #[compute the average luminosity of the whole image]#
+    ## Compute the average luminosity of the whole image
     var sum = 0.0
     for pixel in img.pixels.items :
         sum += log10(delta + pixel.luminosity())    #it is a logaritmic average because our senses work in this way
@@ -206,18 +204,18 @@ proc normalize_image*(img: HdrImage, factor : float, luminosity = -1.0 ) : void 
         img.pixels[i] = (factor / true_luminosity) * img.pixels[i]
 
 proc clamp*(x: float32) : float32 =
-    #[usefull function for clamp_image]#
+    ## Usefull function for clamp_image
     return x/(1+x)
 
 proc clamp_image*(img: HdrImage) : void =
-    #[Makes sure that all colors of all pixels are defined in [0, 1] usimg clamp(x)]#
+    ## Makes sure that all colors of all pixels are defined in the interval from 0 to 1 usimg clamp(x)
     for x in 0..<img.width :
         for y in 0..<img.height :
             var col = newColor(clamp(getPixel(img, x, y).r), clamp(getPixel(img, x, y).g), clamp(getPixel(img, x, y).b))
             setPixel(img, x, y, col)
 
 proc write_png_image*(imgHdr: HdrImage, filepath: string, gamma = 1.0) : void =
-    #[Writes the hdr image in a png file (ldr format)]#
+    ## Writes the hdr image in a png file (ldr format)
     var imgPng = initPixels(imgHdr.width, imgHdr.height)  #creates a png empty image
 
     #fill the image here
@@ -233,16 +231,16 @@ proc write_png_image*(imgHdr: HdrImage, filepath: string, gamma = 1.0) : void =
     simplePNG(filepath, imgPng)     #save the png image
     echo "Saved input HdrImage in ", filepath
 
-### Print method ###
+# Print method
 
 proc print*(img: HdrImage): void =
-    #[Prints HDRImage elements in a more efficient way]#
+    ## Prints HDRImage elements in a more efficient way
     echo "HdrImage(width=", img.width, ", height=", img.height, ")"
 
-### Useful for tests ###
+# Useful for tests
 
 proc is_close*(img1, img2: HdrImage) : bool =
-    #[is_close version specialized for HDRImage elements]#
+    ## To check if two HdrImage are the same, despite machine float truncation
     if (is_close(img1.width, img2.width) == false) or (is_close(img1.height, img2.height) == false) :   #first I check width and height
         return false
 
