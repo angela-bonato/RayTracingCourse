@@ -1,21 +1,20 @@
-#[
-    Implementation of the type Parameters, to obtain the vaule of a-factor and gamma to use in the hdr -> ldr conversion
-]#
+## Implementation of the type Parameters, to obtain the vaule of a-factor and gamma to use in the hdr -> ldr conversion
 
 import std/strutils
 
-### Parameters declaration ###
+# Parameters declaration
 
 type Parameters* = object
+    ## Parameters useful to convert an image from pfm to png
     input_pfm_filename* : string
     output_png_filename* : string
     a_factor* : float        # scale factor on the luminosity
     gamma* : float           # exponent for non-linear response of the schreen
 
-### Parameters constructors ###
+# Parameters constructors
 
 proc newParameters*() : Parameters =
-    #[Empty constructor, initializethe variables to some values]#
+    ## Empty constructor, initializethe variables to standard values
     result.input_pfm_filename = ""
     result.output_png_filename = ""
     result.a_factor = 0.2
@@ -24,7 +23,7 @@ proc newParameters*() : Parameters =
     return result
 
 proc newParameters*(input_pfm_filename, output_png_filename : string, a_factor, gamma : float) : Parameters =
-    #[Constructor with elements, initialize the variables to given values]#
+    ## Constructor with elements, initialize the variables to given values
     result.input_pfm_filename = input_pfm_filename
     result.output_png_filename = output_png_filename
     result.a_factor = a_factor
@@ -33,7 +32,7 @@ proc newParameters*(input_pfm_filename, output_png_filename : string, a_factor, 
     return result
 
 proc newParameters*(argv : seq[string]) : Parameters =   
-
+    ## Constructor that uses command line params, parameters needed form input: <INPUT_PFM_FILE> <A_FACTOR> <GAMMA> <OUTPUT_PNG_FILE>
     if len(argv) != 4:
         raise newException(IOError,"Usage: nimble run project <INPUT_PFM_FILE> <A_FACTOR> <GAMMA> <OUTPUT_PNG_FILE>")
 
