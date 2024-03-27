@@ -1,11 +1,14 @@
 
 import hdrimage
 import parameters
+import vector
 import std/os
 import std/streams
 
 when isMainModule:
+  echo "Hello, world!"
 
+#[
   var 
     params : Parameters
     input_stream : Stream
@@ -36,6 +39,7 @@ when isMainModule:
   echo "File ", params.output_png_filename, " has been written to disk"
 
   input_stream.close()
+]#
  
 
     
