@@ -2,6 +2,7 @@ import ../src/point
 import ../src/vector
 import ../src/normal
 import ../src/transformation
+import ../src/geometryalgebra
 import std/unittest
 import std/math
 
@@ -21,6 +22,19 @@ proc test_point(): void =
     assert almostEqual(point.z, 1.5)
     assert origin.is_close(origin)
     assert not point.is_close(origin)
+
+proc test_point_operation(): void =
+    ## test point operations
+    var
+        p1 = newPoint(1.0, 2.0, 3.0)
+        p2 = newPoint(4.0, 6.0, 8.0)
+        v = newVector(4.0, 6.0, 8.0)
+
+    assert (2*p1).is_close(newPoint(2.0, 4.0, 6.0))
+    assert (p1 + v).is_close(newPoint(5.0, 8.0, 11.0))
+    assert (p2 - p1).is_close(newVector(3.0, 4.0, 5.0))
+    assert (p1 - v).is_close(newPoint(-3.0, -4.0, -5.0))
+
 
 proc test_vector(): void =
     ## test vector constructor 
@@ -49,5 +63,6 @@ proc test_vector_operations(): void =
 
 ##Running all the tests##
 test_point()
+test_point_operation()
 test_vector()
 test_vector_operations()

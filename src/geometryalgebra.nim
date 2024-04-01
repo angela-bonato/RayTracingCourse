@@ -13,11 +13,11 @@ template define_3Dop(op: untyped, type1: typedesc, type2: typedesc, ret: typedes
         result.y = op(a.y, b.y)
         result.z = op(a.z, b.z)
 
-define_3Dop(`+`, Vector, Point, Point)
-define_3Dop(`+`, Point, Vector, Point)  #Equal to the one defined before but inverted for comodity
-define_3Dop(`-`, Vector, Point, Point)
-define_3Dop(`-`, Point, Vector, Point)  #Equal to the one defined before but inverted for comodity
-define_3Dop(`+`, Point, Point, Vector)  #da controllare
+define_3Dop(`+`, Vector, Point, Point)  # I am not so sure about it, but we can talk about it
+define_3Dop(`+`, Point, Vector, Point)  # Equal to the one defined before but inverted for comodity
+#define_3Dop(`-`, Vector, Point, Point) # I don't think this is a proc we need (subtratting a point from a vector doesn't give nothing)
+define_3Dop(`-`, Point, Vector, Point)  
+#define_3Dop(`+`, Point, Point, Vector) # I don't think this is a proc we need (summing two point doesn't give nothing)
 define_3Dop(`-`, Point, Point, Vector)  #da controllare
 
 proc point_to_vec*(p: Point) : Vector =   #è giusto??
@@ -26,4 +26,5 @@ proc point_to_vec*(p: Point) : Vector =   #è giusto??
     result.y = p.y
     result.z = p.z
     return result
+
 

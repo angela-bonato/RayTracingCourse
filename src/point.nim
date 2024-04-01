@@ -26,6 +26,22 @@ proc newPoint*(x,y,z : float): Point =
 
 # Methods 
 
+proc `*`*(a: float, b: Point) : Point =
+    ## Multiplication between scalar and point
+    result.x = a * b.x
+    result.y = a * b.y
+    result.z = a * b.z
+
+    return result
+
+proc `*`*(a: Point, b: float) : Point =
+    ## Multiplication between scalar and point
+    result.x = a.x * b
+    result.y = a.y * b
+    result.z = a.z * b
+
+# Usefull for tests
+
 proc print* (p: Point): void =
     ## Prints Point elements in a clear way
     echo "Point( x=", p.x, ", y=", p.y, ", z=", p.z, ")"
