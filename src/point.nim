@@ -1,4 +1,4 @@
-## Definition of class point with its methods. Note that its algebra its defined via templates, you can find it in geometrytemplate.nim
+## Definition of class point with its methods. Note that its algebra its defined via templates, you can find it in geometryalgebra.nim
 
 # Point type declaration
 
