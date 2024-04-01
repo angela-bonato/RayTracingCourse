@@ -20,11 +20,17 @@ define_3Dop(`-`, Point, Vector, Point)
 #define_3Dop(`+`, Point, Point, Vector) # I don't think this is a proc we need (summing two point doesn't give nothing)
 define_3Dop(`-`, Point, Point, Vector)  #da controllare
 
-proc point_to_vec*(p: Point) : Vector =   #è giusto??
+proc point_to_vec*(p: Point) : Vector =   #è giusto??  credo di sì
     ## Gives the vector defined from the origin to the point taken as an argument
     result.x = p.x
     result.y = p.y
     result.z = p.z
     return result
 
+proc dot*(norm: Normal, vec: Vector) : float =
+    ## scalar product between normal and vector
+    return norm.x * vec.x + norm.y * vec.y + norm.z * vec.z
 
+proc dot*(vec: Vector, norm: Normal) : float =
+    ## scalar product between vector and normal
+    return norm.x * vec.x + norm.y * vec.y + norm.z * vec.z

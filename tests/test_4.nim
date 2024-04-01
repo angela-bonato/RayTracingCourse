@@ -3,7 +3,6 @@ import ../src/vector
 import ../src/normal
 import ../src/transformation
 import ../src/geometryalgebra
-import std/unittest
 import std/math
 
 ##Tests on functions related to geometry classes (point, vector, normal, transformation)##
@@ -61,8 +60,32 @@ proc test_vector_operations(): void =
     assert a.squared_norm().almostEqual(14.0)
     assert almostEqual(14.0, a.norm()^2)
 
+proc test_normal(): void =
+    ## test normal constructor 
+    var 
+        a = newNormal(1.0, 2.0, 3.0)
+        b = newNormal(4.0, 6.0, 8.0)
+    
+    assert a.is_close(a)
+    assert not a.is_close(b)
+
+proc test_normal_operations(): void =
+    ## test normal operations
+    var 
+        a = newNormal(1.0, 2.0, 3.0)
+        b = newNormal(4.0, 6.0, 8.0)
+
+    assert a.neg().is_close(newNormal(-1.0,-2.0,-3.0))
+    assert (2*a).is_close(newNormal(2.0, 4.0, 6.0))
+    assert a.cross(b).is_close(newNormal(-2.0, 4.0, -2.0))
+    assert b.cross(a).is_close(newNormal(2.0, -4.0, 2.0))
+    assert a.squared_norm().almostEqual(14.0)
+    assert almostEqual(14.0, a.norm()^2)
+
 ##Running all the tests##
 test_point()
 test_point_operation()
 test_vector()
 test_vector_operations()
+test_normal()
+test_normal_operations()
