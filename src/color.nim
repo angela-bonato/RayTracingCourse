@@ -1,5 +1,8 @@
 ## Implementation of the type Color and its methods
 
+import std/math
+
+
 #Color type declaration
 
 type Color* = object   # It needs to be fast so I use stack memory
@@ -59,12 +62,8 @@ proc print*(col: Color): void =
 
 # Usefull for tests
 
-proc is_close*(scal1, scal2: float32) : bool =
-    ## Used instead of == when rounding errors could give wrong results, for float scalars
-    return ( abs(scal1-scal2)<=1e-5 )
-
 proc is_close*(col1, col2: Color) : bool =
     ## is_close version specialized for Color elements
-    return ( is_close(col1.r, col2.r) ) and
-            ( is_close(col1.g, col2.g) ) and
-            ( is_close(col1.b, col2.b) )
+    return ( almostEqual(col1.r, col2.r) ) and
+            ( almostEqual(col1.g, col2.g) ) and
+            ( almostEqual(col1.b, col2.b) )
