@@ -7,8 +7,8 @@ import std/math
 # Transformation type declaration
 
 type Transformation* = object
-    matrix : HomMatrix
-    inv_matrix : HomMatrix
+    matrix* : HomMatrix
+    inv_matrix* : HomMatrix
 
 # Transformation type constructors
 
@@ -93,3 +93,21 @@ proc rotation_z*(theta : float) : Transformation =
                                         sin(-theta), cos(-theta),  0.0, 0.0,
                                         0.0,         0.0,          1.0, 0.0,
                                         0.0,         0.0,          0.0, 1.0 ])
+
+## useful for test
+
+proc print*(t: Transformation) : void =
+    ## to print a transformaation in a nice way
+    
+    #echo t.matrix.getElement(0,0)
+
+    
+    echo "Transformation \nMatrix[",  t.matrix.getElement(0,0), ", ", t.matrix.getElement(0,1), ", ", t.matrix.getElement(0,2), ", ", t.matrix.getElement(0,3), ",\n       ",
+                                      t.matrix.getElement(1,0), ", ", t.matrix.getElement(1,1), ", ", t.matrix.getElement(1,2), ", ", t.matrix.getElement(1,3), ",\n       ", 
+                                      t.matrix.getElement(2,0), ", ", t.matrix.getElement(2,1), ", ", t.matrix.getElement(2,2), ", ", t.matrix.getElement(2,3), ",\n       ", 
+                                      t.matrix.getElement(3,0), ", ", t.matrix.getElement(3,1), ", ", t.matrix.getElement(3,2), ", ", t.matrix.getElement(3,3), "]\n",
+                  "Inverse Matrix[",  t.inv_matrix.getElement(0,0), ", ", t.inv_matrix.getElement(0,1), ", ", t.inv_matrix.getElement(0,2), ", ", t.inv_matrix.getElement(0,3), ",\n               ",
+                                      t.inv_matrix.getElement(1,0), ", ", t.inv_matrix.getElement(1,1), ", ", t.inv_matrix.getElement(1,2), ", ", t.inv_matrix.getElement(1,3), ",\n               ",
+                                      t.inv_matrix.getElement(2,0), ", ", t.inv_matrix.getElement(2,1), ", ", t.inv_matrix.getElement(2,2), ", ", t.inv_matrix.getElement(2,3), ",\n               ", 
+                                      t.inv_matrix.getElement(3,0), ", ", t.inv_matrix.getElement(3,1), ", ", t.inv_matrix.getElement(3,2), ", ", t.inv_matrix.getElement(3,3), "]\n"
+    

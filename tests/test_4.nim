@@ -123,6 +123,67 @@ proc test_matrix_product() : void=
     
     assert m3.is_close(m2)
 
+## Test on Transformation class
+
+
+proc test_trans_creation() : void =
+    ## test Transformation creation
+    
+    var 
+        id = newHomMatrix()
+        transform1 = newTransformation(id, id)
+        transform2 = newTransformation()
+
+    assert transform1.is_consistent()
+    assert transform2.is_consistent()
+    assert transform2.matrix.is_close(id)
+
+proc test_translation() : void =
+    ## test translation creation
+
+    var 
+        vec = newVector(1.0, 2.0, 3.0)
+        trasl = translation(vec)
+        mat = newHomMatrix([ 1.0, 0.0, 0.0, 1.0,
+                             0.0, 1.0, 0.0, 2.0, 
+                             0.0, 0.0, 1.0, 3.0,
+                             0.0, 0.0, 0.0, 1.0 ])
+
+    assert trasl.is_consistent()
+    assert mat.is_close(trasl.matrix)
+    
+proc test_rotation() : void =
+    ## test rotation creation
+    
+
+    var 
+        rot_x = rotation_x(PI)
+        rot_y = rotation_y(PI)
+        rot_z = rotation_z(PI)
+
+        mat_x = newHomMatrix([ 1.0, 0.0,  0.0,  0.0, 
+                               0.0, cos(PI), -sin(PI),  0.0,
+                               0.0, sin(PI),  cos(PI), 0.0,
+                               0.0, 0.0,  0.0,  1.0 ])
+    
+        mat_y = newHomMatrix([ cos(PI), 0.0, sin(PI),  0.0,
+                               0.0,  1.0, 0.0,  0.0,
+                               -sin(PI),  0.0, cos(PI), 0.0,
+                               0.0,  0.0, 0.0,  1.0 ])
+
+        mat_z = newHomMatrix([ cos(PI), -sin(PI),  0.0,  0.0,
+                               sin(PI),  cos(PI), 0.0,  0.0,
+                               0.0,  0.0,  1.0,  0.0,
+                               0.0,  0.0,  0.0,  1.0 ])
+
+    assert rot_x.is_consistent()
+    assert rot_y.is_consistent()
+    assert rot_z.is_consistent()
+    assert mat_x.is_close(rot_x.matrix)
+    assert mat_y.is_close(rot_y.matrix)
+    assert mat_z.is_close(rot_z.matrix)
+
+
 ##Running all the tests##
 test_point()
 test_point_operation()
@@ -133,3 +194,6 @@ test_normal_operations()
 test_mat_creation()
 test_element_access()
 test_matrix_product()
+test_trans_creation()
+test_translation()
+test_rotation()

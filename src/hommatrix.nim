@@ -68,3 +68,12 @@ proc is_close*(m1,m2: HomMatrix) : bool =
             return false
     return true
 
+## useful for test
+
+proc print*(h: HomMatrix) : void =
+    ## print a hom matrix in a nice way
+    
+    echo "HomMatrix[", h.getElement(0,0), ", ", h.getElement(0,1), ", ",  h.getElement(0,2), ", ",  h.getElement(0,3), "\n          ",
+                       h.getElement(1,0), ", ", h.getElement(1,1), ", ",  h.getElement(1,2), ", ",  h.getElement(1,3), "\n          ",
+                       h.getElement(2,0), ", ", h.getElement(2,1), ", ",  h.getElement(2,2), ", ",  h.getElement(2,3), "\n          ",
+                       h.getElement(3,0), ", ", h.getElement(3,1), ", ",  h.getElement(3,2), ", ",  h.getElement(3,3), "]"
