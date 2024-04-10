@@ -1,6 +1,7 @@
 import ../src/point
 import ../src/vector
 import ../src/normal
+import ../src/hommatrix
 import ../src/transformation
 import ../src/geometryalgebra
 import std/math
@@ -82,6 +83,46 @@ proc test_normal_operations(): void =
     assert a.squared_norm().almostEqual(14.0)
     assert almostEqual(14.0, a.norm()^2)
 
+## Test on HomMatrix class
+
+proc test_mat_creation() : void =
+    ## tests HomMatrix creators
+    var
+        m1 = newHomMatrix()
+        m2 = newHomMatrix([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+    
+    assert m1.is_close(m2)
+
+proc test_element_access(): void =
+    ##tests all methods regarding element access
+    var
+        mat = newHomMatrix()
+
+    assert mat.valid_coordinates(0, 0)
+    assert mat.valid_coordinates(3, 2)
+    assert not mat.valid_coordinates(-1, 0)
+    assert not mat.valid_coordinates(0, -1)
+    assert not mat.valid_coordinates(4, 0)
+    assert not mat.valid_coordinates(0, 4)
+
+    assert mat.element_offset(3, 2)==11
+    
+    mat.setElement(2, 3, 5.3)
+
+    assert almostEqual(mat.getElement(2, 3), 5.3)
+
+proc test_matrix_product() : void=
+    ##tests the overloading of * 
+    var
+        m1 = newHomMatrix()
+        m2 = newHomMatrix([1.0, 2.0, 3.0, 4.0, 
+                           5.0, 6.0, 7.0, 8.0, 
+                           9.0, 10.0, 11.0, 12.0,
+                           13.0, 14.0, 15.0, 16.0])
+        m3 = m1*m2
+    
+    assert m3.is_close(m2)
+
 ##Running all the tests##
 test_point()
 test_point_operation()
@@ -89,3 +130,6 @@ test_vector()
 test_vector_operations()
 test_normal()
 test_normal_operations()
+test_mat_creation()
+test_element_access()
+test_matrix_product()
