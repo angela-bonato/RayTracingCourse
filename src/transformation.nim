@@ -56,9 +56,9 @@ proc translation*(vec: Vector) : Transformation =
                                         0.0, 0.0, 0.0, 1.0 ] )
 
 proc rotation_x*(theta : float) : Transformation =
-     ## Create a Transformation that perform a rotation of the given angle theta around the x axis
+    ## Create a Transformation that perform a rotation of the given angle theta around the x axis
      
-     result.matrix = newHomMatrix( [ 1.0, 0.0,        0.0,         0.0,
+    result.matrix = newHomMatrix( [ 1.0, 0.0,        0.0,         0.0,
                                      0.0, cos(theta), -sin(theta), 0.0,
                                      0.0, sin(theta), cos(theta),  0.0,
                                      0.0, 0.0,        0.0,         1.0 ])
@@ -69,9 +69,9 @@ proc rotation_x*(theta : float) : Transformation =
                                         0.0, 0.0,         0.0,          1.0 ])
 
 proc rotation_y*(theta : float) : Transformation =
-     ## Create a Transformation that perform a rotation of the given angle theta around the x axis
+    ## Create a Transformation that perform a rotation of the given angle theta around the x axis
      
-     result.matrix = newHomMatrix( [ cos(theta),  0.0, sin(theta), 0.0,
+    result.matrix = newHomMatrix( [ cos(theta),  0.0, sin(theta), 0.0,
                                      0.0,         1.0, 0.0,        0.0,
                                      -sin(theta), 0.0, cos(theta), 0.0,
                                      0.0,         0.0, 0.0,        1.0 ])
@@ -84,7 +84,7 @@ proc rotation_y*(theta : float) : Transformation =
 proc rotation_z*(theta : float) : Transformation =
     ## Create a Transformation that perform a rotation of the given angle theta around the y axis
      
-     result.matrix = newHomMatrix( [ cos(theta), -sin(theta), 0.0, 0.0,
+    result.matrix = newHomMatrix( [ cos(theta), -sin(theta), 0.0, 0.0,
                                      sin(theta), cos(theta),  0.0, 0.0,
                                      0.0,        0.0,         1.0, 0.0,
                                      0.0,        0.0,         0.0, 1.0 ])
