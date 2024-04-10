@@ -183,6 +183,41 @@ proc test_rotation() : void =
     assert mat_y.is_close(rot_y.matrix)
     assert mat_z.is_close(rot_z.matrix)
 
+proc test_translation_application() : void =
+    var
+        trasl = translation(newVector(1.0, 2.0, 3.0))
+        vec = newVector(4.0, 5.0, 6.0)
+        point = newPoint(4.0, 5.0, 6.0)
+        norm = newNormal(4.0, 5.0, 6.0)
+        test_vec = trasl*vec
+        test_point = trasl*point
+        test_norm = trasl*norm
+
+    assert vec.is_close(trasl*vec)
+    assert newPoint(5.0,7.0,9.0).is_close(trasl*point)
+    assert norm.is_close(trasl*norm)
+
+proc test_rotation_application() : void =
+    var 
+        rot_x = rotation_x(PI/2)
+        rot_y = rotation_y(PI/2)
+        rot_z = rotation_z(PI/2)
+        vec = newVector(4.0, 5.0, 6.0)
+        point = newPoint(4.0, 5.0, 6.0)
+        norm = newNormal(4.0, 5.0, 6.0)
+
+    assert newVector(4.0, -6.0, 5.0).is_close(rot_x*vec)
+    assert newVector(6.0, 5.0, -4.0).is_close(rot_y*vec)
+    assert newVector(-5.0, 4.0, 6.0).is_close(rot_z*vec)
+
+    assert newPoint(4.0, -6.0, 5.0).is_close(rot_x*point)
+    assert newPoint(6.0, 5.0, -4.0).is_close(rot_y*point)
+    assert newPoint(-5.0, 4.0, 6.0).is_close(rot_z*point)
+
+    assert newNormal(4.0, -6.0, 5.0).is_close(rot_x*norm)
+    assert newNormal(6.0, 5.0, -4.0).is_close(rot_y*norm)
+    assert newNormal(-5.0, 4.0, 6.0).is_close(rot_z*norm)
+
 
 ##Running all the tests##
 test_point()
@@ -197,3 +232,5 @@ test_matrix_product()
 test_trans_creation()
 test_translation()
 test_rotation()
+test_translation_application()
+test_rotation_application()
