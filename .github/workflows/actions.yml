@@ -1,19 +1,4 @@
-jobs:
-    build:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          nim:
-            - '2.0.2'
-            - '2.1.1'
-            - 'stable'
-      name: Nim ${{ matrix.nim }} sample
-      steps:
-        - uses: actions/checkout@v3
-        - name: Setup nim
-          uses: jiro4989/setup-nim-action@v1
-          with:
-            nim-version: ${{ matrix.nim }}
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
-        - run: nimble build -Y
-        - run: nimble test -Y
+              
+
+- name: Setup Nim environment
+  uses: jiro4989/setup-nim-action@v1.5.1
