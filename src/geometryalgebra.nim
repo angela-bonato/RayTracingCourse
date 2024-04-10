@@ -5,6 +5,7 @@ import vector
 import normal
 import transformation
 import hommatrix
+import std/math
 
 # Algebra for points and vectors
 
@@ -47,21 +48,10 @@ func `*`*(tr: Transformation, p1: Point) : Point =
     p2.y = p1.x*tr.matrix.getElement(1, 0) + p1.y*tr.matrix.getElement(1, 1) + p1.z*tr.matrix.getElement(1, 2) + tr.matrix.getElement(1, 3)
     p2.z = p1.x*tr.matrix.getElement(2, 0) + p1.y*tr.matrix.getElement(2, 1) + p1.z*tr.matrix.getElement(2, 2) + tr.matrix.getElement(2, 3)
 
-    if(w.almostEqual(1.0)):
+    if(almostEqual(1.0,w)):
         return p2
     else:
-        return newPoint(p2.x/w, p2.y/w, p3.z/w)
-
-func `*`*(tr: Transformation, v1: Vector) : Vector =
-    ##  product between a transformation (4x4 matrix) and a vector (3 coordinates and 0)
-    var 
-        v2 = newVector()     # result of tr*v1
-
-    v2.x = v1.x*tr.matrix.getElement(0, 0) + v1.y*tr.matrix.getElement(0, 1) + v1.z*tr.matrix.getElement(0, 2)
-    v2.y = v1.x*tr.matrix.getElement(1, 0) + v1.y*tr.matrix.getElement(1, 1) + v1.z*tr.matrix.getElement(1, 2)
-    v2.z = v1.x*tr.matrix.getElement(2, 0) + v1.y*tr.matrix.getElement(2, 1) + v1.z*tr.matrix.getElement(2, 2)
-
-    return v2
+        return newPoint(p2.x/w, p2.y/w, p2.z/w)
 
 func `*`*(tr: Transformation, v1: Vector) : Vector =
     ##  product between a transformation (4x4 matrix) and a vector (3 coordinates and 0)
