@@ -105,7 +105,7 @@ proc test_element_access(): void =
     assert not mat.valid_coordinates(4, 0)
     assert not mat.valid_coordinates(0, 4)
 
-    assert mat.element_offset(3, 2)==11
+    assert mat.element_offset(3, 2)==14
     
     mat.setElement(2, 3, 5.3)
 

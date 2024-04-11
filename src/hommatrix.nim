@@ -25,24 +25,24 @@ proc newHomMatrix*(myelems: array[16, float]) : HomMatrix =
 
 # Methods to access elements
 
-proc valid_coordinates*(mat: HomMatrix, x,y: int) : bool = 
+proc valid_coordinates*(mat: HomMatrix, i,j: int) : bool = 
     ## Check if the given coordinates are inside the 4x4 matrix
-    return ( (x >= 0) and (x < 4) ) and
-           ( (y >= 0) and (y < 4) ) 
+    return ( (i >= 0) and (i < 4) ) and
+           ( (j >= 0) and (j < 4) ) 
 
-proc element_offset*(mat: HomMatrix, x,y: int) : int = 
+proc element_offset*(mat: HomMatrix, i,j: int) : int = 
     ## Give the linear position of an element, given its x,y
-    return y * 4 + x
+    return i * 4 + j
 
-proc getElement*(mat: HomMatrix, x,y: int) : float =
+proc getElement*(mat: HomMatrix, i,j: int) : float =
     ## Get the element in position x,y of the matrix
-    assert mat.valid_coordinates(x,y)
-    return mat.elements[mat.element_offset(x,y)]
+    assert mat.valid_coordinates(i,j)
+    return mat.elements[mat.element_offset(i,j)]
 
-proc setElement*(mat: var HomMatrix, x,y: int, elem : float) : void =
+proc setElement*(mat: var HomMatrix, i,j: int, elem : float) : void =
     ## Set the element at the coordinates x,y in the matrix
-    assert mat.valid_coordinates(x,y)
-    mat.elements[mat.element_offset(x,y)] = elem
+    assert mat.valid_coordinates(i,j)
+    mat.elements[mat.element_offset(i,j)] = elem
 
 # Algebra
 
