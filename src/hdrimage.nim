@@ -241,7 +241,7 @@ proc print*(img: HdrImage): void =
 
 proc is_close*(img1, img2: HdrImage) : bool =
     ## To check if two HdrImage are the same, despite machine float truncation
-    if (is_close(img1.width, img2.width) == false) or (is_close(img1.height, img2.height) == false) :   #first I check width and height
+    if (almostEqual(float(img1.width), float(img2.width)) == false) or (almostEqual(float(img1.height), float(img2.height)) == false) :   #first I check width and height
         return false
 
     for i in 0..<img1.width :
