@@ -3,6 +3,7 @@
 import point
 import vector
 import geometryalgebra
+import transformation
 
 #Ray type declaration
 
@@ -33,3 +34,8 @@ proc is_close*(ray1, ray2 : Ray): bool =
 proc at*(ray : Ray, t : float): Point =
     ## Returns the point in which the ray falls after a length t from its origin, along its direction.
     return ray.origin + ray.dir * t   # We defined these operations in Point and Vector algebra
+
+proc transform*(ray : Ray, tr : Transformation): Ray =
+    ## Action of a trasformation on a ray.
+    return newRay(tr * ray.origin,tr * ray.dir,   # A trasformation acts only on the ray origin and direction
+                    ray.depth, ray.tmin, ray.tmax)

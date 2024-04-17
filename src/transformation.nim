@@ -94,7 +94,9 @@ proc rotation_z*(theta : float) : Transformation =
                                         0.0,         0.0,          1.0, 0.0,
                                         0.0,         0.0,          0.0, 1.0 ])
 
-## useful for test
+func `*`*(t1,t2: Transformation) : Transformation =
+    ## Perform composition between two transformation via hommatrix product.
+    return newTransformation(t1.matrix * t2.matrix, t1.inv_matrix * t2.inv_matrix)
 
 proc print*(t: Transformation) : void =
     ## to print a transformaation in a nice way
