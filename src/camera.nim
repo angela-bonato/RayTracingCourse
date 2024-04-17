@@ -14,16 +14,8 @@ type Camera* = object
 
 # Camera type constructors
 
-proc newCamera*() : Camera =
-    ## Empty constructor, set variables to default values
-    result.aspect_ratio = 1.0
-    result.distance = 1.0
-    result.transform = newTransformation()
-
-    return result
-
-proc newCamera*( aspect_ratio : float, distance: float, transform : Transformation ) : Camera =
-    ## Constructor with elements, set the variables to given values
+proc newCamera*(aspect_ratio = 1.0, distance = 1.0, transform = newTransformation()) : Camera =
+    ## Hybrid onstructor: when a value is passed as argument it is assigned as defined calling the constructor, when it is not passed the constructor uses the default value. 
     result.aspect_ratio = aspect_ratio
     result.distance = distance
     result.transform = transform
