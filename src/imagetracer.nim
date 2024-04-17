@@ -1,1 +1,50 @@
-# ciao
+## Implementation of the ImageTracer type and its methods. It connect the Camera type to the HdrImage type.
+
+import camera
+import hdrimage
+import ray
+import color
+
+# ImageTracer typer declaration
+
+type ImageTracer* = object
+    image* : HdrImage
+    camera* : Camera
+
+# ImageTracer trace constructor
+
+proc newImageTracer*() : ImageTracer =
+    ## Empty constructor, initialize all the variables to default values
+    result.image = newHdrImage()
+    result.camera = newCamera()
+
+    return result
+
+proc newImageTracer*(image : HdrImage, camera : Camera) : ImageTracer =
+    ## Constructor with elements, initialize the variables to given values
+    result.image = image
+    result.camera = camera
+
+    return result
+
+# ImageTracer procs
+
+proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : FireRayProcs, u_pixel=0.5, v_pixel=0.5) : Ray =
+    ## Fires a ray from a pixel of the screen 
+    var 
+        u = (float(col) + u_pixel) / float(img_tracer.image.width - 1)
+        v = (float(row) + v_pixel) / float(img_tracer.image.height - 1)
+
+    return img_tracer.camera.fire_ray_image(u,v)
+
+type SolveRenderingProcs* = proc (ray: Ray) : Color {.closure.}
+
+proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProcs) : void =
+    ## Fires all the rays, iterating over the rows and the columns of the image
+    for row in countup(0,img_tracer.image.height-1):
+        for col in countup(0,img_tracer.image.width-1):
+            var 
+                ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
+                color = solve_rendering(ray)
+            img_tracer.image.setPixel(col, row, color)
+            
