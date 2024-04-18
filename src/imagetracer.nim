@@ -30,9 +30,9 @@ proc newImageTracer*(image : HdrImage, camera : Camera) : ImageTracer =
 # ImageTracer procs
 
 proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : FireRayProcs, u_pixel=0.5, v_pixel=0.5) : Ray =
-    ## Fires a ray from a pixel of the screen 
+    ## Fires a ray from a pixel of the screen -> give the center of the pixel in the continuum space of the camera to fire the ray
     var 
-        u = (float(col) + u_pixel) / float(img_tracer.image.width - 1)
+        u = (float(col) + u_pixel) / float(img_tracer.image.width - 1)      
         v = (float(row) + v_pixel) / float(img_tracer.image.height - 1)
 
     return img_tracer.camera.fire_ray_image(u,v)
