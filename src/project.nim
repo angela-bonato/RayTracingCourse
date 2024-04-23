@@ -2,11 +2,26 @@
 import hdrimage
 import parameters
 import vector
+import imagetracer
+import camera
 import std/os
 import std/streams
 
 when isMainModule:
   echo "Hello, world!"
+
+#[
+  Firt example how to define the fire_ray proc
+  
+  var
+    kind_of_camera : string
+    fire_ray : FireRayProcs
+
+  if kind_of_camera == "o" :
+    fire_ray = fire_ray_orthogonal
+  else:
+    fire_ray = fire_ray_perspective
+]#
 
 #[
   var 
