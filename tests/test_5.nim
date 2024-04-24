@@ -96,30 +96,52 @@ proc test_perspective_camera(): void =
     assert ray3.at(1.0).is_close(newPoint(0.0, 2.0, 1.0))
     assert ray4.at(1.0).is_close(newPoint(0.0, -2.0, 1.0))
 
-# ImageTracer class
+# ImageTracer class implemented using unittest
 
 proc solverendproc(ray: Ray): Color =
     ##Just a temporary proc which inherit from SolveRenderingProcs type, to be used in the next proc
     return newColor(1.0, 2.0, 3.0)
 
-proc test_image_tracer(): void =
+suite "test_image_tracer":
     ##Tests on ImageTracer methods
-    var 
-        img = newHdrImage(4, 2)
-        cam = newCamera(aspect_ratio=2)
-        fire_ray = fire_ray_perspective     #cam is a perspective camera
-        trc = newImageTracer(img, cam)
-        ray1 = trc.fire_ray_pixel(0, 0, fire_ray, u_pixel=2.5, v_pixel=1.5)
-        ray2 = trc.fire_ray_pixel(2, 1, fire_ray, u_pixel=0.5, v_pixel=0.5)
-        sol = solverendproc
-    
-    assert ray1.is_close(ray2)
+    echo "Starting tests on ImageTracer."
 
-    trc.fire_all_rays(fire_ray, sol)
-    for row in 0..<img.height:
-        for col in 0..<img.width:
-            assert is_close(img.get_pixel(col, row), newColor(1.0, 2.0, 3.0))
+    setup:
+        var 
+            img = newHdrImage(4, 2)
+            cam = newCamera(aspect_ratio=2)
+            fire_ray = fire_ray_perspective     #cam is a perspective camera
+            trc = newImageTracer(img, cam)
 
+        echo "New test started."
+
+    teardown:
+        echo "Test completed."
+
+    test "Orientation":
+        var 
+            top_left_ray = trc.fire_ray_pixel(0, 0, fire_ray, u_pixel=0.0, v_pixel=0.0)
+            bottom_right_ray = trc.fire_ray_pixel(3, 1, fire_ray, u_pixel=1.0, v_pixel=1.0)
+        
+        check(newPoint(0.0, 2.0, 1.0).is_close(top_left_ray.at(1.0)))
+        check(newPoint(0.0, -2.0, -1.0).is_close(bottom_right_ray.at(1.0)))
+
+    test "u-v sub-mapping":
+        var
+            ray1 = trc.fire_ray_pixel(0, 0, fire_ray, u_pixel=2.5, v_pixel=1.5)
+            ray2 = trc.fire_ray_pixel(2, 1, fire_ray, u_pixel=0.5, v_pixel=0.5)
+
+        check(ray1.is_close(ray2))
+
+    test "Image coverage":
+        var sol = solverendproc
+
+        trc.fire_all_rays(fire_ray, sol)
+        for row in 0..<img.height:
+            for col in 0..<img.width:
+                check(is_close(img.get_pixel(col, row), newColor(1.0, 2.0, 3.0)))
+
+    echo "Completed tests on ImageTracer."
 
 ##Running all the tests##
 test_ray()
@@ -127,4 +149,3 @@ test_ray_transform()
 test_orthogonal_camera()
 test_orthogonal_camera_transform()
 test_perspective_camera()
-test_image_tracer()
