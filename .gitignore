@@ -12,8 +12,10 @@ test_1
 test_2
 
 ### Test files  ###
-*.pfm
-*.png
+reference_be.pfm
+reference_le.pfm
+test_ReadWrite.pfm
+
 
 ### VisualStudioCode ###
 .vscode/*
