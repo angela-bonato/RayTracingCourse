@@ -35,19 +35,19 @@ Some example of the conversion of the file ***memorial.pfm*** using different va
 
 <div class="container">
     <div class="image-box">
-        <img src="examples/memorial_1_0.15.png" alt="Immagine 1" width="192" height="288">
+        <img src="examples/memorial_1_0.15.png" alt="Immagine 1" width="128" height="192">
         <p>A_VALUE=0.15  GAMMA=1.0</p>
     </div>
     <div class="image-box">
-        <img src="examples/memorial_1_0.25.png" alt="Immagine 2" width="192" height="288">
+        <img src="examples/memorial_1_0.25.png" alt="Immagine 2" width="128" height="192">
         <p>A_VALUE=0.25  GAMMA=1.0</p>
     </div>
     <div class="image-box">
-        <img src="examples/memorial_2_0.15.png" alt="Immagine 3" width="192" height="288">
+        <img src="examples/memorial_2_0.15.png" alt="Immagine 3" width="128" height="192">
         <p>A_VALUE=0.15  GAMMA=2.0</p>
     </div>
     <div class="image-box">
-        <img src="examples/memorial_2_0.25.png" alt="Immagine 3" width="192" height="288">
+        <img src="examples/memorial_2_0.25.png" alt="Immagine 3" width="128" height="192">
         <p>A_VALUE=0.25  GAMMA=2.0</p>
     </div>
 </div>
