@@ -7,6 +7,7 @@ import ../src/ray
 import ../src/camera
 import ../src/imagetracer
 import std/math
+import std/unittest
 
 ##Tests on functions related to cameras classes (ray, camera, imagetracer)##
 
