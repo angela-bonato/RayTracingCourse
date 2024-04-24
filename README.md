@@ -18,7 +18,6 @@ Some example of the conversion of the file ***memorial.pfm*** using different va
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Allineamento di immagini e didascalie</title>
 </head>
 <body>
 
