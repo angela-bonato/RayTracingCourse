@@ -3,7 +3,7 @@
 ![release](https://img.shields.io/github/v/release/angela-bonato/RayTracingCourse)
 ![Top Language](https://img.shields.io/github/languages/top/angela-bonato/RayTracingCourse)
 
-## v0.1.1
+# v0.1.1
 
 This code allows you to read PFM files and to convert them to PNG files. It can also perform tone mapping and gamma correction.
 
@@ -30,7 +30,10 @@ Some example of the conversion of the file ***memorial.pfm*** using different va
         <img src="examples/memorial_1_0.25.png" alt="Immagine 1" width="154" height="231">
         <p>A_VALUE=0.25  GAMMA=1.0</p>
     </div>
-    <div class="image-box" style="margin: 10px; text-align: center;">
+</div>
+
+<div class="container" style="display: flex; flex-wrap: wrap; justify-content: center;">
+ <div class="image-box" style="margin: 10px; text-align: center;">
         <img src="examples/memorial_2_0.15.png" alt="Immagine 1" width="154" height="231">
         <p>A_VALUE=0.15  GAMMA=2.0</p>
     </div>
