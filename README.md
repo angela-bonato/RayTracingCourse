@@ -56,6 +56,6 @@ Some example of the conversion of the file `memorial.pfm` using different values
 </body>
 </html>
 
-## Licence
+## License
 
 The code is released under the GPL3 License. See the file [LICENSE.md](./LICENSE.md) for more information.
