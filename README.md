@@ -17,7 +17,7 @@ To use the converter, the installation of the [nim-simplepng](https://github.com
 
 To use this program run it with: 
 
-    nimble run project \<INPUT_PFM_FILE\> \<A_FACTOR\> \<GAMMA\> \<OUTPUT_PNG_FILE\>
+    nimble run project <INPUT_PFM_FILE> <A_FACTOR> <GAMMA> <OUTPUT_PNG_FILE>
     
 It will convert the `INPUT_PFM_FILE` to `OUTPUT_PNG_FILE` using the given **GAMMA** and **A_VALUE**.
 
