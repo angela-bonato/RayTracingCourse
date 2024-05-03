@@ -7,6 +7,12 @@
 
 This code allows you to read PFM files and to convert them to PNG files. It can also perform tone mapping and gamma correction.
 
+## Installation
+
+The code is written in Nim, it has been tested with stable and devel Nim versions from 2.0.2 on. It is supported on Ubuntu 23.04 or higher.
+
+To use the converter, the installation of the [nim-simplepng](https://github.com/jrenner/nim-simplepng) library is required.
+
 ## Usage
 
 To use this program run it with: **nimble run project \<INPUT_PFM_FILE\> \<A_FACTOR\> \<GAMMA\> \<OUTPUT_PNG_FILE\>**. It will convert the **INPUT_PFM_FILE** to **OUTPUT_PNG_FILE** using the given **GAMMA** and **A_VALUE**.
@@ -45,3 +51,7 @@ Some example of the conversion of the file ***memorial.pfm*** using different va
 
 </body>
 </html>
+
+## Licence
+
+The code is released under the GPL3 License. See the file [LICENSE.md](./LICENSE.md) for more information.
