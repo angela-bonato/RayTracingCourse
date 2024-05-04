@@ -8,7 +8,7 @@ import ../src/point
 import ../src/normal
 import ../src/transformation
 
-suite "test sphere":
+suite "Test Sphere":
     ## Tests on Sphere
     echo "Started tests on Sphere"
     
@@ -104,6 +104,63 @@ suite "test sphere":
         echo "Test ended"
     
     echo "Ended tests on Sphere"
+
+suite "Test Plane":
+
+    echo "Started test on Plane"
+
+    setup:
+        var 
+            xy_plane = newPlane()
+        echo "New test started"
+
+    test "Ray origin with positive z":
+        var
+            ray = newRay(newPoint(0.5,0.5,1),newVector(0,0,-1))
+            teoretical_hit_point = newPoint(0.5,0.5,0)
+            teoretical_norm = newNormal(0,0,1)
+            teoretical_uv_coordinates = newVec2d(0.5,0.5)
+            hit_point = xy_plane.ray_intersection(ray)
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(1.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Ray origin with negative z":
+        var
+            ray = newRay(newPoint(0.5,0.5,-1),newVector(0,0,1))
+            teoretical_hit_point = newPoint(0.5,0.5,0)
+            teoretical_norm = newNormal(0,0,-1)
+            teoretical_uv_coordinates = newVec2d(0.5,0.5)
+            hit_point = xy_plane.ray_intersection(ray)
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(1.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Rotated plane":
+        var
+            rotated_plane = newPlane( rotation_y(PI/4) )
+            ray = newRay(newPoint(1,0,1),newVector(-1,0,-1))
+            teoretical_hit_point = newPoint(0,0,0)
+            teoretical_norm = newNormal(sqrt(2.0)/2.0,0,sqrt(2.0)/2.0)
+            teoretical_uv_coordinates = newVec2d(0,0)
+            hit_point = rotated_plane.ray_intersection(ray)
+        
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(1.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    teardown:
+        echo "Test ended"
+
+    echo "Ended tests on Plane"
 
     
 
