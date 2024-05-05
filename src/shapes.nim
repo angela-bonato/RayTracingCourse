@@ -50,12 +50,11 @@ proc newHitRecord*( world_point : Point, normal : Normal, surface_point : Vec2d,
 
 proc is_close*(hit1, hit2: HitRecord) : bool =
     ## Usefull to compare two HitRecords in tests
-    return (hit1.isNone and hit2.isNone) or     #both hitrecords are null or all their components are close
-           (is_close(hit1.world_point, hit2.world_point) and 
+    return is_close(hit1.world_point, hit2.world_point) and 
             is_close(hit1.normal, hit2.normal) and 
             is_close(hit1.surface_point, hit2.surface_point) and 
             almostEqual(hit1.t, hit2.t) and 
-            is_close(hit1.ray, hit2.ray))
+            is_close(hit1.ray, hit2.ray)
 
 # Shape type declaration
 
