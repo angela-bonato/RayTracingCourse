@@ -12,27 +12,27 @@ type World* = ref object
 proc newWorld*() : World =
     ## Empty constructor
     new(result)
-    result.shapes = newSeq[Shapes](0)
+    result.shapes = newSeq[Shape](0)
     return result
 
 # Methods
 
 proc add(scene: World, shape: Shape) : void =
     ## Used to add a new shape to the list
-    add(World.shapes, shape)   #add() 
+    add(scene.shapes, shape)   #add() 
 
-proc ray_intersection*(scene: World, ray:Ray) : Option[HitRecord]:
+proc ray_intersections*(scene: World, ray:Ray) : Option[HitRecord] =
     ## Iteration of all the shapes in the scene to search for intersection and find the closest ones 
     var 
         closest, intersection : Option[HitRecord]
 
-    for shape in World.shapes :
+    for shape in scene.shapes :
         intersection = shape.ray_intersection(ray)
 
         if intersection.isNone :
             continue
 
-        if (closest.isNone) or (intersection.t < closest.t):
-            closest = intersection 
+        if (closest.isNone) or (intersection.get().t < closest.get().t):
+            closest.get() = intersection.get()
 
     return closest

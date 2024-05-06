@@ -6,13 +6,16 @@ import imagetracer
 import camera
 import shapes
 import world
+import ray
+import color
+import std/options
 import std/os
 import std/streams
 
 
 proc OnOffTracer(ray: Ray) : Color =
   ## This proc is used to determine the color of each pixel based on what the input ray hit
-  if (ray == isNone) :  #is this the right sintax?
+  if (ray == isNone) :  #is this the right sintax? 
     return newColor(0, 0, 0)  #The background will be black
   else:
     return newColor(255, 255, 255)  #The spheres will be white

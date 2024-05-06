@@ -60,6 +60,11 @@ proc is_close*(hit1, hit2: HitRecord) : bool =
 
 type Shape* = object of RootObj
 
+method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} =
+    ## Virtual ray_intersection method
+    quit "to override!"
+    
+
 # Sphere declaration and procs
 
 type Sphere* = object of Shape  
@@ -89,7 +94,7 @@ proc sphere_point_to_uv*( point: Point ) : Vec2d =
     else:
         return newVec2d(u+1.0,v)
 
-proc ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
+method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
     ## Compute the intersection between a ray and a sphere
     var 
         inv_ray = ray.transform(sphere.transformation.inverse())
@@ -139,7 +144,7 @@ proc plane_point_to_uv*( point: Point ) : Vec2d =
         v = point.y - floor(point.y)
     return newVec2d(u,v)
 
-proc ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
+method ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
     ## Compute the intersection between a ray and a plane
     var inv_ray = ray.transform(plane.transformation.inverse())
     if inv_ray.dir.z == 0: return none(HitRecord) # the ray missed the plane
