@@ -62,10 +62,11 @@ type Shape* = object of RootObj
 
 # Sphere declaration and procs
 
-type Sphere* = object of Shape  # It represent a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
+type Sphere* = object of Shape  
+    ## It represent a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
     transformation* : Transformation
 
-proc NewSphere*( transform = newTransformation() ) : Sphere =
+proc newSphere*( transform = newTransformation() ) : Sphere =
     ## Sphere constructor
     result.transformation = transform
     return result

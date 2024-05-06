@@ -14,8 +14,8 @@ suite "Test Sphere":
     
     setup:
         var
-            unitary_sphere = NewSphere()
-            traslated_sphere = NewSphere(translation( newVector(10.0,0,0)))
+            unitary_sphere = newSphere()
+            traslated_sphere = newSphere(translation( newVector(10.0,0,0)))
         echo "New test started"
 
     test "Ray direction z":

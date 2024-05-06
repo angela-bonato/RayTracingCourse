@@ -1,4 +1,4 @@
-## Implementation of the type Parameters, to obtain the vaule of a-factor and gamma to use in the hdr -> ldr conversion
+## Implementation of the type Parameters used in the pfm2png command, to obtain the vaule of a-factor and gamma to use in the hdr -> ldr conversion
 
 import std/strutils
 
