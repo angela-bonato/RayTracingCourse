@@ -17,7 +17,7 @@ proc newWorld*() : World =
 
 # Methods
 
-proc add(scene: World, shape: Shape) : void =
+proc add*(scene: World, shape: Shape) : void =
     ## Used to add a new shape to the list
     add(scene.shapes, shape)   #add() 
 
@@ -27,12 +27,16 @@ proc ray_intersections*(scene: World, ray:Ray) : Option[HitRecord] =
         closest, intersection : Option[HitRecord]
 
     for shape in scene.shapes :
+        #echo type(shape)
         intersection = shape.ray_intersection(ray)
+
+        if intersection.isSome :
+            echo "sticazzi"
 
         if intersection.isNone :
             continue
 
         if (closest.isNone) or (intersection.get().t < closest.get().t):
-            closest.get() = intersection.get()
+            closest = intersection
 
     return closest

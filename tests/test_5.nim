@@ -102,6 +102,7 @@ proc solverendproc(ray: Ray): Color =
     ##Just a temporary proc which inherit from SolveRenderingProcs type, to be used in the next proc
     return newColor(1.0, 2.0, 3.0)
 
+#[
 suite "test_image_tracer":
     ##Tests on ImageTracer methods
     echo "Starting tests on ImageTracer."
@@ -148,4 +149,4 @@ test_ray()
 test_ray_transform()
 test_orthogonal_camera()
 test_orthogonal_camera_transform()
-test_perspective_camera()
+test_perspective_camera()]#

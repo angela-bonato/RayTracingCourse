@@ -6,7 +6,6 @@ import ray
 import color
 import world
 import std/options
-import shapes
 
 # ImageTracer typer declaration
 

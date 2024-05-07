@@ -1,16 +1,13 @@
 ## This is the main of our programme. It is possible to use it with different commands, thanks to cligen library.
 import hdrimage
-import parameters
 import vector
 import imagetracer
 import camera
-import shapes
 import world
-import ray
 import color
 import std/options
-import std/os
 import std/streams
+import transformation
 
 
 proc OnOffTracer(hit : Option[HitRecord]) : Color =
@@ -20,38 +17,43 @@ proc OnOffTracer(hit : Option[HitRecord]) : Color =
   else:
     return newColor(255, 255, 255)  #The spheres will be white
 
-proc demo(kind_of_camera = 'p', pfm_filename: String, a_factor = 0.18, gamma = 2.0, png_filename: String) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(trasform = translation(point_to_vec(-2, 0, 0))) #This should define an observer in (-2, 0, 0) and a squared screen cetered in (-1, 0, 0)
+    cam = newCamera(transform = translation(newVector(-1, 0, 0))) #This should define an observer in (-2, 0, 0) and a squared screen cetered in (-1, 0, 0)
     fire_ray : FireRayProcs
-    img = newHdrImage(100, 100)  #change the arguments with the desired dimension
+    img = newHdrImage(960, 960)  #change the arguments with the desired dimension
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
     tracer = OnOffTracer
     pfm_stream_write, pfm_stream_read : Stream
     output_img : HdrImage
+    pfm_filename = args[0]
+    png_filename = args[1]
     
   #exceptions to check on the input parameters?
 
   ## Creation of the pfm image
   
-  if kind_of_camera == "o" :  #Default is perspective
+  if kind_of_camera == 'o' :  #Default is perspective
     fire_ray = fire_ray_orthogonal
   else:
     fire_ray = fire_ray_perspective
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
-  scene.add(newSphere(translation(point_to_vec(0.5, -0.5, 0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(-0.5, -0.5, 0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(-0.5, 0.5, 0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(0.5, 0.5, 0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(0.5, -0.5, -0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(-0.5, -0.5, -0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(-0.5, 0.5, -0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(0.5, 0.5, -0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(0, 0, -0.5))*scaling(10, 10, 10)))
-  scene.add(newSphere(translation(point_to_vec(0, 0.5, 0))*scaling(10, 10, 10)))
+  #[
+  scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(0.5, -0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(-0.5, -0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(-0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
+  ]#
+  scene.add(newSphere())
 
   #how to make scene and im_tracer talk to each other? I have to use scene.ray_intersection on each ray of the image then produce a hitRecord from which I can produce the image? boh
 
@@ -79,11 +81,13 @@ proc demo(kind_of_camera = 'p', pfm_filename: String, a_factor = 0.18, gamma = 2
 
 
 #check on default values of parameters
-proc pfm2png(input_pfm_filename: String, a_factor = 0.18, gamma = 2.0, output_png_filename: String) : void =
+proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
   ## Command to convert a pfm file into a png one
   var
     input_stream : Stream
     img : HdrImage
+    input_pfm_filename = args[0]
+    output_png_filename = args[1]
 
   try:
     input_stream = newFileStream(input_pfm_filename, fmRead )

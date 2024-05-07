@@ -62,8 +62,7 @@ type Shape* = object of RootObj
 
 method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} =
     ## Virtual ray_intersection method
-    quit "to override!"
-    
+    quit "To override"
 
 # Sphere declaration and procs
 
@@ -103,6 +102,7 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
         t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
         first_hit : float
 
+    echo t_1, " ", t_2
     if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
         first_hit = t_1
     elif t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
