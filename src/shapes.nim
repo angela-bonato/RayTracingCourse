@@ -58,7 +58,7 @@ proc is_close*(hit1, hit2: HitRecord) : bool =
 
 # Shape type declaration
 
-type Shape* = object of RootObj
+type Shape* = ref object of RootObj
 
 method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} =
     ## Virtual ray_intersection method
@@ -66,12 +66,13 @@ method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} 
 
 # Sphere declaration and procs
 
-type Sphere* = object of Shape  
+type Sphere* = ref object of Shape  
     ## It represent a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
     transformation* : Transformation
 
 proc newSphere*( transform = newTransformation() ) : Sphere =
     ## Sphere constructor
+    new(result)
     result.transformation = transform
     return result
 
@@ -102,7 +103,6 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
         t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
         first_hit : float
 
-    echo t_1, " ", t_2
     if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
         first_hit = t_1
     elif t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
@@ -121,11 +121,12 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
 
 # Plane declaration and procs
 
-type Plane* = object of Shape
+type Plane* = ref object of Shape
     transformation* : Transformation
 
 proc newPlane*( transform = newTransformation() ) : Plane =
     ## Plane constructor
+    new(result)
     result.transformation = transform
     return result
 

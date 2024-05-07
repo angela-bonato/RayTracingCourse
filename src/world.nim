@@ -12,7 +12,7 @@ type World* = ref object
 proc newWorld*() : World =
     ## Empty constructor
     new(result)
-    result.shapes = newSeq[Shape](0)
+    result.shapes = @[]
     return result
 
 # Methods
@@ -27,11 +27,7 @@ proc ray_intersections*(scene: World, ray:Ray) : Option[HitRecord] =
         closest, intersection : Option[HitRecord]
 
     for shape in scene.shapes :
-        #echo type(shape)
         intersection = shape.ray_intersection(ray)
-
-        if intersection.isSome :
-            echo "sticazzi"
 
         if intersection.isNone :
             continue

@@ -22,18 +22,23 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
   var 
     cam = newCamera(transform = translation(newVector(-1, 0, 0))) #This should define an observer in (-2, 0, 0) and a squared screen cetered in (-1, 0, 0)
     fire_ray : FireRayProcs
-    img = newHdrImage(960, 960)  #change the arguments with the desired dimension
+    img = newHdrImage(500, 500)  #change the arguments with the desired dimension
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
     tracer = OnOffTracer
     pfm_stream_write, pfm_stream_read : Stream
     output_img : HdrImage
-    pfm_filename = args[0]
-    png_filename = args[1]
-    
+    pfm_filename, png_filename : string
+
+  if len(args) != 2:
+    quit "Usage: <PFM_FILE> <PNG_FILE>"
+
+  pfm_filename = args[0]
+  png_filename = args[1]
+
   #exceptions to check on the input parameters?
 
-  ## Creation of the pfm image
+  # Creation of the pfm image
   
   if kind_of_camera == 'o' :  #Default is perspective
     fire_ray = fire_ray_orthogonal
@@ -41,7 +46,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
     fire_ray = fire_ray_perspective
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
-  #[
+
   scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
@@ -52,14 +57,12 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
   scene.add(newSphere(translation(newVector(0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
-  ]#
-  scene.add(newSphere())
-
+  
   #how to make scene and im_tracer talk to each other? I have to use scene.ray_intersection on each ray of the image then produce a hitRecord from which I can produce the image? boh
 
   im_tracer.fire_all_rays(fire_ray, tracer, scene)
 
-  ## Creation of the pfm file
+  # Creation of the pfm file
   
   pfm_stream_write = newFileStream(pfm_filename, fmWrite)
   im_tracer.image.write_pfm(pfm_stream_write)
@@ -67,10 +70,17 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
   echo "File ", pfm_filename, " has been written to disk"
   pfm_stream_write.close()
 
-  ## Conversion to png file
+  # Conversion to png file
   
-  pfm_stream_read = newFileStream(pfm_filename, fmRead)
-  output_img = read_pfm_image(pfm_stream_read)
+  try:
+    pfm_stream_read = newFileStream(pfm_filename, fmRead)
+  except CatchableError as e:
+    echo e.msg
+
+  try:
+    output_img = read_pfm_image(pfm_stream_read)
+  except CatchableError as e:
+    echo e.msg
 
   output_img.normalize_image(a_factor)
   output_img.clamp_image()
@@ -113,7 +123,9 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
 
 #Thi is the actual main
 when isMainModule:
-  import cligen; dispatchMulti([demo], [pfm2png])
+  import cligen; dispatchMulti([demo, help={ "kind_of_camera":"set kind of camera, could be perspective 'p' or orthogonal 'o' ", 
+                                             "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>"}],
+                               [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 
     
