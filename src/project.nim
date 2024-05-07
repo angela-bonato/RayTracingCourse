@@ -31,7 +31,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
     pfm_filename, png_filename : string
 
   if len(args) != 2:
-    quit "Usage: <PFM_FILE> <PNG_FILE>"
+    quit "Usage:\n  demo [optional-params] <OUT_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
 
   pfm_filename = args[0]
   png_filename = args[1]
@@ -96,8 +96,10 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
   var
     input_stream : Stream
     img : HdrImage
-    input_pfm_filename = args[0]
-    output_png_filename = args[1]
+    input_pfm_filename, output_png_filename : string
+
+  if len(args) != 2:
+    quit "Usage:\n  demo [optional-params] <IN_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
 
   try:
     input_stream = newFileStream(input_pfm_filename, fmRead )
