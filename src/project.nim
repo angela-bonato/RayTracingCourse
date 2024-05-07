@@ -13,9 +13,9 @@ import std/os
 import std/streams
 
 
-proc OnOffTracer(ray: Ray) : Color =
+proc OnOffTracer(hit : Option[HitRecord]) : Color =
   ## This proc is used to determine the color of each pixel based on what the input ray hit
-  if (ray == isNone) :  #is this the right sintax? 
+  if (hit.isNone) :  #is this the right sintax? 
     return newColor(0, 0, 0)  #The background will be black
   else:
     return newColor(255, 255, 255)  #The spheres will be white
@@ -55,7 +55,7 @@ proc demo(kind_of_camera = 'p', pfm_filename: String, a_factor = 0.18, gamma = 2
 
   #how to make scene and im_tracer talk to each other? I have to use scene.ray_intersection on each ray of the image then produce a hitRecord from which I can produce the image? boh
 
-  im_tracer.fire_all_rays(fire_ray, tracer)
+  im_tracer.fire_all_rays(fire_ray, tracer, scene)
 
   ## Creation of the pfm file
   
