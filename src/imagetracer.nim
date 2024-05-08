@@ -41,17 +41,6 @@ proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : Fir
 
 type SolveRenderingProcs* = proc (hit : Option[HitRecord]) : Color {.closure.}
 
-#[
-proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProcs) : void =
-    ## Fires all the rays, iterating over the rows and the columns of the image
-    for row in countup(0,img_tracer.image.height-1):
-        for col in countup(0,img_tracer.image.width-1):
-            var 
-                ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
-                color = solve_rendering(ray)
-            img_tracer.image.setPixel(col, row, color)
-]#
-
 proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProcs, scene: World) : void =
     ## fire_all_rays alternative version
     for row in countup(0,img_tracer.image.height-1):
