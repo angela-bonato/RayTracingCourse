@@ -87,11 +87,11 @@ proc test_get_set_pixel(): void =
 
 #doing all the tests
 
-#test_col_is_close()
-#test_img_is_close()
-#test_color_creation()
-#test_overload()
-#test_image_creation()
-#test_coordinates()
-#test_pixel_offset()
-#test_get_set_pixel()
+test_col_is_close()
+test_img_is_close()
+test_color_creation()
+test_overload()
+test_image_creation()
+test_coordinates()
+test_pixel_offset()
+test_get_set_pixel()
