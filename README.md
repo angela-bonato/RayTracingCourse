@@ -23,38 +23,30 @@ It will convert the `INPUT_PFM_FILE` to `OUTPUT_PNG_FILE` using the given **GAMM
 
 Some example of the conversion of the file `memorial.pfm` using different values of **GAMMA** and **A_VALUE**.
 
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-
-<div class="container" style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <div class="image-box" style="margin: 10px; text-align: center;">
-        <img src="examples/memorial_1_0.15.png" alt="Immagine 1" width="154" height="231">
-        <p>A_VALUE=0.15  GAMMA=1.0</p>
-    </div>
-    <div class="image-box" style="margin: 10px; text-align: center;">
-        <img src="examples/memorial_1_0.25.png" alt="Immagine 1" width="154" height="231">
-        <p>A_VALUE=0.25  GAMMA=1.0</p>
-    </div>
+<div style="text-align: center;">
+<table style="margin: 0px auto;">
+    <tr>
+        <td> 
+            <img src="examples/memorial_1_0.15.png" alt="Image 1" width="154" height="231">
+            <p>A_VALUE=0.15  GAMMA=1.0</p> 
+        </td>
+        <td> 
+            <img src="examples/memorial_1_0.25.png" alt="Image 2" width="154" height="231">
+            <p>A_VALUE=0.25  GAMMA=1.0</p>
+        </td>
+    </tr>
+    <tr>
+        <td> 
+            <img src="examples/memorial_2_0.15.png" alt="Image 3" width="154" height="231">
+            <p>A_VALUE=0.15  GAMMA=2.0</p>
+        </td>
+        <td> 
+            <img src="examples/memorial_2_0.25.png" alt="Image 4" width="154" height="231">
+            <p>A_VALUE=0.25  GAMMA=2.0</p>
+        </td>
+    </tr>
+</table>
 </div>
-
-<div class="container" style="display: flex; flex-wrap: wrap; justify-content: center;">
- <div class="image-box" style="margin: 10px; text-align: center;">
-        <img src="examples/memorial_2_0.15.png" alt="Immagine 1" width="154" height="231">
-        <p>A_VALUE=0.15  GAMMA=2.0</p>
-    </div>
-    <div class="image-box" style="margin: 10px; text-align: center;">
-        <img src="examples/memorial_2_0.25.png" alt="Immagine 1" width="154" height="231">
-        <p>A_VALUE=0.25  GAMMA=2.0</p>
-    </div>
-</div>
-
-</body>
-</html>
 
 ## License
 
