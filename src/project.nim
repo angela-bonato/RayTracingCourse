@@ -7,6 +7,7 @@ import world
 import color
 import std/options
 import std/streams
+import std/math
 import transformation
 
 
@@ -17,12 +18,12 @@ proc OnOffTracer(hit : Option[HitRecord]) : Color =
   else:
     return newColor(255, 255, 255)  #The spheres will be white
 
-proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, width = 640, height = 480, angle = 0.0, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(transform = translation(newVector(-1, 0, 0))) #This should define an observer in (-2, 0, 0) and a squared screen cetered in (-1, 0, 0)
+    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 0))) 
     fire_ray : FireRayProcs
-    img = newHdrImage(500, 500)  #change the arguments with the desired dimension
+    img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
     tracer = OnOffTracer
@@ -126,7 +127,8 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
 #Thi is the actual main
 when isMainModule:
   import cligen; dispatchMulti([demo, help={ "kind_of_camera":"set kind of camera, could be perspective 'p' or orthogonal 'o' ", 
-                                             "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>"}],
+                                             "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>",
+                                             "angle":"set the angle of view, in 360°"}],
                                [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 
