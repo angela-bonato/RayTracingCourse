@@ -64,17 +64,25 @@ method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} 
     ## Virtual ray_intersection method
     quit "To override"
 
+method all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] {.base.} =
+    ## Virtual all_ray_intersections method
+    quit "To override"
+
+method have_inside*( shape : Shape, point : Point) : bool {.base.} =
+    ## Check if a point is inside a shape
+    quit "To override"
+
 # Sphere declaration and procs
 
 type Sphere* = ref object of Shape  
     ## It represents a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
     transformation* : Transformation
 
-proc newSphere*( transform = newTransformation() ) : Sphere =
+proc newSphere*( transform = newTransformation() ) : Shape =
     ## Sphere constructor
-    new(result)
-    result.transformation = transform
-    return result
+    let sphere = new Sphere
+    sphere.transformation = transform
+    return Shape(sphere)
 
 proc sphere_normal*( point : Point, ray_dir : Vector ) : Normal =
     ## Return the normal to a point of the sphere, depending on the ray direction
@@ -119,17 +127,60 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
                                ray = ray    
                                ) )
 
+method all_ray_intersections*( sphere : Sphere, ray : Ray) : Option[seq[HitRecord]] =
+    ## Compute all the intersections between a ray and a sphere
+    var 
+        inv_ray = ray.transform(sphere.transformation.inverse())
+        reduced_delta =  (inv_ray.dir.dot( inv_ray.origin.point_to_vec() ))^2 - inv_ray.dir.squared_norm() * ( inv_ray.origin.point_to_vec.squared_norm() - 1.0 ) 
+        t_1 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) - sqrt( reduced_delta )) / inv_ray.dir.squared_norm()  # compute the two intersection with the sphere
+        t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
+        hits : seq[HitRecord]
+
+    hits = @[]
+
+    if (t_1 < inv_ray.tmin or t_1 > inv_ray.tmax) and (t_2 < inv_ray.tmin or t_2 > inv_ray.tmax) :
+        return none(seq[HitRecord])
+    
+    if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
+        var hit_point = inv_ray.at(t_1)
+        hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
+                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
+                               surface_point = sphere_point_to_uv(hit_point),
+                               t = t_1,
+                               ray = ray    
+                               ) )
+
+    if t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
+        var hit_point = inv_ray.at(t_2)
+        hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
+                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
+                               surface_point = sphere_point_to_uv(hit_point),
+                               t = t_2,
+                               ray = ray    
+                               ) )
+    
+    return some(hits)
+
+method have_inside*( sphere : Sphere, point : Point ) : bool =
+    ## Check if a point is inside a sphere
+    var inv_point = point_to_vec( sphere.transformation.inverse() * point )
+
+    if inv_point.squared_norm() < 1:
+        return true
+    else:
+        return false
+
 # Plane declaration and procs
 
 type Plane* = ref object of Shape
     ## It defines an infinite plane in space
     transformation* : Transformation
 
-proc newPlane*( transform = newTransformation() ) : Plane =
+proc newPlane*( transform = newTransformation() ) : Shape =
     ## Plane constructor
-    new(result)
-    result.transformation = transform
-    return result
+    let plane = new Plane
+    plane.transformation = transform
+    return Shape(plane)
 
 proc plane_normal*(ray_dir : Vector) : Normal =
     ## Return the normal to a point of the plane, depending on the ray direction
@@ -164,6 +215,41 @@ method ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
                                ray = ray    
                                ) )
 
+method all_ray_intersections*(plane : Plane, ray : Ray) : Option[seq[HitRecord]] =
+    ## Compute all the intersections between a ray and a plane
+    var 
+        inv_ray = ray.transform(plane.transformation.inverse())
+        hits : seq[HitRecord]
+    
+    hits = @[]
+
+    if inv_ray.dir.z == 0: return none(seq[HitRecord]) # the ray missed the plane
+
+    var t_hit = - inv_ray.origin.z / inv_ray.dir.z
+    
+    if t_hit < ray.tmin or t_hit > ray.tmax : return none(seq[HitRecord]) # the intersection is out of the ray boundaries
+
+    var hit_point = inv_ray.at(t_hit)
+
+    hits.add( newHitRecord( world_point = plane.transformation * hit_point , 
+                               normal = plane.transformation * plane_normal( inv_ray.dir ),
+                               surface_point = plane_point_to_uv(hit_point),
+                               t = t_hit,
+                               ray = ray    
+                               ) )
+    
+    return some(hits)
+
+method have_inside*( plane : Plane, point : Point) : bool =
+    ## Check if a point is inside a plane -> mean that the point z is negative
+    var inv_point = plane.transformation.inverse() * point
+
+    if inv_point.z < 0 :
+        return true
+    else: 
+        return false
+
+
 # Parallelepipeid declaration and procs
 
 type Parallelepiped* = ref object of Shape  
@@ -180,3 +266,4 @@ proc newParallelepiped*( transform = newTransformation(), p_m = newPoint(), p_M 
     return result
 
 #to Angela: finish procs of parallelepiped looking at sphere, then define difference in CSG file
+
