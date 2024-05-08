@@ -86,11 +86,11 @@ proc test_read_pfm_image() : void =
 
 ##Execute all tests##
 
-#test_write_pfm()
-#test_readLine()
-#test_parse_img_size()
-#test_parse_endianness()
-#test_read_pfm_image()
+test_write_pfm()
+test_readLine()
+test_parse_img_size()
+test_parse_endianness()
+test_read_pfm_image()
 
 
 
