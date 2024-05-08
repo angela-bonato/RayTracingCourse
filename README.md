@@ -9,9 +9,11 @@ This code allows you to read PFM files and to convert them to PNG files. It can 
 
 ## Installation
 
-The code is written in Nim, it has been tested with stable and devel Nim versions from 2.0.2 on. It is supported on Ubuntu 23.04 or higher.
+The code is written in Nim, it has been tested with stable and devel Nim versions from 2.0.2 on with Ubuntu 22.04.4 or higher.
 
-To use the converter, the installation of the [nim-simplepng](https://github.com/jrenner/nim-simplepng) library is required. Using the [nimble](https://github.com/nim-lang/nimble) package manager is advised.
+To use the converter, the installation of the [nim-simplepng](https://github.com/jrenner/nim-simplepng) library is required. The installation through [nimble](https://github.com/nim-lang/nimble) package manager is advised. Therefore, you can simply run:
+
+    nimble install simplepng
 
 ## Usage
 
