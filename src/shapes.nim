@@ -67,7 +67,7 @@ method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} 
 # Sphere declaration and procs
 
 type Sphere* = ref object of Shape  
-    ## It represent a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
+    ## It represents a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
     transformation* : Transformation
 
 proc newSphere*( transform = newTransformation() ) : Sphere =
@@ -122,6 +122,7 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
 # Plane declaration and procs
 
 type Plane* = ref object of Shape
+    ## It defines an infinite plane in space
     transformation* : Transformation
 
 proc newPlane*( transform = newTransformation() ) : Plane =
@@ -162,3 +163,20 @@ method ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
                                t = t_hit,
                                ray = ray    
                                ) )
+
+# Parallelepipeid declaration and procs
+
+type Parallelepiped* = ref object of Shape  
+    ## It defines an axis-aligned box
+    transformation* : Transformation
+    p_min*, p_max* : Point   #points that define the value of each dimension of the shape, along with its position in space
+
+proc newParallelepiped*( transform = newTransformation(), p_m = newPoint(), p_M = newPoint(1, 1, 1) ) : Parallelepiped =
+    ## Parallelepiped constructor, default is unitary cube defined from the origin
+    new(result)
+    result.transformation = transform
+    result.p_min = p.m
+    result.p_max = p.M
+    return result
+
+#to Angela: finish procs of parallelepiped looking at sphere, then define difference in CSG file
