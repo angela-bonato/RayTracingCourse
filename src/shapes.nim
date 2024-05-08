@@ -257,12 +257,12 @@ type Parallelepiped* = ref object of Shape
     transformation* : Transformation
     p_min*, p_max* : Point   #points that define the value of each dimension of the shape, along with its position in space
 
-proc newParallelepiped*( transform = newTransformation(), p_m = newPoint(), p_M = newPoint(1, 1, 1) ) : Parallelepiped =
+proc newParallelepiped*( transform = newTransformation(), p_min = newPoint(), p_max = newPoint(1.0, 1.0, 1.0) ) : Parallelepiped =
     ## Parallelepiped constructor, default is unitary cube defined from the origin
     new(result)
     result.transformation = transform
-    result.p_min = p.m
-    result.p_max = p.M
+    result.p_min = p_min
+    result.p_max = p_max
     return result
 
 #to Angela: finish procs of parallelepiped looking at sphere, then define difference in CSG file
