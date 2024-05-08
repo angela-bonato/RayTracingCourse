@@ -75,7 +75,7 @@ method have_inside*( shape : Shape, point : Point) : bool {.base.} =
 # Sphere declaration and procs
 
 type Sphere* = ref object of Shape  
-    ## It represent a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
+    ## It represents a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
     transformation* : Transformation
 
 proc newSphere*( transform = newTransformation() ) : Shape =
@@ -173,6 +173,7 @@ method have_inside*( sphere : Sphere, point : Point ) : bool =
 # Plane declaration and procs
 
 type Plane* = ref object of Shape
+    ## It defines an infinite plane in space
     transformation* : Transformation
 
 proc newPlane*( transform = newTransformation() ) : Shape =
@@ -247,3 +248,22 @@ method have_inside*( plane : Plane, point : Point) : bool =
         return true
     else: 
         return false
+
+
+# Parallelepipeid declaration and procs
+
+type Parallelepiped* = ref object of Shape  
+    ## It defines an axis-aligned box
+    transformation* : Transformation
+    p_min*, p_max* : Point   #points that define the value of each dimension of the shape, along with its position in space
+
+proc newParallelepiped*( transform = newTransformation(), p_min = newPoint(), p_max = newPoint(1.0, 1.0, 1.0) ) : Parallelepiped =
+    ## Parallelepiped constructor, default is unitary cube defined from the origin
+    new(result)
+    result.transformation = transform
+    result.p_min = p_min
+    result.p_max = p_max
+    return result
+
+#to Angela: finish procs of parallelepiped looking at sphere, then define difference in CSG file
+
