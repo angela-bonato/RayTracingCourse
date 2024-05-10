@@ -1,6 +1,7 @@
 ## This is the main of our programme. It is possible to use it with different commands, thanks to cligen library.
 import hdrimage
 import vector
+import point
 import imagetracer
 import camera
 import world
@@ -8,6 +9,7 @@ import color
 import std/options
 import std/streams
 import transformation
+import std/math
 
 
 proc OnOffTracer(hit : Option[HitRecord]) : Color =
@@ -17,7 +19,7 @@ proc OnOffTracer(hit : Option[HitRecord]) : Color =
   else:
     return newColor(255, 255, 255)  #The spheres will be white
 
-proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.20, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
     cam = newCamera(transform = translation(newVector(-1, 0, 0))) #This should define an observer in (-2, 0, 0) and a squared screen cetered in (-1, 0, 0)
@@ -46,7 +48,6 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
     fire_ray = fire_ray_perspective
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
-
   scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
@@ -57,8 +58,6 @@ proc demo(kind_of_camera = 'p', a_factor = 0.18, gamma = 2.0, args : seq[string]
   scene.add(newSphere(translation(newVector(0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
-  
-  #how to make scene and im_tracer talk to each other? I have to use scene.ray_intersection on each ray of the image then produce a hitRecord from which I can produce the image? boh
 
   im_tracer.fire_all_rays(fire_ray, tracer, scene)
 
