@@ -1,7 +1,6 @@
 ## This is the main of our programme. It is possible to use it with different commands, thanks to cligen library.
 import hdrimage
 import vector
-import point
 import imagetracer
 import camera
 import world
@@ -10,7 +9,6 @@ import std/options
 import std/streams
 import std/math
 import transformation
-import std/math
 
 
 proc OnOffTracer(hit : Option[HitRecord]) : Color =
@@ -49,6 +47,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     fire_ray = fire_ray_perspective
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
+
   scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
