@@ -279,10 +279,10 @@ proc paral_point_to_uv*( point: Point ) : Vec2d =
     newVec2d(0,0)
 
 method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] =
-    ## Compute the intersection between a ray and a parallelepiped
+    ## Compute all the intersection between a ray and a parallelepiped 
     var 
         inv_ray = ray.transform(paral.transformation.inverse())
-        #intersections with planes forming the parallelepiped
+        #intersections with the planes which form the parallelepiped
         tx1 = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
         tx2 = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
         txmin = min(tx1, tx2)
@@ -403,53 +403,141 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
                         ray = ray) )
     return none(HitRecord)
 
-#[
-
-
-
-method all_ray_intersections*( sphere : Sphere, ray : Ray) : Option[seq[HitRecord]] =
-    ## Compute all the intersections between a ray and a sphere
+method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[HitRecord]] =
+    ## Compute the nearest intersection between a ray and a parallelepiped form the observer's pov
     var 
-        inv_ray = ray.transform(sphere.transformation.inverse())
-        reduced_delta =  (inv_ray.dir.dot( inv_ray.origin.point_to_vec() ))^2 - inv_ray.dir.squared_norm() * ( inv_ray.origin.point_to_vec.squared_norm() - 1.0 ) 
-        t_1 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) - sqrt( reduced_delta )) / inv_ray.dir.squared_norm()  # compute the two intersection with the sphere
-        t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
+        inv_ray = ray.transform(paral.transformation.inverse())
+        #intersections with the planes which form the parallelepiped
+        tx1 = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
+        tx2 = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
+        txmin = min(tx1, tx2)
+        txmax = max(tx1, tx2)
+        ty1 = (paral.pmin.y - inv_ray.origin.y) / inv_ray.dir.y
+        ty2 = (paral.pmax.y - inv_ray.origin.y) / inv_ray.dir.y
+        tymin = min(ty1, ty2)
+        tymax = max(ty1, ty2)
+        tz1 = (paral.pmin.z - inv_ray.origin.z) / inv_ray.dir.z
+        tz2 = (paral.pmax.z - inv_ray.origin.z) / inv_ray.dir.z
+        tzmin = min(tz1, tz2)
+        tzmax = max(tz1, tz2)
+        hit_point : Point
         hits : seq[HitRecord]
 
     hits = @[]
 
-    if (t_1 < inv_ray.tmin or t_1 > inv_ray.tmax) and (t_2 < inv_ray.tmin or t_2 > inv_ray.tmax) :
-        return none(seq[HitRecord])
-    
-    if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
-        var hit_point = inv_ray.at(t_1)
-        hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
-                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
-                               surface_point = sphere_point_to_uv(hit_point),
-                               t = t_1,
-                               ray = ray    
-                               ) )
+    #First I look at x and y with z fixed, then I check on z
+    if txmin < tymin :
+        if txmax <= tymin :
+            return none(seq[HitRecord])
+        else :
+            if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).z < paral.pmax.z and inv_ray.at(tymin).z > paral.pmin.z) :
+                hit_point = inv_ray.at(tymin)
+                hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        surface_point = paral_point_to_uv(hit_point),
+                        t = tymin,
+                        ray = ray) )
+            if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).z < paral.pmax.z and inv_ray.at(txmax).z > paral.pmin.z) :
+                hit_point = inv_ray.at(txmax)
+                hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        surface_point = paral_point_to_uv(hit_point),
+                        t = txmax,
+                        ray = ray) )
+            else :
+                return none(seq[HitRecord])
+    elif tymin < txmin :  #Works in the same way as the if indented like this elif
+        if tymax <= txmin :
+            return none(seq[HitRecord])
+        else : 
+            if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).z < paral.pmax.z and inv_ray.at(txmin).z > paral.pmin.z):
+                hit_point = inv_ray.at(txmin)
+                hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        surface_point = paral_point_to_uv(hit_point),
+                        t = txmin,
+                        ray = ray) )
+            elif tymax > inv_ray.tmin and tymax < inv_ray.tmax and (inv_ray.at(tymax).z < paral.pmax.z and inv_ray.at(tymax).z > paral.pmin.z):
+                hit_point = inv_ray.at(tymax)
+                hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        surface_point = paral_point_to_uv(hit_point),
+                        t = tymax,
+                        ray = ray) )
+            else :
+                return none(seq[HitRecord])
 
-    if t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
-        var hit_point = inv_ray.at(t_2)
-        hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
-                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
-                               surface_point = sphere_point_to_uv(hit_point),
-                               t = t_2,
-                               ray = ray    
-                               ) )
+    #Now I fix y at first to look at x,z
+    if txmin < tzmin :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).y < paral.pmax.y and inv_ray.at(tzmin).y > paral.pmin.y) :
+            hit_point = inv_ray.at(tzmin)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tzmin,
+                    ray = ray) )
+        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).y < paral.pmax.y and inv_ray.at(txmax).y > paral.pmin.y) :  #I have to chek also intersections with z to find the nearest hit point
+            hit_point = inv_ray.at(txmax)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = txmax,
+                    ray = ray) )
+    elif tzmin < txmin :  #Works in the same way as the last if indented like this elif
+        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).y < paral.pmax.y and inv_ray.at(txmin).y > paral.pmin.y):
+            hit_point = inv_ray.at(txmin)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = txmin,
+                    ray = ray) )
+        elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).y < paral.pmax.y and inv_ray.at(tzmax).y > paral.pmin.y):
+            hit_point = inv_ray.at(tzmax)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tzmax,
+                    ray = ray) )
+
+    #Now I fix x at first to look at y,z
+    if tymin < tzmin :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x < paral.pmax.x and inv_ray.at(tzmin).x > paral.pmin.x) :
+            hit_point = inv_ray.at(tzmin)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tzmin,
+                    ray = ray) )
+        elif (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x < paral.pmax.x and inv_ray.at(tymax).x > paral.pmin.x) : 
+            hit_point = inv_ray.at(tymax)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tymax,
+                    ray = ray) )
+    elif tzmin < tymin :  #Works in the same way as the last if indented like this elif
+        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x < paral.pmax.x and inv_ray.at(tymin).x > paral.pmin.x):
+            hit_point = inv_ray.at(tymin)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tymin,
+                    ray = ray) )
+        elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x < paral.pmax.x and inv_ray.at(tzmax).x > paral.pmin.x):
+            hit_point = inv_ray.at(tzmax)
+            hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
+                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    surface_point = paral_point_to_uv(hit_point),
+                    t = tzmax,
+                    ray = ray) )
     
     return some(hits)
 
-method have_inside*( sphere : Sphere, point : Point ) : bool =
-    ## Check if a point is inside a sphere
-    var inv_point = point_to_vec( sphere.transformation.inverse() * point )
+method have_inside*(paral : Parallelepiped, point : Point ) : bool =
+    ## Check if a point is inside a parallelepiped (works the same as the sphere version)
+    var inv_point = point_to_vec(paral.transformation.inverse() * point )
 
     if inv_point.squared_norm() < 1:
         return true
     else:
         return false
-
-]#
-#to Angela: finish procs of parallelepiped looking at sphere, then define difference in CSG file
-
