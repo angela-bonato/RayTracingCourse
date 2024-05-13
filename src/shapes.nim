@@ -535,7 +535,8 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
 
 method have_inside*(paral : Parallelepiped, point : Point ) : bool =
     ## Check if a point is inside a parallelepiped 
-    if (point.x > paral.pmin.x and point.x < paral.pmax.x) and (point.y > paral.pmin.y and point.y < paral.pmax.y) and (point.z > paral.pmin.z and point.z < paral.pmax.z) :
+    var inv_point = paral.transformation.inverse() * point
+    if (inv_point.x > paral.pmin.x and inv_point.x < paral.pmax.x) and (inv_point.y > paral.pmin.y and inv_point.y < paral.pmax.y) and (inv_point.z > paral.pmin.z and inv_point.z < paral.pmax.z) :
         return true
     else:
         return false
