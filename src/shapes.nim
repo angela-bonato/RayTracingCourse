@@ -530,14 +530,12 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                     surface_point = paral_point_to_uv(hit_point),
                     t = tzmax,
                     ray = ray) )
-    
+    if len(hits) == 0: return none(seq[HitRecord])
     return some(hits)
 
 method have_inside*(paral : Parallelepiped, point : Point ) : bool =
-    ## Check if a point is inside a parallelepiped (works the same as the sphere version)
-    var inv_point = point_to_vec(paral.transformation.inverse() * point )
-
-    if inv_point.squared_norm() < 1:
+    ## Check if a point is inside a parallelepiped 
+    if (point.x > paral.pmin.x and point.x < paral.pmax.x) and (point.y > paral.pmin.y and point.y < paral.pmax.y) and (point.z > paral.pmin.z and point.z < paral.pmax.z) :
         return true
     else:
         return false

@@ -146,3 +146,94 @@ method have_inside*(intersection : Shapes_Intersection, point : Point) : bool =
         return true
     else:
         return false
+
+# Define shapes difference
+
+type Shapes_Difference* = ref object of Shape 
+    shape1*, shape2 : Shape
+
+proc subtract*(shape1, shape2 : Shape) : Shapes_Difference =
+    ## Returns the difference between two shapes (shape1-shape2, it is not commutative)
+    new(result)
+    result.shape1 = shape1
+    result.shape2 = shape2
+
+method ray_intersection*(difference : Shapes_Difference, ray : Ray) : Option[HitRecord] =
+    ## Ray intersection for the difference between two shapes (returns only the intersection nearest to the observer)
+    var
+        hit1 = shape1.ray_intersection(ray)
+        hit2 = shape2.ray_intersection(ray)
+    
+    #shape1-shape2=shape1 without points of shapes1 which lie inside shape2 and all the points which lie outside shape1
+
+    if hit1.isNone : return none(HitRecord)
+
+    elif (hit1.get().t <= hit2.get().t) or (hit1.isSome and hit2.isNone) : return hit1
+    
+    else :
+        var  
+            shape1_ray_intersections = intersection.shape1.all_ray_intersections(ray)
+            shape2_ray_intersections = intersection.shape2.all_ray_intersections(ray)
+            diff_intersections : seq[HitRecord]
+            first_hit : HitRecord
+    
+        diff_intersections = @[]
+
+        if shape1_ray_intersections.isSome:
+            for hit in shape1_ray_intersections.get():
+                if not intersection.shape2.have_inside(hit.world_point):    #have_inside does not consider boundary points
+                    diff_intersections.add(hit)
+        
+        if shape2_ray_intersections.isSome:
+            for hit in shape2_ray_intersections.get():
+                if intersection.shape1.have_inside(hit.world_point):
+                    diff_intersections.add(hit)
+
+        if len(diff_intersections) == 0: return none(HitRecord) 
+
+        first_hit = diff_intersections[0]
+
+        for hit in diff_intersections: 
+            if hit.t < first_hit.t: 
+                first_hit = hit
+    
+        return some(first_hit)
+
+method all_ray_intersections*(difference : Shapes_Difference, ray : Ray) : Option[seq[HitRecord]] =
+    ## Compute all the intersections of a ray with an difference of shapes
+    var
+        hit1 = shape1.ray_intersection(ray)
+        
+    #shape1-shape2=shape1 without points of shapes1 which lie inside shape2 and all the points which lie outside shape1
+
+    if hit1.isNone : return none(seq[HitRecord])
+
+    else :
+        var  
+            shape1_ray_intersections = intersection.shape1.all_ray_intersections(ray)
+            shape2_ray_intersections = intersection.shape2.all_ray_intersections(ray)
+            diff_intersections : seq[HitRecord]
+            first_hit : HitRecord
+    
+        diff_intersections = @[]
+
+        if shape1_ray_intersections.isSome:
+            for hit in shape1_ray_intersections.get():
+                if not intersection.shape2.have_inside(hit.world_point):    #have_inside does not consider boundary points
+                    diff_intersections.add(hit)
+        
+        if shape2_ray_intersections.isSome:
+            for hit in shape2_ray_intersections.get():
+                if intersection.shape1.have_inside(hit.world_point):
+                    diff_intersections.add(hit)
+
+        if len(diff_intersections) == 0: return none(seq[HitRecord]) 
+        return some(diff_intersections)
+
+method have_inside*(difference : Shapes_Difference, point : Point) : bool = 
+    ## Check if a point is inside a difference between shape1 and shape2
+    if intersection.shape1.have_inside(point) and not intersection.shape2.have_inside(point):        # simple logic operation 
+        return true
+    else:
+        return false
+
