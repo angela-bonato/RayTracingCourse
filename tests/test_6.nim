@@ -1,12 +1,13 @@
 import std/unittest
 import std/options
 import std/math
-import ../src/shapes
+import ../src/world
 import ../src/ray
 import ../src/vector
 import ../src/point
 import ../src/normal
 import ../src/transformation
+import ../src/csg
 
 suite "Test Sphere":
     ## Tests on Sphere
@@ -17,6 +18,9 @@ suite "Test Sphere":
             unitary_sphere = newSphere()
             traslated_sphere = newSphere(translation( newVector(10.0,0,0)))
         echo "New test started"
+
+    teardown:
+        echo "Test ended"
 
     test "Ray direction z":
         var 
@@ -100,9 +104,37 @@ suite "Test Sphere":
         assert hit_point_1.isNone
         assert hit_point_2.isNone
 
-    teardown:
-        echo "Test ended"
+    test "All intersection":
+        var
+            ray = newRay(newPoint(-2,0,0),newVector(1.0,0,0))
+            teoretical_hit_point1 = newHitRecord( world_point = newPoint(-1.0,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0.5,0.5),
+                                                  t = 1.0,
+                                                  ray = ray
+                                                )
+            teoretical_hit_point2 = newHitRecord( world_point = newPoint(1.0,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0,0.5),
+                                                  t = 3.0,
+                                                  ray = ray
+                                                )
+            hit_points = unitary_sphere.all_ray_intersections(ray)
+
+
+        assert hit_points.isSome()
+        assert len(hit_points.get()) == 2
+        assert teoretical_hit_point1 in hit_points.get()
+        assert teoretical_hit_point2 in hit_points.get()
     
+    test "Have inside":
+        var 
+            point1 = newPoint()
+            point2 = newPoint(1,1,1)
+
+        assert unitary_sphere.have_inside(point1)
+        assert not unitary_sphere.have_inside(point2)
+
     echo "Ended tests on Sphere"
 
 suite "Test Plane":
@@ -113,6 +145,9 @@ suite "Test Plane":
         var 
             xy_plane = newPlane()
         echo "New test started"
+
+    teardown:
+        echo "Test ended"
 
     test "Ray origin with positive z":
         var
@@ -156,12 +191,175 @@ suite "Test Plane":
         assert hit_point.get().normal.is_close( teoretical_norm )
         assert hit_point.get().t.almostEqual(1.0)
         assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+    
+    test "Have inside":
+        var
+            point1 = newPoint(0,0,1)
+            point2 = newPoint(0,0,-1)
+
+        assert xy_plane.have_inside(point2)
+        assert not xy_plane.have_inside(point1)
+
+    echo "Ended tests on Plane"
+
+suite "Test CSG":
+
+    echo "Started tests on CSG"
+
+    setup:
+        var
+            sphere1 = newSphere( translation(newVector(0.5,0,0)) )
+            sphere2 = newSphere( translation(newVector(-0.5,0,0)))
+            ray = newRay(newPoint(-2,0,0),newVector(1.0,0,0))
+        
+        echo "New test started"
 
     teardown:
         echo "Test ended"
 
-    echo "Ended tests on Plane"
+    test "Union":
+        var 
+            union = unite(sphere1, sphere2)
+            teoretical_hit_point = newPoint(-1.5,0,0)
+            teoretical_norm = newNormal(-1,0,0)
+            teoretical_uv_coordinates = newVec2d(0.5,0.5)
+            hit_point = union.ray_intersection(ray)
 
-    
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(0.5)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
 
+    test "All intersections for Union":
+        var
+            union = unite(sphere1, sphere2)
+            teoretical_hit_point1 = newHitRecord( world_point = newPoint(-1.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0.5,0.5),
+                                                  t = 0.5,
+                                                  ray = ray
+                                                )
+            teoretical_hit_point2 = newHitRecord( world_point = newPoint(1.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0,0.5),
+                                                  t = 3.5,
+                                                  ray = ray
+                                                )
+            hit_points = union.all_ray_intersections(ray)
+
+
+        assert hit_points.isSome()
+        assert len(hit_points.get()) == 2
+        assert teoretical_hit_point1 in hit_points.get()
+        assert teoretical_hit_point2 in hit_points.get()
     
+    test "Have inside for Union":
+        var
+            point1 = newPoint()
+            point2 = newPoint(1,0,0)
+            point3 = newPoint(-1,0,0)
+            point4 = newpoint(0,0,2)
+            union = unite(sphere1, sphere2)
+
+        assert union.have_inside(point1)
+        assert union.have_inside(point2)
+        assert union.have_inside(point3)
+        assert not union.have_inside(point4)
+        
+
+    test "Intersection":
+        var 
+            intersection = intersect(sphere1, sphere2)
+            teoretical_hit_point = newPoint(-0.5,0,0)
+            teoretical_norm = newNormal(-1,0,0)
+            teoretical_uv_coordinates = newVec2d(0.5,0.5)
+            hit_point = intersection.ray_intersection(ray)
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(1.5)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "All intersections for Intersection":
+        var
+            intersect = intersect(sphere1, sphere2)
+            teoretical_hit_point1 = newHitRecord( world_point = newPoint(-0.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0.5,0.5),
+                                                  t = 1.5,
+                                                  ray = ray
+                                                )
+            teoretical_hit_point2 = newHitRecord( world_point = newPoint(0.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0,0.5),
+                                                  t = 2.5,
+                                                  ray = ray
+                                                )
+            hit_points = intersect.all_ray_intersections(ray)
+
+        assert hit_points.isSome()
+        assert len(hit_points.get()) == 2
+        assert teoretical_hit_point1 in hit_points.get()
+        assert teoretical_hit_point2 in hit_points.get()
+
+    test "Have inside for Intersection":
+        var
+            point1 = newPoint()
+            point2 = newPoint(1,0,0)
+            point3 = newPoint(-1,0,0)
+            intersection = intersect(sphere1, sphere2)
+
+        assert intersection.have_inside(point1)
+        assert not intersection.have_inside(point2)
+        assert not intersection.have_inside(point3)
+
+    test "Difference":
+        var 
+            difference = subtract(sphere1, sphere2)
+            teoretical_hit_point = newPoint(0.5,0,0)
+            teoretical_norm = newNormal(-1,0,0)
+            teoretical_uv_coordinates = newVec2d(0,0.5)
+            hit_point = difference.ray_intersection(ray)
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_norm )
+        assert hit_point.get().t.almostEqual(2.5)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "All intersections for Difference":
+        var
+            difference = subtract(sphere1, sphere2)
+            teoretical_hit_point1 = newHitRecord( world_point = newPoint(0.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0,0.5),
+                                                  t = 2.5,
+                                                  ray = ray
+                                                )
+            teoretical_hit_point2 = newHitRecord( world_point = newPoint(1.5,0,0),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(0,0.5),
+                                                  t = 3.5,
+                                                  ray = ray
+                                                )
+            hit_points = difference.all_ray_intersections(ray)
+
+        assert hit_points.isSome()
+        assert len(hit_points.get()) == 2
+        assert teoretical_hit_point1 in hit_points.get()
+        assert teoretical_hit_point2 in hit_points.get()
+
+    test "Have inside for Difference":
+        var
+            point1 = newPoint()
+            point2 = newPoint(1,0,0)
+            point3 = newPoint(-1,0,0)
+            difference = subtract(sphere1, sphere2)
+
+        assert not difference.have_inside(point1)
+        assert difference.have_inside(point2)
+        assert not difference.have_inside(point3)
+
+    echo "Ended tests on CSG"

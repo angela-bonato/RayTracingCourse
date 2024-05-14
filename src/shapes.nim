@@ -62,15 +62,15 @@ type Shape* = ref object of RootObj
 
 method ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] {.base.} =
     ## Virtual ray_intersection method
-    quit "To override"
+    quit "Called ray_intersection of Shape, it is a virtual method!"
 
 method all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] {.base.} =
     ## Virtual all_ray_intersections method
-    quit "To override"
+    quit "Called all_ray_intersections of Shape, it is a virtual method!"
 
 method have_inside*( shape : Shape, point : Point) : bool {.base.} =
     ## Check if a point is inside a shape
-    quit "To override"
+    quit "Called have_inside of Shape, it is a virtual method!"
 
 # Sphere declaration and procs
 
@@ -97,6 +97,7 @@ proc sphere_point_to_uv*( point: Point ) : Vec2d =
     var 
         u = arctan2(point.y, point.x) / (2.0 * PI) 
         v = arccos(point.z) / PI
+
     if u >= 0.0: 
         return newVec2d(u,v)
     else:
