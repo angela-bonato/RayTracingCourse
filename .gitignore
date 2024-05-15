@@ -13,10 +13,12 @@ test_2
 test_3
 test_4
 test_5
+test_6
 
 ### Test files  ###
 *.pfm
 *.png
+*.mp4
 
 ### VisualStudioCode ###
 .vscode/*
