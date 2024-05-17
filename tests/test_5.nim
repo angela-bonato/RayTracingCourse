@@ -6,8 +6,10 @@ import ../src/transformation
 import ../src/ray
 import ../src/camera
 import ../src/imagetracer
+import ../src/world
 import std/math
 import std/unittest
+import std/options
 
 ##Tests on functions related to cameras classes (ray, camera, imagetracer)##
 
@@ -98,7 +100,7 @@ proc test_perspective_camera(): void =
 
 # ImageTracer class implemented using unittest
 
-proc solverendproc(ray: Ray): Color =
+proc solverendproc(hit: Option[HitRecord]): Color =
     ##Just a temporary proc which inherit from SolveRenderingProcs type, to be used in the next proc
     return newColor(1.0, 2.0, 3.0)
 
@@ -134,9 +136,11 @@ suite "test_image_tracer":
         check(ray1.is_close(ray2))
 
     test "Image coverage":
-        var sol = solverendproc
+        var 
+            sol = solverendproc
+            scene = newWorld()
 
-        trc.fire_all_rays(fire_ray, sol)
+        trc.fire_all_rays(fire_ray, sol, scene)
         for row in 0..<img.height:
             for col in 0..<img.width:
                 check(is_close(img.get_pixel(col, row), newColor(1.0, 2.0, 3.0)))

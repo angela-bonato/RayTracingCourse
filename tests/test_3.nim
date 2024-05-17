@@ -52,7 +52,7 @@ proc test_normalize_image() : void =
 
 ##Doing all the tests##
 
-#test_luminosity()
-#test_clamp_image()
-#test_average_luminosity()
-#test_normalize_image()
+test_luminosity()
+test_clamp_image()
+test_average_luminosity()
+test_normalize_image()

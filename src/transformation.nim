@@ -42,6 +42,19 @@ proc is_consistent*(trans : Transformation) : bool =
 
 # Different types of transformation
 
+proc scaling*( x,y,z : float) :  Transformation =
+    ## Create a trasformation that perform a scale transformation in each direction, given the scaling value
+    
+    result.matrix = newHomMatrix( [ x,   0.0, 0.0, 0.0, 
+                                    0.0, y,   0.0, 0.0, 
+                                    0.0, 0.0, z,   0.0, 
+                                    0.0, 0.0, 0.0, 1.0 ] )
+
+    result.inv_matrix = newHomMatrix( [ 1/x, 0.0, 0.0, 0.0, 
+                                        0.0, 1/y, 0.0, 0.0, 
+                                        0.0, 0.0, 1/z, 0.0, 
+                                        0.0, 0.0, 0.0, 1.0 ] )
+
 proc translation*(vec: Vector) : Transformation =
     ## Create a Transformation that perform a translation of the given vector
     

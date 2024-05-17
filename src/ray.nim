@@ -39,3 +39,8 @@ proc transform*(ray : Ray, tr : Transformation): Ray =
     ## Action of a trasformation on a ray.
     return newRay(tr * ray.origin,tr * ray.dir,   # A trasformation acts only on the ray origin and direction
                     ray.depth, ray.tmin, ray.tmax)
+
+proc print*( ray : Ray) : void =
+    ## Print method for Ray
+    echo "Ray:\nOrigin = (", ray.origin.x, ", ", ray.origin.y, ", ", ray.origin.z, " )\nDirection = (", ray.dir.x, ", ", ray.dir.y, ", ", ray.dir.z, " ) \n"
+
