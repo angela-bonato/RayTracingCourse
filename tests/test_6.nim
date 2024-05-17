@@ -202,6 +202,133 @@ suite "Test Plane":
 
     echo "Ended tests on Plane"
 
+suite "Test Parallelepiped":
+
+    echo "Started tests on Parallelepiped"
+    
+    setup:
+        var
+            cube = newParallelepiped()
+        echo "New test started"
+
+    teardown:
+        echo "Test ended"
+
+    test "Ray direction z":
+        var 
+            ray = newRay(newPoint(0.5,0.5,2.0),newVector(0,0,-1.0))
+            teoretical_hit_point = newPoint(0.5,0.5,1.0)
+            teoretical_normal = newNormal(0,0,1.0)
+            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            hit_point = cube.ray_intersection(ray)
+
+        hit_point.get().world_point.print()
+        teoretical_hit_point.print()
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_normal )
+        assert hit_point.get().t.almostEqual(1.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Ray direction x":
+        var 
+            ray = newRay(newPoint(3.0,0.5,0.5),newVector(-1,0,0))
+            teoretical_hit_point = newPoint(1.0,0.5,0.5)
+            teoretical_normal = newNormal(1.0,0,0)
+            teoretical_uv_coordinates = newVec2d(5/6,5/8)
+            hit_point = cube.ray_intersection(ray)
+
+        hit_point.get().normal.print()
+        teoretical_normal.print()
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_normal )
+        assert hit_point.get().t.almostEqual(2.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Ray inside the cube":
+        var 
+            ray = newRay(newPoint(0.5,0.5,0.5),newVector(1,0,0))
+            teoretical_hit_point = newPoint(1.0,0,0)
+            teoretical_normal = newNormal(-1.0,0,0)
+            teoretical_uv_coordinates = newVec2d(5/6,5/8)
+            hit_point = cube.ray_intersection(ray)
+        
+        hit_point.get().world_point.print()
+        teoretical_hit_point.print()
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_normal )
+        assert hit_point.get().t.almostEqual(0.5)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Traslated cube intersection":
+
+        cube.transformation = translation(newVector(10.0,0,0))
+
+        var
+            ray = newRay(newPoint(10.5,0.5,2.0),newVector(0,0,-1.0))
+            teoretical_hit_point = newPoint(10.5,0.5,1.0)
+            teoretical_normal = newNormal(0,0,1.0)
+            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            hit_point = cube.ray_intersection(ray)
+        
+        hit_point.get().world_point.print()
+        teoretical_hit_point.print()
+
+        assert hit_point.isSome
+        assert hit_point.get().world_point.is_close( teoretical_hit_point )
+        assert hit_point.get().normal.is_close( teoretical_normal )
+        assert hit_point.get().t.almostEqual(1.0)
+        assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
+
+    test "Not intersecting rays":
+        var 
+            ray_1 = newRay(newPoint(0,0,2),newVector(1,0,0))
+            ray_2 = newRay(newPoint(-10,0,2),newVector(0,0,-1))
+            hit_point_1 = cube.ray_intersection(ray_1)
+            hit_point_2 = cube.ray_intersection(ray_2)
+
+        assert hit_point_1.isNone
+        assert hit_point_2.isNone
+
+    test "All intersection":
+        var
+            ray = newRay(newPoint(-2,0.5,0.5),newVector(1.0,0,0))
+            teoretical_hit_point1 = newHitRecord( world_point = newPoint(0,0.5,0.5),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(1/6,5/8),
+                                                  t = 2.0,
+                                                  ray = ray
+                                                )
+            teoretical_hit_point2 = newHitRecord( world_point = newPoint(1.0,0.5,0.5),
+                                                  normal = newNormal(-1.0,0,0),
+                                                  surface_point = newVec2d(5/6,5/8),
+                                                  t = 3.0,
+                                                  ray = ray
+                                                )
+            hit_points = cube.all_ray_intersections(ray)
+
+
+        assert hit_points.isSome()
+        assert len(hit_points.get()) == 2
+        assert teoretical_hit_point1 in hit_points.get()
+        assert teoretical_hit_point2 in hit_points.get()
+    
+    test "Have inside":
+        var 
+            point1 = newPoint(0.5,0.5,0.5)
+            point2 = newPoint(-0.5,-0.5,-0.5)
+
+        assert cube.have_inside(point1)
+        assert not cube.have_inside(point2)
+
+    echo "Ended tests on Sphere"
+
+
 suite "Test CSG":
 
     echo "Started tests on CSG"
