@@ -60,6 +60,10 @@ proc is_close*(hit1, hit2: HitRecord) : bool =
 
 type Shape* = ref object of RootObj
 
+method shape_normal*(shape : Shape, point : Point, ray_dir : Vector) : Normal {.base.} =
+    ## Virtual ray_intersection method
+    quit "Called shape_normal of Shape, it is a virtual method!"
+
 method point_to_uv*(shape : Shape, point : Point) : Vec2d {.base.} =
     ## Virtual ray_intersection method
     quit "Called point_to_uv of Shape, it is a virtual method!"
@@ -88,7 +92,7 @@ proc newSphere*( transform = newTransformation() ) : Shape =
     sphere.transformation = transform
     return Shape(sphere)
 
-proc sphere_normal*( point : Point, ray_dir : Vector ) : Normal =
+method shape_normal*(sphere: Sphere, point : Point, ray_dir : Vector ) : Normal =
     ## Return the normal to a point of the sphere, depending on the ray direction
     result = newNormal(point.x, point.y, point.z)
     if result.dot(ray_dir) < 0.0: 
@@ -126,7 +130,7 @@ method ray_intersection*( sphere: Sphere, ray : Ray) : Option[HitRecord] =
     var hit_point = inv_ray.at(first_hit)
 
     return some( newHitRecord( world_point = sphere.transformation * hit_point , 
-                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
+                               normal = sphere.transformation * sphere.shape_normal( hit_point, inv_ray.dir ),
                                surface_point = sphere.point_to_uv(hit_point),
                                t = first_hit,
                                ray = ray    
@@ -149,7 +153,7 @@ method all_ray_intersections*( sphere : Sphere, ray : Ray) : Option[seq[HitRecor
     if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
         var hit_point = inv_ray.at(t_1)
         hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
-                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
+                               normal = sphere.transformation * sphere.shape_normal( hit_point, inv_ray.dir ),
                                surface_point = sphere.point_to_uv(hit_point),
                                t = t_1,
                                ray = ray    
@@ -158,7 +162,7 @@ method all_ray_intersections*( sphere : Sphere, ray : Ray) : Option[seq[HitRecor
     if t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
         var hit_point = inv_ray.at(t_2)
         hits.add( newHitRecord( world_point = sphere.transformation * hit_point , 
-                               normal = sphere.transformation * sphere_normal( hit_point, inv_ray.dir ),
+                               normal = sphere.transformation * sphere.shape_normal( hit_point, inv_ray.dir ),
                                surface_point = sphere.point_to_uv(hit_point),
                                t = t_2,
                                ray = ray    
@@ -187,7 +191,7 @@ proc newPlane*( transform = newTransformation() ) : Shape =
     plane.transformation = transform
     return Shape(plane)
 
-proc plane_normal*(ray_dir : Vector) : Normal =
+method shape_normal*(plane: Plane, point: Point, ray_dir : Vector) : Normal =
     ## Return the normal to a point of the plane, depending on the ray direction
     result = newNormal(0,0,1)
     if result.dot(ray_dir) < 0.0: 
@@ -214,7 +218,7 @@ method ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
     var hit_point = inv_ray.at(t_hit)
 
     return some( newHitRecord( world_point = plane.transformation * hit_point , 
-                               normal = plane.transformation * plane_normal( inv_ray.dir ),
+                               normal = plane.transformation * plane.shape_normal(hit_point, inv_ray.dir ),
                                surface_point = plane.point_to_uv(hit_point),
                                t = t_hit,
                                ray = ray    
@@ -237,7 +241,7 @@ method all_ray_intersections*(plane : Plane, ray : Ray) : Option[seq[HitRecord]]
     var hit_point = inv_ray.at(t_hit)
 
     hits.add( newHitRecord( world_point = plane.transformation * hit_point , 
-                               normal = plane.transformation * plane_normal( inv_ray.dir ),
+                               normal = plane.transformation * plane.shape_normal(hit_point, inv_ray.dir ),
                                surface_point = plane.point_to_uv(hit_point),
                                t = t_hit,
                                ray = ray    
@@ -275,9 +279,22 @@ proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 
     
     return result
 
-proc paral_normal*( point : Point, ray_dir : Vector ) : Normal =
-    ## Return the normal to a point of the parallelepiped, depending on the ray direction
-    result = newNormal(point.x, point.y, point.z)
+method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) : Normal =
+    ## Return the normal to a point of the parallelepiped (based on the face on which it lies), depending on the ray direction
+    #Now I define the normal pointing out from the parallelepiped but if nedeed it is fixed below
+    if point.z.almostEqual(paral.pmax.z) :
+        result = newNormal(0.0, 0.0, 1.0)
+    if point.y.almostEqual(0.0) :
+        result = newNormal(0.0, -1.0, 0.0)
+    if point.x.almostEqual(paral.pmax.x) :
+        result = newNormal(1.0, 0.0, 0.0)
+    if point.y.almostEqual(paral.pmax.y) :
+        result = newNormal(0.0, 1.0, 0.0)
+    if point.z.almostEqual(0.0) :
+        result = newNormal(0.0, 0.0, -1.0)
+    if point.x.almostEqual(0.0) :
+        result = newNormal(-1.0, 0.0, 0.0)
+    
     if result.dot(ray_dir) < 0.0: 
         return result
     else:
@@ -342,7 +359,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).z < paral.pmax.z and inv_ray.at(tymin).z > paral.pmin.z) :
                 hit_point = inv_ray.at(tymin)   #I am sure this is the hit point nearest to the observer
                 return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymin,
                         ray = ray) )
@@ -357,7 +374,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).z < paral.pmax.z and inv_ray.at(txmin).z > paral.pmin.z):
                 hit_point = inv_ray.at(txmin)
                 return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmin,
                         ray = ray) )
@@ -372,7 +389,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tzmin)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -380,7 +397,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, txmax)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -389,7 +406,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, txmin)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -397,7 +414,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tzmax)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -408,7 +425,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tzmin)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -416,7 +433,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tymax)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -425,7 +442,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tymin)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -433,7 +450,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             th2 = min(th1, tzmax)
             hit_point = inv_ray.at(th2)
             return some( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = th2,
                         ray = ray) )
@@ -469,14 +486,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
             if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).z < paral.pmax.z and inv_ray.at(tymin).z > paral.pmin.z) :
                 hit_point = inv_ray.at(tymin)
                 hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymin,
                         ray = ray) )
             if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).z < paral.pmax.z and inv_ray.at(txmax).z > paral.pmin.z) :
                 hit_point = inv_ray.at(txmax)
                 hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmax,
                         ray = ray) )
@@ -489,14 +506,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
             if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).z < paral.pmax.z and inv_ray.at(txmin).z > paral.pmin.z):
                 hit_point = inv_ray.at(txmin)
                 hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmin,
                         ray = ray) )
             elif tymax > inv_ray.tmin and tymax < inv_ray.tmax and (inv_ray.at(tymax).z < paral.pmax.z and inv_ray.at(tymax).z > paral.pmin.z):
                 hit_point = inv_ray.at(tymax)
                 hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                        normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                        normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymax,
                         ray = ray) )
@@ -508,14 +525,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
         if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).y < paral.pmax.y and inv_ray.at(tzmin).y > paral.pmin.y) :
             hit_point = inv_ray.at(tzmin)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tzmin,
                     ray = ray) )
         if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).y < paral.pmax.y and inv_ray.at(txmax).y > paral.pmin.y) :  #I have to chek also intersections with z to find the nearest hit point
             hit_point = inv_ray.at(txmax)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = txmax,
                     ray = ray) )
@@ -523,14 +540,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
         if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).y < paral.pmax.y and inv_ray.at(txmin).y > paral.pmin.y):
             hit_point = inv_ray.at(txmin)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = txmin,
                     ray = ray) )
         elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).y < paral.pmax.y and inv_ray.at(tzmax).y > paral.pmin.y):
             hit_point = inv_ray.at(tzmax)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tzmax,
                     ray = ray) )
@@ -540,14 +557,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
         if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x < paral.pmax.x and inv_ray.at(tzmin).x > paral.pmin.x) :
             hit_point = inv_ray.at(tzmin)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tzmin,
                     ray = ray) )
         elif (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x < paral.pmax.x and inv_ray.at(tymax).x > paral.pmin.x) : 
             hit_point = inv_ray.at(tymax)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tymax,
                     ray = ray) )
@@ -555,14 +572,14 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
         if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x < paral.pmax.x and inv_ray.at(tymin).x > paral.pmin.x):
             hit_point = inv_ray.at(tymin)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tymin,
                     ray = ray) )
         elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x < paral.pmax.x and inv_ray.at(tzmax).x > paral.pmin.x):
             hit_point = inv_ray.at(tzmax)
             hits.add( newHitRecord(world_point = paral.transformation * hit_point , 
-                    normal = paral.transformation * paral_normal( hit_point, inv_ray.dir ),
+                    normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                     surface_point = paral.point_to_uv(hit_point),
                     t = tzmax,
                     ray = ray) )
