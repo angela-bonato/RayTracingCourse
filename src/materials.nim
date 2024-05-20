@@ -1,11 +1,32 @@
-## Here we define everything about the Pigment (which associate a specific color to an (u,v) point) the BRDF and finally the Material types.
+## Here we define everything about the Vec2d, the Pigment (which associate a specific color to an (u,v) point) the BRDF and finally the Material types.
 
 import hdrimage
-import shapes
+#import shapes
 import color
 import normal
 import vector
 import std/math
+
+# Vec2d type declaration
+
+type Vec2d* = object # It represent a point in the shape independant u,v coordinates
+    u* : float
+    v* : float
+
+proc newVec2d*(u = 0.0,v = 0.0) : Vec2d =
+    ## Constructor for Vec2d
+    result.u = u
+    result.v = v
+    return result
+
+proc is_close*( vec1, vec2 : Vec2d ) : bool =
+    ## is_close method for Vec2d
+    return (vec1.u.almostEqual(vec2.u) and
+            vec1.v.almostEqual(vec2.v) )
+    
+proc print*( vec : Vec2d ) : void =
+    ## print method for Vec2d
+    echo "Vec2d( u=", vec.u, ", v=", vec.v, " )"
 
 # Virtual definitions for Pigment
 
@@ -127,5 +148,3 @@ proc newMaterial*(mybrdf = newDiffuseBrdf(), mypig = newUniformPigment(newColor(
     result.brdf = mybrdf
     result.emitted_radiance = mypig
     return result
-
-

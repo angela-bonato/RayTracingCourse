@@ -1,6 +1,5 @@
 import std/unittest
 import ../src/hdrimage
-import ../src/shapes
 import ../src/color
 import ../src/materials
 
