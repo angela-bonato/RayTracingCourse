@@ -3,6 +3,8 @@
 import hdrimage
 import shapes
 import color
+import normal
+import vector
 import std/math
 
 # Virtual definitions for Pigment
@@ -110,7 +112,7 @@ proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 
 
 method eval*(difb : DiffuseBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
     ## Definition of eval method specific for DiffuseBrdf
-    return difb.pigment.get_color(coord) * (difb.reflectance / PI)
+    return (difb.reflectance / PI) * difb.pigment.get_color(coord)
 
 # Material type definition
 
