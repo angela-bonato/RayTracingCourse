@@ -1,13 +1,14 @@
-## Here we define everything about the Pigment class which associate a specific color to an (u,v) point.
+## Here we define everything about the Pigment (which associate a specific color to an (u,v) point) the BRDF and finally the Material types.
 
 import hdrimage
 import shapes
 import color
+import std/math
 
-# Virtual definitions
+# Virtual definitions for Pigment
 
 type Pigment* = ref object of RootObj
-    ## Abstract definition
+    ## Virtual definition
 
 method get_color*(pig : Pigment, coord : Vec2d) : Color {.base.} =
     ## Virtual get_color method
@@ -83,3 +84,46 @@ method get_color*(impig : ImagePigment, coord : Vec2d) : Color =
         ind_row = impig.image.height - 1
     
     return impig.image.get_pixel(ind_col, ind_row)     #Color of the pixel correspondent to the (u,v) point
+
+# Virtual definitions for BRDF
+
+type Brdf* = ref object of RootObj
+    ## Virtual definition
+
+method eval*(brdf : Brdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color {.base.} =
+    ## Virtual eval method
+    quit "Called eval of Brdf, it is a virtual method!"
+
+# Diffusive BRDF
+
+type DiffuseBrdf* = ref object of Brdf
+    ## Definition of the DiffuseBrdf type, it is constant for the shape on which it is called.
+    pigment* : Pigment
+    reflectance* : float
+
+proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 1.0) : Brdf =
+    ## Costructor of DiffuseBrdf with possible default arguments
+    let difb = new DiffuseBrdf
+    difb.pigment = mypig
+    difb.reflectance = refl
+    return Brdf(difb)
+
+method eval*(difb : DiffuseBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
+    ## Definition of eval method specific for DiffuseBrdf
+    return difb.pigment.get_color(coord) * (difb.reflectance / PI)
+
+# Material type definition
+
+type Material* = ref object 
+    ## Definition of type Material
+    brdf* : Brdf
+    emitted_radiance* : Pigment
+
+proc newMaterial*(mybrdf = newDiffuseBrdf(), mypig = newUniformPigment(newColor(0,0,0))) : Material =
+    ## Material constructor with possibility of using default arguments
+    new(result)
+    result.brdf = mybrdf
+    result.emitted_radiance = mypig
+    return result
+
+

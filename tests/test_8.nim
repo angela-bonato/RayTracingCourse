@@ -2,7 +2,7 @@ import std/unittest
 import ../src/hdrimage
 import ../src/shapes
 import ../src/color
-import ../src/pigment
+import ../src/materials
 
 suite "Test Pigment":
     ## Tests on all Pigment types
