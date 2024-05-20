@@ -1,22 +1,13 @@
 ## This is the main of our programme. It is possible to use it with different commands, thanks to cligen library.
 import hdrimage
 import vector
+import transformation
 import imagetracer
 import camera
 import world
-import color
-import std/options
+import renderprocs
 import std/streams
 import std/math
-import transformation
-
-
-proc OnOffTracer(hit : Option[HitRecord]) : Color =
-  ## This proc is used to determine the color of each pixel based on what the input ray hit
-  if (hit.isNone) :  #is this the right sintax? 
-    return newColor(0, 0, 0)  #The background will be black
-  else:
-    return newColor(255, 255, 255)  #The spheres will be white
 
 proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file

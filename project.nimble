@@ -1,9 +1,9 @@
 # Package
 
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "Angela Bonato and Tommaso Rovelli"
 description   = "Ray Tracing Course Project (a.y. 2023-2024)"
-license       = "MIT"
+license       = "GPL v3"
 srcDir        = "src"
 bin           = @["project"]
 

@@ -7,9 +7,9 @@ import ../src/ray
 import ../src/camera
 import ../src/imagetracer
 import ../src/world
+import ../src/renderprocs
 import std/math
 import std/unittest
-import std/options
 
 ##Tests on functions related to cameras classes (ray, camera, imagetracer)##
 
@@ -99,10 +99,6 @@ proc test_perspective_camera(): void =
     assert ray4.at(1.0).is_close(newPoint(0.0, -2.0, 1.0))
 
 # ImageTracer class implemented using unittest
-
-proc solverendproc(hit: Option[HitRecord]): Color =
-    ##Just a temporary proc which inherit from SolveRenderingProcs type, to be used in the next proc
-    return newColor(1.0, 2.0, 3.0)
 
 suite "test_image_tracer":
     ##Tests on ImageTracer methods

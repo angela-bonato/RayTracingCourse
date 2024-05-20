@@ -3,9 +3,8 @@
 import camera
 import hdrimage
 import ray
-import color
 import world
-import std/options
+import renderprocs
 
 # ImageTracer typer declaration
 
@@ -38,8 +37,6 @@ proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : Fir
         v = 1.0 - (float(row) + v_pixel) / float(img_tracer.image.height )
 
     return img_tracer.camera.fire_ray_image(u,v)
-
-type SolveRenderingProcs* = proc (hit : Option[HitRecord]) : Color {.closure.}
 
 proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProcs, scene: World) : void =
     ## fire_all_rays alternative version
