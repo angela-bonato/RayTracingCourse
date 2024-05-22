@@ -1,36 +1,12 @@
 ## Here we deefine all the procs in the class SolveRenderingProcs
 
 import world
+#import shapes
 import color
 import vector
+import normal
 import std/options
 import std/math
-
-# Orthonormal base type definition
-
-type OrthoNormalBase* = object
-  e1 : Vector
-  e2 : Vector
-  e3 : Vector
-
-proc newOrthoNormalBase*(e1,e2,e3 : Vector) : OrthoNormalBase =
-  ## Creator for ONB
-  result.e1 = e1
-  result.e2 = e2
-  result.e3 = e3
-
-proc create_onb_from_z*( normal : Vector|Normal ) : OrthoNormalBase =
-  ## Creation of a orthonormal base using the algorithm by Duff et al.
-  ## It works only if normal is normalized
-  var
-    sign = copySign(1.0, normal.z)
-    a = -1.0 / (sign + normal.z)
-    b = normal.x * normal.y * a
-    e1 = newVector( 1.0 + sign * normal.x * normal.x * a, sign * b, -sign * normal.x )
-    e2 = newVector( b, sign + normal.y * normal.y * a, -normal.y )
-    e3 = newVector( normal-x, normal.y, normal.z )
-
-    return newOrthoNormalBase(e1, e2, e3)
 
 # Definition of the possible rendering procs  
 
