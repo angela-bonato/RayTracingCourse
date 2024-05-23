@@ -2,6 +2,11 @@ import std/unittest
 import ../src/hdrimage
 import ../src/color
 import ../src/materials
+import ../src/world
+import ../src/ray
+import ../src/vector
+import ../src/point
+import ../src/renderprocs
 
 suite "Test Pigment":
     ## Tests on all Pigment types
@@ -49,3 +54,36 @@ suite "Test Pigment":
         assert impig.get_color(newVec2d(1.0, 1.0)).is_close(newColor(3.0, 2.0, 1.0))
     
     echo "Ended tests on Pigment"
+
+suite "Test SolveRenderingProcs":
+    ## Tests on SolveRenderingProcs types
+    echo "Started tests on SolveRenderingProcs"
+    
+    setup:
+        var
+            shape_color = newColor(50,150,250)
+            shape_pigment = newUniformPigment(shape_color)
+            shape_brdf = newDiffuseBrdf( mypig = shape_pigment )
+            material = newMaterial(mybrdf = shape_brdf)
+            sphere = newSphere(material = material)
+            ray1 = newRay(origin = newPoint(0,0,-2), dir = newVector(0,0,1))
+            ray2 = newRay(origin = newPoint(0,0,-2), dir = newVector(0,0,-1))
+        echo "New test started"
+
+    teardown:
+        echo "Test ended"
+
+    test "Test on FlatRenderer":
+        var
+            background_color = newColor(20,30,40)
+            hit1 = sphere.ray_intersection(ray1)
+            hit2 = sphere.ray_intersection(ray2)
+            color1 = FlatRenderer(hit1, background_color)
+            color2 = FlatRenderer(hit2, background_color)
+
+        assert color1.is_close(shape_color)
+        assert color2.is_close(background_color)
+
+
+    echo "Ended tests on SolveRenderingProcs"
+        

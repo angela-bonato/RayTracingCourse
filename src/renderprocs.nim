@@ -25,7 +25,7 @@ proc OnOffTracer*(hit : Option[HitRecord]) : Color =
   else:
     return newColor(255, 255, 255)  #The spheres will be white
 
-proc FlatRenderer*(hit : Option[HitRecord], background_color : Color) : Color =
+proc FlatRenderer*(hit : Option[HitRecord], background_color = newColor(0,0,0)) : Color =
   ## A «flat» renderer
   ## This renderer estimates the solution of the rendering equation by neglecting any contribution of the light.
   ## It just uses the pigment of each surface to determine how to compute the final radiance.
