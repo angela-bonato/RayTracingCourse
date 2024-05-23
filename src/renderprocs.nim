@@ -5,6 +5,7 @@ import world
 import color
 import vector
 import normal
+import materials
 import std/options
 import std/math
 
@@ -24,3 +25,12 @@ proc OnOffTracer*(hit : Option[HitRecord]) : Color =
   else:
     return newColor(255, 255, 255)  #The spheres will be white
 
+proc FlatRenderer*(hit : Option[HitRecord], background_color : Color) : Color =
+  ## A «flat» renderer
+  ## This renderer estimates the solution of the rendering equation by neglecting any contribution of the light.
+  ## It just uses the pigment of each surface to determine how to compute the final radiance.
+  
+  if (hit.isNone) :
+    return background_color
+  else:
+    return hit.get().shape.material.brdf.pigment.get_color(hit.get().surface_point) + hit.get().shape.material.emitted_radiance.get_color(hit.get().surface_point)

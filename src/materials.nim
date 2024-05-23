@@ -142,6 +142,7 @@ method get_color*(impig : ImagePigment, coord : Vec2d) : Color =
 
 type Brdf* = ref object of RootObj
     ## Virtual definition
+    pigment* : Pigment
 
 method eval*(brdf : Brdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color {.base.} =
     ## Virtual eval method
@@ -155,7 +156,7 @@ method scatter_ray*(bdrf: Brdf, pcg: var Pcg, incoming_dir: Vector, interaction_
 
 type DiffuseBrdf* = ref object of Brdf
     ## Definition of the DiffuseBrdf type, it is constant for the shape on which it is called.
-    pigment* : Pigment
+    # Pigment
     reflectance* : float
 
 proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 1.0) : Brdf =
@@ -188,7 +189,7 @@ method scatter_ray*(difb : DiffuseBrdf, pcg: var Pcg, incoming_dir: Vector, inte
 
 type SpecularBrdf* = ref object of Brdf
     ## Definition of the SpecularBrdf type
-    pigment* : Pigment
+    # Pigment
     threshold_angle_rad* : float
 
 proc newSpecularBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : SpecularBrdf =

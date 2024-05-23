@@ -13,6 +13,8 @@ import std/options
 # Shape type declaration
 
 type Shape* = ref object of RootObj
+    transformation* : Transformation
+    material* : Material
 
 # HitRecord type declaration and costructor
 
@@ -68,8 +70,8 @@ method have_inside*( shape : Shape, point : Point) : bool {.base.} =
 
 type Sphere* = ref object of Shape  
     ## It represents a unitary sphere centered in the origin, the proper position of the object is represented by the transformation 
-    transformation* : Transformation
-    material* : Material
+    # Transformation
+    # Material
 
 proc newSphere*( transform = newTransformation(), material = newMaterial() ) : Shape =
     ## Sphere constructor
@@ -169,8 +171,8 @@ method have_inside*( sphere : Sphere, point : Point ) : bool =
 
 type Plane* = ref object of Shape
     ## It defines an infinite plane in space
-    transformation* : Transformation
-    material* : Material
+    # Transformation
+    # Material
 
 proc newPlane*( transform = newTransformation(), material = newMaterial() ) : Shape =
     ## Plane constructor
@@ -250,9 +252,9 @@ method have_inside*( plane : Plane, point : Point) : bool =
 
 type Parallelepiped* = ref object of Shape  
     ## It defines an axis-aligned box
-    transformation* : Transformation
+    # Transformation
+    # Material
     pmin*, pmax* : Point   #points that define the value of each dimension of the shape, along with its position in space
-    material* : Material
 
 proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 1.0, 1.0), material = newMaterial() ) : Shape =
     ## Parallelepiped constructor, default is unitary cube defined from the origin, to change the default you can change pmax but as long as it is ppositive
