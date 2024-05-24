@@ -27,7 +27,7 @@ or compile it with
 
     nimble build
 
-and then run it through
+and then run it via
 
     ./project <COMMAND> <ARGUMENTS>
 
@@ -43,7 +43,7 @@ To use this program to convert an `INPUT_PFM_FILE` to an `OUTPUT_PNG_FILE` run
 
     nimble run project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
     
-To perform tone mapping and/or gamma correction during the conversion, you can specify `<GAMMA>` and/or `<A_VALUE>` using:
+To perform tone mapping and/or gamma correction during the conversion, you can specify `<GAMMA>` and/or `<A_VALUE>` using
 
     nimble run project pfm2png -a=<A_VALUE> -g=<GAMMA> <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
 
@@ -100,12 +100,10 @@ With this code it is also possible to produce an animation which shows the demo 
 
     sh demo_animation.sh
 
-Press play to see the output you should be able to get
+All the images used as frames for the animation will be saved in the `demo_animation`, together with an mp4 version of this:
 
 <p align="center">
-<video width="320" height="240" controls>
-  <source src="examples/spheres-perspective.mp4" type="video/mp4">
-</video>
+<img  style="center" src="examples/spheres-perspective.gif" width="320" height="240">
 
 ## Advanced usage
 
