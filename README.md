@@ -51,6 +51,7 @@ These are optional arguments so you can either specify them both, just one of th
 
 Here are some example of the conversion of the file `memorial.pfm` using different values of `<GAMMA>` and `<A_VALUE>`.
 
+<p align="center">
 <div style="text-align: center;">
 <table style="margin: 0px auto;">
     <tr>
