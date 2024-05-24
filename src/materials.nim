@@ -3,9 +3,39 @@
 import hdrimage
 #import shapes
 import color
+import geometryalgebra
 import normal
 import vector
+import point
+import ray
+import pcg
 import std/math
+
+# Orthonormal base type definition
+
+type OrthoNormalBase* = object
+  e1 : Vector
+  e2 : Vector
+  e3 : Vector
+
+proc newOrthoNormalBase*(e1,e2,e3 : Vector) : OrthoNormalBase =
+  ## Creator for ONB
+  result.e1 = e1
+  result.e2 = e2
+  result.e3 = e3
+
+proc create_onb_from_z*( normal : Vector|Normal ) : OrthoNormalBase =
+  ## Creation of a orthonormal base using the algorithm by Duff et al.
+  ## It works only if normal is normalized
+  var
+    sign = copySign(1.0, normal.z)
+    a = -1.0 / (sign + normal.z)
+    b = normal.x * normal.y * a
+    e1 = newVector( 1.0 + sign * normal.x * normal.x * a, sign * b, -sign * normal.x )
+    e2 = newVector( b, sign + normal.y * normal.y * a, -normal.y )
+    e3 = newVector( normal.x, normal.y, normal.z )
+
+  return newOrthoNormalBase(e1, e2, e3)
 
 # Vec2d type declaration
 
@@ -112,16 +142,21 @@ method get_color*(impig : ImagePigment, coord : Vec2d) : Color =
 
 type Brdf* = ref object of RootObj
     ## Virtual definition
+    pigment* : Pigment
 
 method eval*(brdf : Brdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color {.base.} =
     ## Virtual eval method
     quit "Called eval of Brdf, it is a virtual method!"
 
+method scatter_ray*(bdrf: Brdf, pcg: var Pcg, incoming_dir: Vector, interaction_point: Point, normal: Normal, depth: int) : Ray {.base.} =
+    ## Virtual scatter_ray method
+    quit "Called scatter_ray of Brdf, it is a virtual method!"
+
 # Diffusive BRDF
 
 type DiffuseBrdf* = ref object of Brdf
     ## Definition of the DiffuseBrdf type, it is constant for the shape on which it is called.
-    pigment* : Pigment
+    # Pigment
     reflectance* : float
 
 proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 1.0) : Brdf =
@@ -134,6 +169,58 @@ proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 
 method eval*(difb : DiffuseBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
     ## Definition of eval method specific for DiffuseBrdf
     return (difb.reflectance / PI) * difb.pigment.get_color(coord)
+
+method scatter_ray*(difb : DiffuseBrdf, pcg: var Pcg, incoming_dir: Vector, interaction_point: Point, normal: Normal, depth: int) : Ray =
+    ## scatter_ray method for a DiffusiveBrdf   
+    var
+        onb = create_onb_from_z(normal)
+        cos_theta_sq = pcg.random_float()
+        cos_theta = sqrt(cos_theta_sq)
+        sin_theta = sqrt(1.0 - cos_theta_sq)
+        phi = 2 * PI * pcg.random_float()
+
+    return newRay( origin = interaction_point, 
+                   dir = onb.e1 * cos(phi) * cos_theta + onb.e2 * sin(phi) * cos_theta + onb.e3 * sin_theta,
+                   t_min = 10e-3,
+                   depth = depth )
+
+
+# Specular BRDF
+
+type SpecularBrdf* = ref object of Brdf
+    ## Definition of the SpecularBrdf type
+    # Pigment
+    threshold_angle_rad* : float
+
+proc newSpecularBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : SpecularBrdf =
+    ## Constructor of SpecularBrdf
+    result.pigment = mypig
+    result.threshold_angle_rad = ta_rad
+
+method eval*(spec : SpecularBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
+    ## Definition of eval method specific for SpecularBrdf
+    ## We provide this implementation for reference, but we are not going to use it (neither in the
+    ## path tracer nor in the point-light tracer)
+    var 
+        theta_in = arccos( normalized(normal).dot(in_dir) )
+        theta_out = arccos( normalized(normal).dot(out_dir) )
+    
+    if abs(theta_in - theta_out) < spec.threshold_angle_rad:
+            return spec.pigment.get_color(coord)
+    else:
+        return newColor(0.0, 0.0, 0.0)
+
+method scatter_ray*(spec : SpecularBrdf, pcg: var Pcg, incoming_dir: Vector, interaction_point: Point, normal: Normal, depth: int) : Ray =
+    ## scatter_ray method for a SpecularBrdf   
+    var
+        ray_dir = newVector(incoming_dir.x, incoming_dir.y, incoming_dir.z).normalized()
+        normal = newVector(normal.x, normal.y, normal.z).normalized()
+
+    return newRay(origin=interaction_point,
+               dir=ray_dir - normal * 2 * normal.dot(ray_dir),
+               tmin=1e-3,
+               tmax=Inf,
+               depth=depth)
 
 # Material type definition
 

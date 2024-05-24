@@ -21,7 +21,7 @@ proc random*(pcg : var Pcg) : uint32 =
 
     return uint32( (xorshifted shr rot) or (xorshifted shl ((-rot) and 31)) )
 
-proc random_float(pcg : var Pcg) : float =
+proc random_float*(pcg : var Pcg) : float =
     ## Generate a pseudo random number in the interval [0,1]
     return int64(pcg.random()) / int64(0xffffffff)  #conversion to int64 because division between uint32 is not implemented, int64 is used instead of int32 to avoid change of sign
 
