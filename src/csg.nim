@@ -168,7 +168,7 @@ method ray_intersection*(difference : Shapes_Difference, ray : Ray) : Option[Hit
 
     if hit1.isNone : return none(HitRecord)
 
-    elif (hit1.get().t <= hit2.get().t) or (hit1.isSome and hit2.isNone) : return hit1
+    elif (hit1.isSome and hit2.isNone) or (hit1.get().t <= hit2.get().t) : return hit1
     
     else :
         var  
