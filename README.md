@@ -100,7 +100,7 @@ With this code it is also possible to produce an animation which shows the demo 
 
     sh demo_animation.sh
 
-All the images used as frames for the animation will be saved in the `demo_animation`, together with an mp4 version of this:
+All the images used as frames for the animation will be saved in the `demo_animation` directory, together with an mp4 version of this:
 
 <p align="center">
 <img  style="center" src="examples/spheres-perspective.gif" width="320" height="240">
