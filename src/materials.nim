@@ -1,7 +1,6 @@
 ## Here we define everything about the Vec2d, the Pigment (which associate a specific color to an (u,v) point) the BRDF and finally the Material types.
 
 import hdrimage
-#import shapes
 import color
 import geometryalgebra
 import normal

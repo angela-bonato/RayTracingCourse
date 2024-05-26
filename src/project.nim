@@ -17,7 +17,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
-    tracer = OnOffTracer
+    tracer = OnOffRenderer
     pfm_stream_write, pfm_stream_read : Stream
     output_img : HdrImage
     pfm_filename, png_filename : string
