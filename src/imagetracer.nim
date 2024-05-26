@@ -38,13 +38,12 @@ proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : Fir
 
     return img_tracer.camera.fire_ray_image(u,v)
 
-proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProcs, scene: World) : void =
+proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProc, scene: World) : void =
     ## fire_all_rays alternative version
     for row in countup(0,img_tracer.image.height-1):
         for col in countup(0,img_tracer.image.width-1):
             var 
                 img_ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
-                hit = scene.ray_intersections(img_ray)
-                color = solve_rendering(hit)
+                color = solve_rendering(scene, img_ray)
             img_tracer.image.setPixel(col, row, color)
             

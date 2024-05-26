@@ -1,6 +1,8 @@
+
 include ../src/materials
 include ../src/pcg
 include ../src/geometryalgebra
+include ../src/renderprocs
 include std/unittest
 
 
@@ -9,6 +11,9 @@ suite "Test ONB creation":
     
     setup:
         var pcg = newPcg()
+
+    teardown:
+        echo "ONB test ended"
 
     test "Random test on create_onb_from_z":
         for i in 0..1000:
@@ -30,3 +35,40 @@ suite "Test ONB creation":
             assert onb.e1.norm().almostEqual(1.0)
             assert onb.e2.norm().almostEqual(1.0)
             assert onb.e3.norm().almostEqual(1.0)
+    
+    echo "Random test ended"
+
+
+suite "Tests on PathTracer":
+    ## Tests on PathTracer
+    
+    setup:
+        var pcg = newPcg()
+
+    teardown:
+        echo "PathTracer test ended"
+
+    test "Fournace test":
+        for i in 0..5:
+            var
+                scene = newWorld()
+                emitted_rad = pcg.random_float()
+                reflectance = pcg.random_float() * 0.9
+                enclosure_mat = newMaterial(
+                                    brdf = newDiffuseBRDF(pigment = newUniformPigment(newColor(1.0, 1.0, 1.0) * reflectance)),
+                                    emitted_radiance = newUniformPigment(newColor(1.0, 1.0, 1.0) * emitted_rad))
+                ray = newRay(origin = newPoint(), dir = newVector(1, 0, 0))
+            
+            scene.add(newSphere(material = enclosure_mat))
+
+            var 
+                path_tracer = PathTracer(scene = scene, ray = ray, pcg = pcg, n_rays = 1, max_depth = 100, lim_depth = 101)
+                solving_proc = newPathTracer(scene, ray, path_tracer)
+                path_col = solving_proc()                
+                expected = emitted_rad/(1.0-reflectance)
+
+            assert path_col.r.almostEqual(expected)
+            assert path_col.g.almostEqual(expected)
+            assert path_col.b.almostEqual(expected)
+
+    echo "Fournace test ended"

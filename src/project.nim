@@ -18,6 +18,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
     tracer = OnOffRenderer
+    solvingproc = newOnOffRenderer(tracer)
     pfm_stream_write, pfm_stream_read : Stream
     output_img : HdrImage
     pfm_filename, png_filename : string
@@ -50,7 +51,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
 
-  im_tracer.fire_all_rays(fire_ray, tracer, scene)
+  im_tracer.fire_all_rays(fire_ray, solvingproc, scene)
 
   # Creation of the pfm file
   

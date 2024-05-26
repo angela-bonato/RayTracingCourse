@@ -133,7 +133,7 @@ suite "test_image_tracer":
 
     test "Image coverage":
         var 
-            sol = solverendproc
+            sol = Solverendproc
             scene = newWorld()
 
         trc.fire_all_rays(fire_ray, sol, scene)

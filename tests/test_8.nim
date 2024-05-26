@@ -76,10 +76,13 @@ suite "Test SolveRenderingProcs":
     test "Test on FlatRenderer":
         var
             background_color = newColor(20,30,40)
-            hit1 = sphere.ray_intersection(ray1)
-            hit2 = sphere.ray_intersection(ray2)
-            color1 = FlatRenderer(hit1, background_color)
-            color2 = FlatRenderer(hit2, background_color)
+            scene = newWorld() 
+        
+        scene.add(sphere)
+            
+        var 
+            color1 = FlatRenderer(scene, ray1, background_color)
+            color2 = FlatRenderer(scene, ray2, background_color)
 
         assert color1.is_close(shape_color)
         assert color2.is_close(background_color)
