@@ -13,9 +13,9 @@ import std/math
 # Orthonormal base type definition
 
 type OrthoNormalBase* = object
-  e1 : Vector
-  e2 : Vector
-  e3 : Vector
+  e1* : Vector
+  e2* : Vector
+  e3* : Vector
 
 proc newOrthoNormalBase*(e1,e2,e3 : Vector) : OrthoNormalBase =
   ## Creator for ONB
