@@ -25,10 +25,6 @@ proc OnOffRenderer*(scene : World, ray : Ray, background_color = newColor(0, 0, 
   else:
     return hit_color  #The spheres will be white if default is used
 
-proc newOnOffRenderer*(scene : World, ray : Ray, OnOffRenderer : proc) : SolveRenderingProc =
-  ## It is a wrapper to use OnOffRenderer as a SolveRenderingProc, I call it as if it were a constructor
-  return OnOffRenderer(scene, ray)
-
 proc FlatRenderer*(scene : World, ray : Ray, background_color = newColor(0,0,0)) : Color =
   ## A «flat» renderer
   ## This renderer estimates the solution of the rendering equation by neglecting any contribution of the light.
@@ -39,11 +35,7 @@ proc FlatRenderer*(scene : World, ray : Ray, background_color = newColor(0,0,0))
   else:
     return hit.get().shape.material.brdf.pigment.get_color(hit.get().surface_point) + hit.get().shape.material.emitted_radiance.get_color(hit.get().surface_point)
 
-proc newFlatRenderer*(scene : World, ray : Ray, FlatRenderer : proc) : SolveRenderingProc =
-  ## It is a wrapper to use OnOffRenderer as a SolveRenderingProc, I call it as if it were a constructor
-  return FlatRenderer(scene, ray)
-
-proc PathTracer*(scene : World, ray : Ray, background_color = newColor(0,0,0), pcg: var Pcg, n_rays: int, max_depth: int, lim_depth: int) : Color =
+proc PathTracer*(scene : World, ray : Ray, background_color = newColor(0,0,0), pcg: var Pcg, n_rays = 50, max_depth = 10, lim_depth = 5) : Color =
   ## The real reay-tracer algorithm
   if ray.depth > max_depth :
     return newColor(0,0,0)
@@ -59,6 +51,7 @@ proc PathTracer*(scene : World, ray : Ray, background_color = newColor(0,0,0), p
     emitted_rad = hit_material.emitted_radiance.get_color(hit.get().surface_point)
     hit_col_lum = max(max(hit_color.r, hit_color.g), hit_color.b)
 
+
   if ray.depth >= lim_depth :
     # Russian roulette
     var q = max(0.05, 1-hit_col_lum)
@@ -68,24 +61,20 @@ proc PathTracer*(scene : World, ray : Ray, background_color = newColor(0,0,0), p
     else:
       return emitted_rad
 
-    # Monte Carlo integration
-    var cum_rad = newColor(0, 0, 0)
+  # Monte Carlo integration
+  var cum_rad = newColor(0, 0, 0)
 
-    # Only do costly recursions if it's worth it
-    if hit_col_lum > 0.0:
-      for index in 0..n_rays :
-        var 
-          new_ray = hit_material.brdf.scatter_ray(pcg = pcg, 
+  # Only do costly recursions if it's worth it
+  if hit_col_lum > 0.0:
+    for index in 0..<n_rays :
+      var 
+        new_ray = hit_material.brdf.scatter_ray(pcg = pcg, 
                                             incoming_dir = hit.get().ray.dir, 
                                             interaction_point = hit.get().world_point,
                                             normal = hit.get().normal,
                                             depth = ray.depth+1)
-          new_rad = PathTracer(scene, new_ray, background_color, pcg, n_rays, max_depth, lim_depth)
-        cum_rad = cum_rad+(hit_color*new_rad)
+        new_rad = PathTracer(scene, new_ray, background_color, pcg, n_rays, max_depth, lim_depth)
+      cum_rad = cum_rad+(hit_color*new_rad)
 
-    return emitted_rad+((1.0/float(n_rays))*cum_rad)
-
-proc newPathTracer*(scene : World, ray : Ray, PathTracer : proc) : SolveRenderingProc =
-  ## It is a wrapper to use OnOffRenderer as a SolveRenderingProc, I call it as if it were a constructor
-  return PathTracer(scene, ray)
+  return emitted_rad+((1.0/float(n_rays))*cum_rad)
 

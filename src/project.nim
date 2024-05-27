@@ -5,11 +5,15 @@ import transformation
 import imagetracer
 import camera
 import world
+import ray
+import color
 import renderprocs
+import pcg
+import materials
 import std/streams
 import std/math
 
-proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, algorithm = "path_tracer", args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
     cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 0))) 
@@ -17,11 +21,28 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
     scene = newWorld()
-    tracer = OnOffRenderer
-    solvingproc = newOnOffRenderer(tracer)
     pfm_stream_write, pfm_stream_read : Stream
     output_img : HdrImage
     pfm_filename, png_filename : string
+    pcg = newPcg()
+    renderproc_wrapped : SolveRenderingProc
+
+  case algorithm:
+    of "onoff":
+      proc onoff(scene : World, ray : Ray) : Color =
+        return OnOffRenderer(scene, ray, background_color = newColor(0, 0, 0), hit_color = newColor(255, 255, 255) )
+      renderproc_wrapped = onoff
+    of "flat":
+      proc flat(scene : World, ray : Ray) : Color =
+        return FlatRenderer(scene, ray, background_color = newColor(0, 0, 0))
+      renderproc_wrapped = flat
+    of "path_tracer":
+      proc path_tracer(scene : World, ray : Ray) : Color =
+        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 20, max_depth = 10, lim_depth = 5 )
+      renderproc_wrapped = path_tracer
+    else:
+      quit "Chose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
+
 
   if len(args) != 2:
     quit "Usage:\n  demo [optional-params] <OUT_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
@@ -40,7 +61,10 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
 
-  scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
+  var enclosure_mat = newMaterial( mybrdf = newDiffuseBRDF(mypig = newUniformPigment(newColor(255, 255, 255) )),
+                                    mypig = newUniformPigment( newColor(255, 255, 255) ))
+
+  scene.add(newSphere(transform = translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1), material = enclosure_mat))
   scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
@@ -51,7 +75,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
 
-  im_tracer.fire_all_rays(fire_ray, solvingproc, scene)
+  im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene)
 
   # Creation of the pfm file
   
@@ -118,7 +142,8 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
 when isMainModule:
   import cligen; dispatchMulti([demo, help={ "kind_of_camera":"set kind of camera, could be perspective 'p' or orthogonal 'o' ", 
                                              "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>",
-                                             "angle":"set the angle of view, in 360°"}],
+                                             "angle":"set the angle of view, in 360°",
+                                             "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"}],
                                [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 

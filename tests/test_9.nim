@@ -1,9 +1,15 @@
 
-include ../src/materials
-include ../src/pcg
-include ../src/geometryalgebra
-include ../src/renderprocs
-include std/unittest
+import ../src/ray
+import ../src/color
+import ../src/renderprocs
+import ../src/pcg
+import ../src/materials
+import ../src/normal
+import ../src/vector
+import ../src/world
+import ../src/point
+import std/unittest
+import std/math
 
 
 suite "Test ONB creation":
@@ -54,18 +60,15 @@ suite "Tests on PathTracer":
                 scene = newWorld()
                 emitted_rad = pcg.random_float()
                 reflectance = pcg.random_float() * 0.9
-                enclosure_mat = newMaterial(
-                                    brdf = newDiffuseBRDF(pigment = newUniformPigment(newColor(1.0, 1.0, 1.0) * reflectance)),
-                                    emitted_radiance = newUniformPigment(newColor(1.0, 1.0, 1.0) * emitted_rad))
+                enclosure_mat = newMaterial( mybrdf = newDiffuseBRDF(mypig = newUniformPigment(reflectance * newColor(1.0, 1.0, 1.0))),
+                                             mypig = newUniformPigment(emitted_rad * newColor(1.0, 1.0, 1.0)))
                 ray = newRay(origin = newPoint(), dir = newVector(1, 0, 0))
             
             scene.add(newSphere(material = enclosure_mat))
 
             var 
-                path_tracer = PathTracer(scene = scene, ray = ray, pcg = pcg, n_rays = 1, max_depth = 100, lim_depth = 101)
-                solving_proc = newPathTracer(scene, ray, path_tracer)
-                path_col = solving_proc()                
-                expected = emitted_rad/(1.0-reflectance)
+                path_col = PathTracer(scene = scene, ray = ray, pcg = pcg, n_rays = 1, max_depth = 100, lim_depth = 101)            
+                expected = emitted_rad/(1.0-reflectance) 
 
             assert path_col.r.almostEqual(expected)
             assert path_col.g.almostEqual(expected)
