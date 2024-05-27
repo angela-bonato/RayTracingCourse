@@ -63,8 +63,8 @@ suite "Test SolveRenderingProcs":
         var
             shape_color = newColor(50,150,250)
             shape_pigment = newUniformPigment(shape_color)
-            shape_brdf = newDiffuseBrdf( mypig = shape_pigment )
-            material = newMaterial(mybrdf = shape_brdf)
+            shape_brdf = newDiffuseBrdf( pigment = shape_pigment )
+            material = newMaterial(brdf = shape_brdf)
             sphere = newSphere(material = material)
             ray1 = newRay(origin = newPoint(0,0,-2), dir = newVector(0,0,1))
             ray2 = newRay(origin = newPoint(0,0,-2), dir = newVector(0,0,-1))

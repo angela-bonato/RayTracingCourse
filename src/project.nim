@@ -38,7 +38,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
       renderproc_wrapped = flat
     of "path_tracer":
       proc path_tracer(scene : World, ray : Ray) : Color =
-        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 20, max_depth = 10, lim_depth = 5 )
+        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 10, max_depth = 10, lim_depth = 3 )
       renderproc_wrapped = path_tracer
     else:
       quit "Chose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
@@ -59,21 +59,17 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   else:
     fire_ray = fire_ray_perspective
 
-  # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
+  var 
+    sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
+                          em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
+    ground_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newCheckeredPigment(col_even = newColor(0.3, 0.5, 0.1), col_odd = newColor(0.1, 0.2, 0.5), div_u = 4, div_v = 4)))
+    sph1_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newUniformPigment(newColor(0.3, 0.4, 0.8))))
+    #sph2_mat = newMaterial(brdf = newSpecularBrdf(pigment = newUniformPigment(newColor(0.6, 0.2, 0.3))))
 
-  var enclosure_mat = newMaterial( mybrdf = newDiffuseBRDF(mypig = newUniformPigment(newColor(255, 255, 255) )),
-                                    mypig = newUniformPigment( newColor(255, 255, 255) ))
-
-  scene.add(newSphere(transform = translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1), material = enclosure_mat))
-  scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(0.5, -0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(-0.5, -0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(-0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
-  scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
+  scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
+  scene.add(newPlane(material = ground_mat))
+  scene.add(newSphere(material = sph1_mat, transform = translation(newVector(0, 0, 1))))
+ # scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))
 
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene)
 

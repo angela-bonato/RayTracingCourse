@@ -23,7 +23,7 @@ proc newOrthoNormalBase*(e1,e2,e3 : Vector) : OrthoNormalBase =
   result.e2 = e2
   result.e3 = e3
 
-proc create_onb_from_z*( normal : Vector|Normal ) : OrthoNormalBase =
+proc create_onb_from_z*(normal : Vector|Normal ) : OrthoNormalBase =
   ## Creation of a orthonormal base using the algorithm by Duff et al.
   ## It works only if normal is normalized
   var
@@ -62,7 +62,7 @@ proc print*( vec : Vec2d ) : void =
 type Pigment* = ref object of RootObj
     ## Virtual definition
 
-method get_color*(pig : Pigment, coord : Vec2d) : Color {.base.} =
+method get_color*(pigment : Pigment, coord : Vec2d) : Color {.base.} =
     ## Virtual get_color method
     quit "Called get_color of Pigment, it is a virtual method!"
 
@@ -72,10 +72,10 @@ type UniformPigment* = ref object of Pigment
     ## Definition of the UniformPigmrnt type, it associates a single color to the shape on which it is called.
     color* : Color
 
-proc newUniformPigment*(mycol : Color) : Pigment =
+proc newUniformPigment*(color : Color) : Pigment =
     ## Costructor of UniformPigment
     let unipig = new UniformPigment
-    unipig.color = mycol
+    unipig.color = color
     return Pigment(unipig)
 
 method get_color*(unipig : UniformPigment, coord : Vec2d) : Color =
@@ -89,13 +89,13 @@ type CheckeredPigment* = ref object of Pigment
     col_even*, col_odd* : Color     #the two colors used in the checkered texture
     div_u*, div_v* : int    #number of divisions along the u and v axes to define the squares or rectangles of the texture
 
-proc newCheckeredPigment*(cole,colo : Color, divu,divv : int) : Pigment =
+proc newCheckeredPigment*(col_even,col_odd : Color, div_u,div_v : int) : Pigment =
     ## Constructor of CheckeredPigment
     let chepig = new CheckeredPigment
-    chepig.col_even = cole
-    chepig.col_odd = colo
-    chepig.div_u = divu
-    chepig.div_v = divv
+    chepig.col_even = col_even
+    chepig.col_odd = col_odd
+    chepig.div_u = div_u
+    chepig.div_v = div_v
     return Pigment(chepig)
 
 method get_color*(chepig : CheckeredPigment, coord : Vec2d) : Color =
@@ -117,10 +117,10 @@ type ImagePigment* = ref object of Pigment
     ## Definition of the Image type of pigment, it uses an HdrImage as texture for the shape on which it is called
     image* : HdrImage
 
-proc newImagePigment*(myimg : HdrImage) : Pigment =
+proc newImagePigment*(image : HdrImage) : Pigment =
     ## Constructor of ImagePigment
     let impig = new ImagePigment
-    impig.image = myimg
+    impig.image = image
     return Pigment(impig)
 
 method get_color*(impig : ImagePigment, coord : Vec2d) : Color =
@@ -158,10 +158,10 @@ type DiffuseBrdf* = ref object of Brdf
     # Pigment
     reflectance* : float
 
-proc newDiffuseBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), refl = 1.0) : Brdf =
+proc newDiffuseBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), refl = 1.0) : Brdf =
     ## Costructor of DiffuseBrdf with possible default arguments
     let difb = new DiffuseBrdf
-    difb.pigment = mypig
+    difb.pigment = pigment
     difb.reflectance = refl
     return Brdf(difb)
 
@@ -191,9 +191,9 @@ type SpecularBrdf* = ref object of Brdf
     # Pigment
     threshold_angle_rad* : float
 
-proc newSpecularBrdf*(mypig = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : SpecularBrdf =
+proc newSpecularBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : SpecularBrdf =
     ## Constructor of SpecularBrdf
-    result.pigment = mypig
+    result.pigment = pigment
     result.threshold_angle_rad = ta_rad
 
 method eval*(spec : SpecularBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
@@ -228,9 +228,9 @@ type Material* = ref object
     brdf* : Brdf
     emitted_radiance* : Pigment
 
-proc newMaterial*(mybrdf = newDiffuseBrdf(), mypig = newUniformPigment(newColor(0,0,0))) : Material =
+proc newMaterial*(brdf = newDiffuseBrdf(), em_rad = newUniformPigment(newColor(0,0,0))) : Material =
     ## Material constructor with possibility of using default arguments
     new(result)
-    result.brdf = mybrdf
-    result.emitted_radiance = mypig
+    result.brdf = brdf
+    result.emitted_radiance = em_rad
     return result

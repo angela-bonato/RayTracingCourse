@@ -60,8 +60,8 @@ suite "Tests on PathTracer":
                 scene = newWorld()
                 emitted_rad = pcg.random_float()
                 reflectance = pcg.random_float() * 0.9
-                enclosure_mat = newMaterial( mybrdf = newDiffuseBRDF(mypig = newUniformPigment(reflectance * newColor(1.0, 1.0, 1.0))),
-                                             mypig = newUniformPigment(emitted_rad * newColor(1.0, 1.0, 1.0)))
+                enclosure_mat = newMaterial( brdf = newDiffuseBRDF(pigment = newUniformPigment(reflectance * newColor(1.0, 1.0, 1.0))),
+                                             em_rad = newUniformPigment(emitted_rad * newColor(1.0, 1.0, 1.0)))
                 ray = newRay(origin = newPoint(), dir = newVector(1, 0, 0))
             
             scene.add(newSphere(material = enclosure_mat))
