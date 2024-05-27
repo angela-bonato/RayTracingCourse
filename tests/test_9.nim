@@ -64,7 +64,7 @@ suite "Tests on PathTracer":
             var 
                 path_tracer = PathTracer(scene = scene, ray = ray, pcg = pcg, n_rays = 1, max_depth = 100, lim_depth = 101)
                 solving_proc = newPathTracer(scene, ray, path_tracer)
-                path_col = solving_proc()                
+                path_col = solving_proc                
                 expected = emitted_rad/(1.0-reflectance)
 
             assert path_col.r.almostEqual(expected)
