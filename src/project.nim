@@ -16,7 +16,7 @@ import std/math
 proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, algorithm = "path_tracer", args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 0))) 
+    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 1))) 
     fire_ray : FireRayProcs
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
@@ -38,7 +38,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
       renderproc_wrapped = flat
     of "path_tracer":
       proc path_tracer(scene : World, ray : Ray) : Color =
-        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 10, max_depth = 10, lim_depth = 3 )
+        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 20, max_depth = 5, lim_depth = 3 )
       renderproc_wrapped = path_tracer
     else:
       quit "Chose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
@@ -64,12 +64,12 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
                           em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
     ground_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newCheckeredPigment(col_even = newColor(0.3, 0.5, 0.1), col_odd = newColor(0.1, 0.2, 0.5), div_u = 4, div_v = 4)))
     sph1_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newUniformPigment(newColor(0.3, 0.4, 0.8))))
-    #sph2_mat = newMaterial(brdf = newSpecularBrdf(pigment = newUniformPigment(newColor(0.6, 0.2, 0.3))))
+    sph2_mat = newMaterial(brdf = newSpecularBrdf(pigment = newUniformPigment(newColor(0.6, 0.2, 0.3))))
 
   scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
   scene.add(newPlane(material = ground_mat))
   scene.add(newSphere(material = sph1_mat, transform = translation(newVector(0, 0, 1))))
- # scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))
+  scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))
 
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene)
 

@@ -6,6 +6,9 @@ import ray
 import world
 import renderprocs
 
+import std/terminal
+import std/strutils
+
 # ImageTracer typer declaration
 
 type ImageTracer* = object
@@ -42,8 +45,17 @@ proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solv
     ## fire_all_rays alternative version
     for row in countup(0,img_tracer.image.height-1):
         for col in countup(0,img_tracer.image.width-1):
+
+            var counter = toInt( (row*img_tracer.image.width + col) / (img_tracer.image.height*img_tracer.image.width) * 100 )
+
+            stdout.styledWriteLine(fgRed, "0% ", fgWhite, '#'.repeat counter, if counter > 50: fgGreen else: fgYellow, "\t", $counter , "%")
+            cursorUp 1
+            eraseLine()
+
             var 
                 img_ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
                 color = solve_rendering(scene, img_ray)
             img_tracer.image.setPixel(col, row, color)
+
+    stdout.resetAttributes()
             
