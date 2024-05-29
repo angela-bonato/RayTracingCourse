@@ -13,7 +13,7 @@ import materials
 import std/streams
 import std/math
 
-proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, algorithm = "path_tracer", args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, algorithm = "path_tracer", antial_rays = 9, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
     cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 1))) 
@@ -41,12 +41,11 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
         return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 20, max_depth = 5, lim_depth = 3 )
       renderproc_wrapped = path_tracer
     else:
-      quit "Chose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
+      quit "Invalid algorithm argument: choose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
 
 
   if len(args) != 2:
     quit "Usage:\n  demo [optional-params] <OUT_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
-
   pfm_filename = args[0]
   png_filename = args[1]
 
@@ -58,6 +57,9 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     fire_ray = fire_ray_orthogonal
   else:
     fire_ray = fire_ray_perspective
+
+  if sqrt(float(antial_rays))!=floor(sqrt(float(antial_rays))) :
+    quit "Invalid antial_rays value: choose a perfect square as antial_rays."
 
   var 
     sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
@@ -71,7 +73,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newSphere(material = sph1_mat, transform = translation(newVector(0, 0, 1))))
   scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))
 
-  im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene)
+  im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene, toInt(sqrt(float(antial_rays))))
 
   # Creation of the pfm file
   
@@ -139,7 +141,8 @@ when isMainModule:
   import cligen; dispatchMulti([demo, help={ "kind_of_camera":"set kind of camera, could be perspective 'p' or orthogonal 'o' ", 
                                              "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>",
                                              "angle":"set the angle of view, in 360°",
-                                             "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"}],
+                                             "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm",
+                                             "antial":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off."}],
                                [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 
