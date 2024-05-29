@@ -38,12 +38,43 @@ proc fire_ray_pixel*(img_tracer: ImageTracer, col,row :int, fire_ray_image : Fir
 
     return img_tracer.camera.fire_ray_image(u,v)
 
-proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProc, scene: World) : void =
-    ## fire_all_rays alternative version
-    for row in countup(0,img_tracer.image.height-1):
-        for col in countup(0,img_tracer.image.width-1):
+proc MC_fire_ray_pixel*(img_tracer: ImageTracer, col,row : int, fire_ray_image: FireRayProcs, s_min: float, s_max: float, pcg_a: var Pcg) : Ray =
+    ## Fires a ray from a random point of a portion of a pixel of the screen
+    var
+        u_pixel = pcg_a.random_float()*(s_max-s_min)+s_min
+        v_pixel = pcg_a.random_float()*(s_max-s_min)+s_min
+        u = (float(col) + u_pixel) / float(img_tracer.image.width )      
+        v = 1.0 - (float(row) + v_pixel) / float(img_tracer.image.height )
+
+    return img_tracer.camera.fire_ray_image(u,v)
+
+proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProc, scene: World, antial: int) : void =
+    ## fire_all_rays 
+    if antial == 0 :
+        ## antialising turned off
+        for row in countup(0,img_tracer.image.height-1):
+            for col in countup(0,img_tracer.image.width-1):
+                var 
+                    img_ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
+                    color = solve_rendering(scene, img_ray)
+                img_tracer.image.setPixel(col, row, color)
+
+    else:
+        ## antialising turned on
+        pcg_a = newPcg()
+        var square = 1.0/float(antial)
+        for a in 0..antial:
+            # ranges for stratified sampilng, usefull to call MC_fire_ray_pixel
             var 
-                img_ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
-                color = solve_rendering(scene, img_ray)
-            img_tracer.image.setPixel(col, row, color)
-            
+                s_min = a*square
+                s_max = (a+1)*square
+                color = newColor(0, 0, 0)
+            for row in countup(0,img_tracer.image.height-1):
+                for col in countup(0,img_tracer.image.width-1):
+                    var img_ray = img_tracer.MC_fire_ray_pixel(col, row, fire_ray_image, s_min, s_max, pcg_a)
+                    color = color + solve_rendering(scene, img_ray)
+                    if a==antial-1:
+                        img_tracer.image.setPixel(col, row, (1.0/float(a))*color)
+
+
+        
