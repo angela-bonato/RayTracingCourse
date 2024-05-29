@@ -133,10 +133,10 @@ suite "test_image_tracer":
 
     test "Image coverage":
         var 
-            sol = solverendproc
+            sol = Solverendproc
             scene = newWorld()
 
-        trc.fire_all_rays(fire_ray, sol, scene)
+        trc.fire_all_rays(fire_ray, sol, scene, 0)
         for row in 0..<img.height:
             for col in 0..<img.width:
                 check(is_close(img.get_pixel(col, row), newColor(1.0, 2.0, 3.0)))
