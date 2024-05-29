@@ -191,10 +191,12 @@ type SpecularBrdf* = ref object of Brdf
     # Pigment
     threshold_angle_rad* : float
 
-proc newSpecularBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : SpecularBrdf =
+proc newSpecularBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : Brdf =
     ## Constructor of SpecularBrdf
-    result.pigment = pigment
-    result.threshold_angle_rad = ta_rad
+    let spec = new SpecularBrdf
+    spec.pigment = pigment
+    spec.threshold_angle_rad = ta_rad
+    return Brdf(spec)
 
 method eval*(spec : SpecularBrdf, normal : Normal, in_dir,out_dir : Vector, coord: Vec2d) : Color =
     ## Definition of eval method specific for SpecularBrdf

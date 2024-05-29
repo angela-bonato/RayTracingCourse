@@ -6,6 +6,9 @@ import ray
 import world
 import renderprocs
 
+import std/terminal
+import std/strutils
+
 # ImageTracer typer declaration
 
 type ImageTracer* = object
@@ -54,10 +57,21 @@ proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solv
         ## antialising turned off
         for row in countup(0,img_tracer.image.height-1):
             for col in countup(0,img_tracer.image.width-1):
+                
+                #progress bar
+                var counter = toInt( (row*img_tracer.image.width + col) / (img_tracer.image.height*img_tracer.image.width) * 100 )
+                stdout.styledWriteLine(fgRed, "0% ", fgWhite, '#'.repeat counter, if counter > 50: fgGreen else: fgYellow, "\t", $counter , "%")
+                cursorUp 1
+                eraseLine()
+
+                #fire rays
                 var 
                     img_ray = img_tracer.fire_ray_pixel(col, row, fire_ray_image)
                     color = solve_rendering(scene, img_ray)
                 img_tracer.image.setPixel(col, row, color)
+
+        #progress bar again
+        stdout.resetAttributes()
 
     else:
         ## antialising turned on
@@ -71,10 +85,17 @@ proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solv
                 color = newColor(0, 0, 0)
             for row in countup(0,img_tracer.image.height-1):
                 for col in countup(0,img_tracer.image.width-1):
+                    #progress bar
+                    var counter = toInt( (row*img_tracer.image.width + col) / (img_tracer.image.height*img_tracer.image.width) * 100 )
+                    stdout.styledWriteLine(fgRed, "0% ", fgWhite, '#'.repeat counter, if counter > 50: fgGreen else: fgYellow, "\t", $counter , "%")
+                    cursorUp 1
+                    eraseLine()
+                    
+                    #fire rays
                     var img_ray = img_tracer.MC_fire_ray_pixel(col, row, fire_ray_image, s_min, s_max, pcg_a)
                     color = color + solve_rendering(scene, img_ray)
                     if a==antial-1:
                         img_tracer.image.setPixel(col, row, (1.0/float(a))*color)
 
-
-        
+            #progress bar again
+            stdout.resetAttributes()
