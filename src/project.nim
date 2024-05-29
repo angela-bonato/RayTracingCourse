@@ -142,7 +142,7 @@ when isMainModule:
                                              "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>",
                                              "angle":"set the angle of view, in 360°",
                                              "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm",
-                                             "antial":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off."}],
+                                             "antial_rays":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off."}],
                                [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 
