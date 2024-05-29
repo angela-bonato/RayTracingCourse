@@ -13,7 +13,7 @@ import materials
 import std/streams
 import std/math
 
-proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, algorithm = "path_tracer", antial_rays = 9, args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 5, lim_depth = 3, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
     cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 1))) 
@@ -38,7 +38,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
       renderproc_wrapped = flat
     of "path_tracer":
       proc path_tracer(scene : World, ray : Ray) : Color =
-        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = 20, max_depth = 5, lim_depth = 3 )
+        return PathTracer(scene, ray, background_color = newColor(0,0,0), pcg = pcg, n_rays = num_rays, max_depth = max_depth, lim_depth = lim_depth )
       renderproc_wrapped = path_tracer
     else:
       quit "Invalid algorithm argument: choose a working algorithm, you can use one of the following: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm"
@@ -141,8 +141,13 @@ when isMainModule:
   import cligen; dispatchMulti([demo, help={ "kind_of_camera":"set kind of camera, could be perspective 'p' or orthogonal 'o' ", 
                                              "args":"<OUT_PFM_FILENAME> <OUT_PNG_FILENAME>",
                                              "angle":"set the angle of view, in 360°",
+                                             "width":"set the width of the generated image",
+                                             "height":"set the height of the generated image",
                                              "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm",
-                                             "antial_rays":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off."}],
+                                             "antial_rays":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off",
+                                             "num_rays":"set the number of diffused rays to perform MC integration in the path_tracer algorithm",
+                                             "max_depth":"set the max depth (number of times the ray is scattered) to perform MC integration in the path_tracer algorithm",
+                                             "lim_depth":"set the depth (number of time the ray is scattered) at wich the russian roulette is activated"}],
                                [pfm2png, help={ "args":"<IN_PFM_FILENAME> <OUT_PNG_FILENAME>"}])
  
 
