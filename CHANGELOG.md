@@ -1,4 +1,4 @@
-# HEAD
+# v0.2.0
 
 - Add geometry classes (vectors, points, matrixes ecc) used for rendering
 - Add classes to create a scene and a camera (which defines the pov of the image that will be produced)

@@ -20,8 +20,6 @@ test_9
 
 ### Test files  ###
 *.pfm
-*.png
-*.mp4
 
 ### VisualStudioCode ###
 .vscode/*
