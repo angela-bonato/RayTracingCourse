@@ -113,7 +113,7 @@ All the images used as frames for the animation will be saved in the `demo_anima
 
 ## Advanced usage
 
-If you are a skilled user, by properly changing `demo()` procs in [project.nim](./src/project.nim), you can produce many other images. To give you an idea about what is feasible with this program, here is a selection to inspire you.
+If you are a skilled user, by properly changing `demo()` proc in [project.nim](./src/project.nim), you can produce many other images. To give you an idea about what is feasible with this program, here is a selection to inspire you.
 
 <div style="text-align: center;">
 <table style="margin: 0px auto;">
