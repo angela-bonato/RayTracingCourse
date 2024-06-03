@@ -33,7 +33,7 @@ and then run it via
 
 Two commands are available: `pfm2png` and `demo`. Keep reading to learn about them or run
 
-    nimble run project <COMMAND> -h
+    ./project <COMMAND> -h
 
 for a quick guide.
 
@@ -41,11 +41,11 @@ for a quick guide.
 
 To use this program to convert an `INPUT_PFM_FILE` to an `OUTPUT_PNG_FILE` run  
 
-    nimble run project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
     
 To perform tone mapping and/or gamma correction during the conversion, you can specify `<GAMMA>` and/or `<A_VALUE>` using
 
-    nimble run project pfm2png -a=<A_VALUE> -g=<GAMMA> <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project pfm2png -a=<A_VALUE> -g=<GAMMA> <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
 
 These are optional arguments so you can either specify them both, just one of them or none of them as in the previous case.
 
