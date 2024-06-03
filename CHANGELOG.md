@@ -1,3 +1,7 @@
+# v0.2.1
+
+- Fixed bug in Parallelepiped class
+
 # v0.2.0
 
 - Add geometry classes (vectors, points, matrixes ecc) used for rendering
