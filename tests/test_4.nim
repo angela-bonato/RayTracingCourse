@@ -138,12 +138,12 @@ proc test_trans_creation() : void =
     assert transform2.is_consistent()
     assert transform2.matrix.is_close(id)
 
-proc test_translation() : void =
-    ## test translation creation
+proc test_traslation() : void =
+    ## test traslation creation
 
     var 
         vec = newVector(1.0, 2.0, 3.0)
-        trasl = translation(vec)
+        trasl = traslation(vec)
         mat = newHomMatrix([ 1.0, 0.0, 0.0, 1.0,
                              0.0, 1.0, 0.0, 2.0, 
                              0.0, 0.0, 1.0, 3.0,
@@ -183,9 +183,9 @@ proc test_rotation() : void =
     assert mat_y.is_close(rot_y.matrix)
     assert mat_z.is_close(rot_z.matrix)
 
-proc test_translation_application() : void =
+proc test_traslation_application() : void =
     var
-        trasl = translation(newVector(1.0, 2.0, 3.0))
+        trasl = traslation(newVector(1.0, 2.0, 3.0))
         vec = newVector(4.0, 5.0, 6.0)
         point = newPoint(4.0, 5.0, 6.0)
         norm = newNormal(4.0, 5.0, 6.0)
@@ -230,7 +230,7 @@ test_mat_creation()
 test_element_access()
 test_matrix_product()
 test_trans_creation()
-test_translation()
+test_traslation()
 test_rotation()
-test_translation_application()
+test_traslation_application()
 test_rotation_application()

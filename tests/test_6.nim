@@ -17,7 +17,7 @@ suite "Test Sphere":
     setup:
         var
             unitary_sphere = newSphere()
-            traslated_sphere = newSphere(translation( newVector(10.0,0,0)))
+            traslated_sphere = newSphere(traslation( newVector(10.0,0,0)))
         echo "New test started"
 
     teardown:
@@ -268,7 +268,7 @@ suite "Test Parallelepiped":
 
     test "Traslated cube intersection":
         var
-            tr_cube = newParallelepiped(transform = translation(newVector(10.0,0,0)))
+            tr_cube = newParallelepiped(transform = traslation(newVector(10.0,0,0)))
             ray = newRay(newPoint(10.5,0.5,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(10.5,0.5,1.0)
             teoretical_normal = newNormal(0,0,1.0)
@@ -330,8 +330,8 @@ suite "Test CSG":
 
     setup:
         var
-            sphere1 = newSphere( translation(newVector(0.5,0,0)) )
-            sphere2 = newSphere( translation(newVector(-0.5,0,0)))
+            sphere1 = newSphere( traslation(newVector(0.5,0,0)) )
+            sphere2 = newSphere( traslation(newVector(-0.5,0,0)))
             ray = newRay(newPoint(-2,0,0),newVector(1.0,0,0))
         
         echo "New test started"

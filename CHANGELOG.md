@@ -1,3 +1,16 @@
+# HEAD
+
+- Add rendering algorithms (FlatRenderer and PathTracer)
+- Add BRDF, Pgment and Material classes
+- Add antialiasing
+- Add pcg random generator to perform ray-tracing
+- Adjurned demo command
+- Add bash script to parallelize the production of animations
+
+# v0.2.1
+
+- Fixed bugs in Parallelepiped class
+
 # v0.2.0
 
 - Add geometry classes (vectors, points, matrixes ecc) used for rendering

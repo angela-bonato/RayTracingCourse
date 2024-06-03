@@ -5,6 +5,7 @@ import transformation
 import imagetracer
 import camera
 import world
+import point
 import ray
 import color
 import renderprocs
@@ -16,7 +17,7 @@ import std/math
 proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 5, lim_depth = 3, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 1))) 
+    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*traslation(newVector(-4, 0, 1))) 
     fire_ray : FireRayProcs
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
@@ -61,6 +62,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   if sqrt(float(antial_rays))!=floor(sqrt(float(antial_rays))) :
     quit "Invalid antial_rays value: choose a perfect square as antial_rays."
 
+#[
   var 
     sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
                           em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
@@ -70,8 +72,34 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
 
   scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
   scene.add(newPlane(material = ground_mat))
-  scene.add(newSphere(material = sph1_mat, transform = translation(newVector(0, 0, 1))))
-  scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))
+  scene.add(newSphere(material = sph1_mat, transform = traslation(newVector(0, 0, 1))))
+  scene.add(newSphere(material = sph2_mat, transform = traslation(newVector(1, 2.5, 0))))
+]#
+#[
+  var 
+    sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
+                          em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
+    ground_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newCheckeredPigment(col_even = newColor(1.0, 1.0, 0.0), col_odd = newColor(0.1, 0.2, 0.5), div_u = 4, div_v = 4)))
+    paral_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newUniformPigment(newColor(0.3, 0.4, 0.8))))
+    mirror1_mat = newMaterial(brdf = newSpecularBrdf(pigment = newUniformPigment(newColor(0.6, 0.2, 0.3))))
+    mirror2_mat = newMaterial(brdf = newSpecularBrdf(pigment = newUniformPigment(newColor(0.1, 0.8, 0.9))))
+
+  scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
+  scene.add(newPlane(material = ground_mat))
+  scene.add(newPlane(material = mirror1_mat, transform = rotation_z(PI/4.0)*rotation_y(PI/2.0)))
+  scene.add(newPlane(material = mirror2_mat, transform = rotation_z(3.0*PI/4.0)*rotation_y(PI/2.0)))
+  scene.add(newParallelepiped(material = paral_mat, transform = traslation(newVector(-2, -1, 0))*rotation_z(PI/3.0)))
+]#
+
+  var 
+    sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
+                          em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
+    ground_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newCheckeredPigment(col_even = newColor(1.0, 1.0, 0.0), col_odd = newColor(0.1, 0.2, 0.5), div_u = 4, div_v = 4)))
+    paral_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newUniformPigment(newColor(0.3, 0.4, 0.8))))
+
+  scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
+  scene.add(newPlane(material = ground_mat))
+  scene.add(newParallelepiped(material = paral_mat, transform = traslation(newVector(-2, -1, 0))*rotation_z(PI/4.0)))
 
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene, toInt(sqrt(float(antial_rays))))
 
