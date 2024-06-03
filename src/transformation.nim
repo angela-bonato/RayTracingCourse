@@ -55,8 +55,8 @@ proc scaling*( x,y,z : float) :  Transformation =
                                         0.0, 0.0, 1/z, 0.0, 
                                         0.0, 0.0, 0.0, 1.0 ] )
 
-proc translation*(vec: Vector) : Transformation =
-    ## Create a Transformation that perform a translation of the given vector
+proc traslation*(vec: Vector) : Transformation =
+    ## Create a Transformation that perform a traslation of the given vector
     
     result.matrix = newHomMatrix( [ 1.0, 0.0, 0.0, vec.x, 
                                     0.0, 1.0, 0.0, vec.y, 
