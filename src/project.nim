@@ -10,10 +10,11 @@ import color
 import renderprocs
 import pcg
 import materials
+import csg
 import std/streams
 import std/math
 
-proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 5, lim_depth = 3, args : seq[string]) : void =
+proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 3, lim_depth = 2, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
     cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 1))) 
@@ -112,7 +113,9 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
     input_pfm_filename, output_png_filename : string
 
   if len(args) != 2:
-    quit "Usage:\n  demo [optional-params] <IN_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
+    quit "Usage:\n pfm2png [optional-params] <OUT_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
+  input_pfm_filename = args[0]
+  output_png_filename = args[1]
 
   try:
     input_stream = newFileStream(input_pfm_filename, fmRead )
