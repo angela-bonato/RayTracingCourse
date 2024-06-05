@@ -12,7 +12,7 @@ import std/math
 proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-1, 0, 0))) 
+    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*translation(newVector(-3, 1, 1))) 
     fire_ray : FireRayProcs
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
@@ -38,7 +38,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
     fire_ray = fire_ray_perspective
 
   # These are the 10 spheres placed in the scene, scaling(10, 10, 10) means that each sphere has radius=1/10
-
+#[
   scene.add(newSphere(translation(newVector(0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, -0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(-0.5, 0.5, 0.5))*scaling(0.1, 0.1, 0.1)))
@@ -49,6 +49,8 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newSphere(translation(newVector(0.5, 0.5, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0, -0.5))*scaling(0.1, 0.1, 0.1)))
   scene.add(newSphere(translation(newVector(0, 0.5, 0))*scaling(0.1, 0.1, 0.1)))
+]#
+  scene.add(newParallelepiped(rotation_z(PI/3.0)))
 
   im_tracer.fire_all_rays(fire_ray, tracer, scene)
 
