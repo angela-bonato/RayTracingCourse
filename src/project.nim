@@ -91,15 +91,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newParallelepiped(material = paral_mat, transform = traslation(newVector(-2, -1, 0))*rotation_z(PI/3.0)))
 ]#
 
-  var 
-    sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
-                          em_rad = newUniformPigment(newColor(1.0, 0.9, 0.5)))
-    ground_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newCheckeredPigment(col_even = newColor(1.0, 1.0, 0.0), col_odd = newColor(0.1, 0.2, 0.5), div_u = 4, div_v = 4)))
-    paral_mat = newMaterial(brdf = newDiffuseBrdf(pigment = newUniformPigment(newColor(0.3, 0.4, 0.8))))
-
-  scene.add(newSphere(material = sky_mat, transform = scaling(200, 200, 200)))
-  scene.add(newPlane(material = ground_mat))
-  scene.add(newParallelepiped(material = paral_mat, transform = traslation(newVector(-2, -1, 0))*rotation_z(PI/4.0)))
+  scene.add(newParallelepiped(transform = traslation(newVector(-0.5, -0.5, -0.5))))
 
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene, toInt(sqrt(float(antial_rays))))
 
