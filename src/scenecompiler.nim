@@ -30,3 +30,81 @@ type GrammarError* = object of CatchableError
     ## - `message`: a user-frendly error message
     location : SourceLocation
     msg : string
+
+# Keywords definition usefull to define KeywordToken
+
+type KeywordEnum* = enum
+    ## Here we define all the keywords that a user can use to define the scene
+    # generic 
+    NEW = "new", MATERIAL = "material", CAMERA = "camera", ORTHOGONAL = "orthogonal", PERSPECTIVE = "perspective", FLOAT = "float",
+    # shapes 
+    PLANE = "plane", SPHERE = "sphere", PARALLELEPIPED = "parallelepiped",
+    # CSG
+    UNITE = "unite", SUBTRACT = "subtract", INTERSECT = "intersect",
+    # BRDF
+    DIFFUSE = "diffuse", SPECULAR = "specular", 
+    # pigments
+    UNIFORM = "uniform", CHECKERED = "checkered", IMAGE = "image",
+    # transformations
+    TRANSLATION = "translation", ROTATION_X = "rotation_x", ROTATION_Y = "rotation_y", ROTATION_Z = "rotation_y", SCALING = "scaling"
+
+#Tokens definition
+
+type 
+
+    TokenKind* = enum 
+    ## All possible kinds of token
+        StopToken, KeywordToken, IdentifierToken, StringToken, LiteralNumberToken, SymbolToken 
+    
+    Token* = object 
+    ## Definitions of token
+        location*: SourceLocation
+        
+        case kind*: TokenKind 
+            of StopToken: 
+                discard
+            of KeywordToken:
+                keyword*: KeywordEnum
+            of IdentifierToken:
+                str*: string
+            of StringToken:
+                str*: string
+            of LiteralNumberToken:
+                value*: float
+            of SymbolToken:
+                symbol*: string
+
+## Token constructors
+
+proc newStopToken*(location: SourceLocation): Token {.inline.} =
+    Token(location: location, kind: StopToken)
+
+proc newKeywordToken*(location: SourceLocation, keyword: KeywordEnum): Token {.inline.} =
+    Token(location: location, kind: KeywordToken, keyword: keyword)
+
+proc newIdentifierToken*(location: SourceLocation, str: string): Token {.inline.} =
+    Token(location: location, kind: IdentifierToken, str: str)
+
+proc newStringToken*(location: SourceLocation, str: string): Token {.inline.} =
+    Token(location: location, kind: StringToken, str: str)
+
+proc newLiteralNumberToken*(location: SourceLocation, value: float): Token {.inline.} =
+    Token(location: location, kind: LiteralNumberToken, value: value)
+
+proc newSymbolToken*(location: SourceLocation, value: string): Token {.inline.} =
+    Token(location: location, kind: SymbolToken, value: value)
+
+proc to_string*(token: Token): string =
+    ## returns the argumetn of a token as strings
+    case token.kind:
+        of KeywordToken:
+            return $(token.keyword)
+        of IdentifierToken:
+            return token.str    #already string type
+        of StringToken:
+            return token.str    #already string type
+        of LiteralNumberToken:
+            return $(token.value)
+        of SymbolToken:
+            return token.symbol    #already string type
+
