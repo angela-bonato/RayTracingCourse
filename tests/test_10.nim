@@ -10,9 +10,6 @@ suite "Test InputStream":
     setup:
         var istream = newInputStream(stream = newStringStream("abc   \nd\nef"))
 
-    teardown:
-        echo "InputStream test ended"
-
     test "Test on read_char":
         assert istream.location.line_num == 1
         assert istream.location.col_num == 1
@@ -23,6 +20,9 @@ suite "Test InputStream":
     echo "Test on read_char ended"
 
     test "Test on unread_char":
+
+        assert istream.read_char() == 'a'
+
         istream.unread_char('A')
 
         assert istream.location.line_num == 1
@@ -42,9 +42,15 @@ suite "Test InputStream":
     echo "Test on unread_char ended"
 
     test "Test on skip_whites_comms":
-        istream.skip_whites_comms()
 
+        assert istream.read_char() == 'a'
+        assert istream.read_char() == 'b'
+        assert istream.read_char() == 'c'
+
+        istream.skip_whites_comms()
+        
         assert istream.read_char() == 'd'
+
         assert istream.location.line_num == 2
         assert istream.location.col_num == 2
 
@@ -60,8 +66,10 @@ suite "Test InputStream":
         assert istream.location.line_num == 3
         assert istream.location.col_num == 3
 
-        assert istream.read_char() == ' '
+        assert istream.read_char() == '\0'
     echo "Test on skip_whites_comms ended"
+
+    echo "InputStream test ended"
     
 
 

@@ -35,14 +35,14 @@ proc newInputStream*(stream: Stream, file_name = "", tab = 4) : InputStream =
     ## constructor for InputStream type
     result.stream = stream
     result.location = newSourceLocation(file_name = file_name, line_num = 1, col_num = 1)  #note: we start counting lines and colums from 1 not 0
-    result.saved_char = ' '
+    result.saved_char = '\0'
     result.saved_location = result.location
     result.tab = tab
     return result
 
 proc update_pos*(istream: var InputStream, ch: char): void =
     ## update istream.location each time a char is read from the file
-    if ch == ' ':  #if ch=='' do nothing
+    if ch == '\0':  #if ch=='' do nothing
         return
     elif ch == '\n':
         istream.location.line_num += 1
@@ -55,9 +55,9 @@ proc update_pos*(istream: var InputStream, ch: char): void =
 proc read_char*(istream: var InputStream): char =
     ## Read a character from the stream
     var ch: char
-    if istream.saved_char != ' ':    # re-reads the previously discarted character
+    if istream.saved_char != '\0':    # re-reads the previously discarted character
         ch = istream.saved_char
-        istream.saved_char = ' '
+        istream.saved_char = '\0'
     else:
         ch = istream.stream.readChar()
     
@@ -69,20 +69,20 @@ proc read_char*(istream: var InputStream): char =
 
 proc unread_char*(istream: var InputStream, ch: char): void =
     ## Puts a char back in the position where it previously red it in order to be able to read it again
-    assert istream.saved_char == ' '
+    assert istream.saved_char == '\0'
     istream.saved_char = ch
     var loc = istream.saved_location
     istream.location = loc
 
 proc skip_whites_comms*(istream: var InputStream): void =
     ## While reading the InputStream skip white spaces and comments
-    var ch = istream.stream.readChar()
+    var ch = istream.read_char()
     while ch in [' ', '\t', '\n', '\r'] or ch == '#':
         if ch == '#':  #comment
-            while not (istream.stream.readChar() in [' ', '\n', '\r']):
+            while not (istream.stream.readChar() in ['\n', '\r']):
                 discard
-        ch = istream.stream.readChar()
-        if ch == ' ':
+        ch = istream.read_char()
+        if ch == '\0':
             return
     istream.unread_char(ch)  #I put back at its place the first character non whitespace or comment
 
