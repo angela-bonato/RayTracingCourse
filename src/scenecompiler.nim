@@ -301,7 +301,6 @@ proc assert_is_keyword*(token: Token, keyword : KeywordEnum) : void =
     assert token.keyword == keyword, "Token " & token.to_string() & " is not equal to keyword " & $keyword
 
 proc assert_is_identifier*(token: Token, identifier : string) : void =
-    echo token.kind
     assert token.kind == IdentifierToken
     assert token.ident == identifier, "Expecting identifier " & identifier & " instead of " & token.to_string()
 
