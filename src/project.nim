@@ -102,9 +102,7 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newPlane(material = ground_mat))
   scene.add(newParallelepiped(material = paral_mat, transform = traslation(newVector(-2, -1, 0))*rotation_z(PI/4.0)))]#
 
-  var
-    stream = newFileStream( "../cubo.pfm", fmRead )
-    cube_image = read_pfm_image(stream)
+  
 
   #[var 
     sky_mat = newMaterial(brdf = newDiffuseBrdf(newUniformPigment(newColor(0, 0, 0))), 
@@ -118,9 +116,8 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   scene.add(newSphere(material = sph1_mat, transform = translation(newVector(0, 0, 1))))
   scene.add(newSphere(material = sph2_mat, transform = translation(newVector(1, 2.5, 0))))]#
 
-  var mat = newMaterial( brdf = newDiffuseBrdf( newImagePigment(cube_image) ), em_rad = newUniformPigment( newColor(0,0,0)) )
-
-  scene.add( newParallelepiped( material = mat ) )
+  
+  scene.add( newParallelepiped(transform = traslation(newVector(-0.5, -0.5, -0.5))))
 
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene, toInt(sqrt(float(antial_rays))))
 
