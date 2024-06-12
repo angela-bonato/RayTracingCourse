@@ -251,6 +251,11 @@ method have_inside*( plane : Plane, point : Point) : bool =
 
 # Parallelepipeid declaration and procs
 
+proc is_close(a,b: float) : bool =
+    ## alternative function to almostEqual. I define this to avoid small rounding errors
+    if abs(a-b)<1e-5 : return true
+    else : return false
+
 type Parallelepiped* = ref object of Shape  
     ## It defines an axis-aligned box
     # Transformation
@@ -276,17 +281,17 @@ proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 
 method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) : Normal =
     ## Return the normal to a point of the parallelepiped (based on the face on which it lies), depending on the ray direction
     #Now I define the normal pointing out from the parallelepiped but if nedeed it is fixed below
-    if point.z.almostEqual(paral.pmax.z) :
+    if point.z.is_close(paral.pmax.z) :
         result = newNormal(0.0, 0.0, 1.0)
-    if point.x.almostEqual(paral.pmax.x) :
+    if point.x.is_close(paral.pmax.x) :
         result = newNormal(1.0, 0.0, 0.0)
-    if point.y.almostEqual(paral.pmax.y) :
+    if point.y.is_close(paral.pmax.y) :
         result = newNormal(0.0, 1.0, 0.0)
-    if point.y.almostEqual(0.0) :
+    if point.y.is_close(0.0) :
         result = newNormal(0.0, -1.0, 0.0)
-    if point.z.almostEqual(0.0) :
+    if point.z.is_close(0.0) :
         result = newNormal(0.0, 0.0, -1.0)
-    if point.x.almostEqual(0.0) :
+    if point.x.is_close(0.0) :
         result = newNormal(-1.0, 0.0, 0.0)
     
     if result.dot(ray_dir) < 0.0: 
@@ -296,6 +301,23 @@ method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) :
 
 method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     ## Maps the parallelepiped into a 2D plane with coordinates u,v in [0, 1]
+    ## 
+    ##      ___________________ _v=1
+    ##     |     |      |      |                          ______
+    ##     |  // |   5  |  //  |                        /  5   /| 
+    ##     |_____|______|______|                       /______/ |-->3
+    ##     |     |      |      |                       |      |4|
+    ##     |  2  |   6  |   4  |                   2<--|  6   | /
+    ##     |_____|______|______|            z|         |______|/
+    ##     |     |      |      |             |             |
+    ##     |  // |   1  |   // |             |----- y      v
+    ##     |_____|______|______|            /              1
+    ##     |     |      |      |           /x 
+    ##     |  // |   3  |   // |         
+    ##     |_____|______|______|_v=0  
+    ##     |                   |
+    ##     u=0                 u=1
+    ## 
     # point is in the ref syst of the shape, the idea here is to associate each face of the parallelepiped to a specific region of the (u,v) plane
     var
         u, v : float #these are the output coordinates
@@ -303,32 +325,26 @@ method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
         normalu = 2.0*paral.pmax.x + paral.pmax.y  
         normalv = 2.0*(paral.pmax.x + paral.pmax.z)
     # I have to understand in which face of the parallelepiped the point is placed and then map it in the correspondent part of the (u,v) plane
-    if point.z.almostEqual(paral.pmax.z) :
+    if point.z.is_close(paral.pmax.z) :  #face number 5
         u = (paral.pmax.x + point.y)/normalu
         v = (paral.pmax.x + 2.0*paral.pmax.z + point.x)/normalv
-    if point.y.almostEqual(0.0) :
+    if point.y.is_close(0.0) :  #face number 2
         u = point.x/normalu
         v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.x.almostEqual(paral.pmax.x) :
+    if point.x.is_close(paral.pmax.x) :  #face number 6
         u = (paral.pmax.x + point.y)/normalu
         v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.y.almostEqual(paral.pmax.y) :
+    if point.y.is_close(paral.pmax.y) :  #face number 4
         u = (paral.pmax.x + paral.pmax.y + point.x)/normalu
         v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.z.almostEqual(0.0) :
+    if point.z.is_close(0.0) :  #face number 1
         u = (paral.pmax.x + point.y)/normalu
         v = (paral.pmax.z + point.x)/normalv
-    if point.x.almostEqual(0.0) :
+    if point.x.is_close(0.0) :  #face number 
         u = (paral.pmax.x + point.y)/normalu
         v = point.z/normalv
     
     return newVec2d(u,v)
-
-proc is_close(a,b: float) : bool =
-    ## alternative function to almostEqual. I define this to avoid small rounding errors
-    if abs(a-b)<1e-5 : return true
-    else : return false
-    
 
 func `<=`*(a,b: float32) : bool =
     ## to use <= with float avoiding rounding errors
