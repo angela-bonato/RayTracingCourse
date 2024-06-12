@@ -324,16 +324,22 @@ method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     
     return newVec2d(u,v)
 
+proc is_close(a,b: float) : bool =
+    ## alternative function to almostEqual. I define this to avoid small rounding errors
+    if abs(a-b)<1e-5 : return true
+    else : return false
+    
+
 func `<=`*(a,b: float32) : bool =
     ## to use <= with float avoiding rounding errors
     if a < b : return true
-    elif almostEqual(a, b) : return true
+    elif is_close(a, b) : return true
     else : return false
 
 func `>=`*(a,b: float32) : bool =
     ## to use >= with float avoiding rounding errors
     if a > b : return true
-    elif almostEqual(a, b) : return true
+    elif is_close(a, b) : return true
     else : return false
 
 method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] =
@@ -341,25 +347,23 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
     var 
         inv_ray = ray.transform(paral.transformation.inverse())
         #intersections with the planes which form the parallelepiped
-        tx1 = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
-        tx2 = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
-        txmin = min(tx1, tx2)
-        txmax = max(tx1, tx2)
-        ty1 = (paral.pmin.y - inv_ray.origin.y) / inv_ray.dir.y
-        ty2 = (paral.pmax.y - inv_ray.origin.y) / inv_ray.dir.y
-        tymin = min(ty1, ty2)
-        tymax = max(ty1, ty2)
-        tz1 = (paral.pmin.z - inv_ray.origin.z) / inv_ray.dir.z
-        tz2 = (paral.pmax.z - inv_ray.origin.z) / inv_ray.dir.z
-        tzmin = min(tz1, tz2)
-        tzmax = max(tz1, tz2)
+        txmin = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
+        txmax = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
+        tymin = (paral.pmin.y - inv_ray.origin.y) / inv_ray.dir.y
+        tymax = (paral.pmax.y - inv_ray.origin.y) / inv_ray.dir.y
+        tzmin = (paral.pmin.z - inv_ray.origin.z) / inv_ray.dir.z
+        tzmax = (paral.pmax.z - inv_ray.origin.z) / inv_ray.dir.z
         ts : seq[float]
         hit_point : Point
 
     ts = @[]
 
+    if txmin > txmax : swap(txmin, txmax)
+    if tymin > tymax : swap(tymin, tymax)
+    if tzmin > tzmax : swap(tzmin, tzmax)
+
     #I separatelly check if the ray is parallel to a face of the parallelepiped
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to z
         if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y):
             if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z):
@@ -379,7 +383,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             else :
                 return none(HitRecord)
 
-    if inv_ray.dir.z.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.z.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to x
         if (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
             if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
@@ -399,7 +403,7 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             else :
                 return none(HitRecord) 
 
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.z.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.z.is_close(0.0) :
         #Ray parallel to y
         if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
             if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z):
@@ -472,26 +476,24 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
     var 
         inv_ray = ray.transform(paral.transformation.inverse())
         #intersections with the planes which form the parallelepiped
-        tx1 = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
-        tx2 = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
-        txmin = min(tx1, tx2)
-        txmax = max(tx1, tx2)
-        ty1 = (paral.pmin.y - inv_ray.origin.y) / inv_ray.dir.y
-        ty2 = (paral.pmax.y - inv_ray.origin.y) / inv_ray.dir.y
-        tymin = min(ty1, ty2)
-        tymax = max(ty1, ty2)
-        tz1 = (paral.pmin.z - inv_ray.origin.z) / inv_ray.dir.z
-        tz2 = (paral.pmax.z - inv_ray.origin.z) / inv_ray.dir.z
-        tzmin = min(tz1, tz2)
-        tzmax = max(tz1, tz2)
+        txmin = (paral.pmin.x - inv_ray.origin.x) / inv_ray.dir.x
+        txmax = (paral.pmax.x - inv_ray.origin.x) / inv_ray.dir.x
+        tymin = (paral.pmin.y - inv_ray.origin.y) / inv_ray.dir.y
+        tymax = (paral.pmax.y - inv_ray.origin.y) / inv_ray.dir.y
+        tzmin = (paral.pmin.z - inv_ray.origin.z) / inv_ray.dir.z
+        tzmax = (paral.pmax.z - inv_ray.origin.z) / inv_ray.dir.z
         ts : seq[float]
         hit_point : Point
         hits : seq[HitRecord]
 
-    hits = @[]
     ts = @[]
+    hits = @[]
 
- #I separatelly check if the ray is parallel to a face of the parallelepiped
+    if txmin > txmax : swap(txmin, txmax)
+    if tymin > tymax : swap(tymin, tymax)
+    if tzmin > tzmax : swap(tzmin, tzmax)
+
+#I separatelly check if the ray is parallel to a face of the parallelepiped
     if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
         #Ray parallel to z
         if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y):

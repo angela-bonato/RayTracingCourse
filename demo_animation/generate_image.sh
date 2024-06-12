@@ -11,3 +11,4 @@ readonly pfmfile=image$angleNNN.pfm
 readonly pngfile=image$angleNNN.png
 
 time ./../project demo --antial_rays=0 --algorith=flat --angle=$angle $pfmfile $pngfile
+
