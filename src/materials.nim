@@ -127,8 +127,8 @@ method get_color*(impig : ImagePigment, coord : Vec2d) : Color =
     ## Definition of get_color method specific for ImagePigment
     var 
         #I associate to (u,v) point, a pixel of the hdrimage (i.e., colum and row indexes in the image)
-        ind_col = int(coord.u * float(impig.image.width))
-        ind_row = int(coord.v * float(impig.image.height))
+        ind_col = int( coord.u * float(impig.image.width))
+        ind_row = int((1- coord.v) * float(impig.image.height))
     
     if ind_col >= impig.image.width:
         ind_col = impig.image.width - 1
