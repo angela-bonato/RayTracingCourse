@@ -4,6 +4,9 @@ import std/streams
 import std/strutils
 import std/options
 import std/tables
+import materials
+import world
+import camera
 
 # SourceLocation definition and procs
 
@@ -312,6 +315,60 @@ proc assert_is_number*(token: Token, num : float) : void =
     assert token.kind == LiteralNumberToken
     assert token.value == num, "Token " & token.to_string() & " is not equal to number " & $num
 
-proc assert_is_string*(token: Token, str : string) : void =
+proc assert_is_string*(token: Token, str: string) : void =
     assert token.kind == StringToken
     assert token.str == str, "Token " & token.to_string() & " is not equal to string " & str
+
+
+# Scene class 
+
+type Scene* : object 
+    ## Scene class that have to be red from the File
+    materials : Table[string, Material]
+    world : World
+    camera : Option[Camera]
+    float_variables : Table[string, float]
+    overridden_variables : seq[string]
+
+# expect_* procs
+
+proc expect_symbol*( istream: InputStream, symbol: string) : void = 
+    ## Read a token from input_file and check that it is the expected symbol
+    var token = istream.read_token()
+    if token.kind != SymbolToken or token.symbol != symbol:
+        raise GrammarError.newException( message = "Missing " & symbol & " at (" & $token_location.line_num & "," & $token_location.col_num & ") of " & token_location.file_name )
+
+proc expect_keywords*( istream: InputStream, keywords: seq[KeywordEnum] ) : KeywordEnum =
+    ## Read a token from input_file and check that it is one of the expected keywords
+    var token = istream.read_token()
+    if (token.kind != KeywordToken) or (token.keyword not in keywords) :
+        raise GrammarError.newException( message = "Got unexpected or wrong kewyword at (" & $token_location.line_num & "," & $token_location.col_num & ") of " & token_location.file_name )
+    return token.keyword
+
+proc expect_number*( istream: InputStream, scene: Scene) : float =
+    ## Read a token and check if it is a number (could be LiteralNumber or Identifier ) 
+    var token = istream.read_token()
+    if token.kind == LiteralNumberToken:
+        return token.value
+    elif token.kind == IdentifierToken:
+        var variable_name = token.ident 
+        if not scene.float_variables.hasKey(variable_name):
+            raise GrammarError.newException( message = "Unknown variable " & variable_name )
+        return scene.float_variables[variable_name]
+
+    raise GrammarError.newException( message = "Missing number at (" & $token_location.line_num & "," & $token_location.col_num & ") of " & token_location.file_name )
+
+proc expect_string*( istream: InputStream ) : string =
+    ## Read a token and check if it is a string
+    var token = istream.read_token()
+    if token.kind != StringToken:
+        raise GrammarError.newException( message = "Missing string at (" & $token_location.line_num & "," & $token_location.col_num & ") of " & token_location.file_name )
+    return token.str
+
+proc expect_identifier*( istream: InputStream ) : string =
+    ## Read a token and check if it is an identifier
+    var token = istream.read_token()
+    if token.kind != IdentifierToken:
+        raise GrammarError.newException( message = "Missing identifier at (" & $token_location.line_num & "," & $token_location.col_num & ") of " & token_location.file_name )
+    return token.ident
+
