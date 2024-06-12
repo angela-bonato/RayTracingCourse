@@ -17,13 +17,13 @@ test_6
 test_7
 test_8
 test_9
+test_10
 
 ### Test files  ###
 *.pfm
 
 ### Useless .png and .pfm files ###
 demo_animation/*.pfm
-demo_animation/*.png
 demo_animation/*.mp4 
 
 ### VisualStudioCode ###
