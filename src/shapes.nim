@@ -261,6 +261,11 @@ method have_inside*( plane : Plane, point : Point) : bool =
 
 # Parallelepipeid declaration and procs
 
+proc is_close(a,b: float) : bool =
+    ## alternative function to almostEqual. I define this to avoid small rounding errors
+    if abs(a-b)<1e-5 : return true
+    else : return false
+
 type Parallelepiped* = ref object of Shape  
     ## It defines an axis-aligned box
     transformation* : Transformation
@@ -283,17 +288,17 @@ proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 
 method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) : Normal =
     ## Return the normal to a point of the parallelepiped (based on the face on which it lies), depending on the ray direction
     #Now I define the normal pointing out from the parallelepiped but if nedeed it is fixed below
-    if point.z.almostEqual(paral.pmax.z) :
+    if point.z.is_close(paral.pmax.z) :
         result = newNormal(0.0, 0.0, 1.0)
-    if point.x.almostEqual(paral.pmax.x) :
+    if point.x.is_close(paral.pmax.x) :
         result = newNormal(1.0, 0.0, 0.0)
-    if point.y.almostEqual(paral.pmax.y) :
+    if point.y.is_close(paral.pmax.y) :
         result = newNormal(0.0, 1.0, 0.0)
-    if point.y.almostEqual(0.0) :
+    if point.y.is_close(0.0) :
         result = newNormal(0.0, -1.0, 0.0)
-    if point.z.almostEqual(0.0) :
+    if point.z.is_close(0.0) :
         result = newNormal(0.0, 0.0, -1.0)
-    if point.x.almostEqual(0.0) :
+    if point.x.is_close(0.0) :
         result = newNormal(-1.0, 0.0, 0.0)
     
     if result.dot(ray_dir) < 0.0: 
@@ -303,6 +308,23 @@ method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) :
 
 method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     ## Maps the parallelepiped into a 2D plane with coordinates u,v in [0, 1]
+    ## 
+    ##      ___________________ _v=0
+    ##     |     |      |      |                          ______
+    ##     |  // |   5  |  //  |                        /  5   /| 
+    ##     |_____|______|______|                       /______/ |-->3
+    ##     |     |      |      |                       |      |4|
+    ##     |  2  |   6  |   4  |                   2<--|  6   | /
+    ##     |_____|______|______|            z|         |______|/
+    ##     |     |      |      |             |             |
+    ##     |  // |   1  |   // |             |----- y      v
+    ##     |_____|______|______|            /              1
+    ##     |     |      |      |           /x 
+    ##     |  // |   3  |   // |         
+    ##     |_____|______|______|_v=1  
+    ##     |                   |
+    ##     u=0                 u=1
+    ## 
     # point is in the ref syst of the shape, the idea here is to associate each face of the parallelepiped to a specific region of the (u,v) plane
     var
         u, v : float #these are the output coordinates
@@ -310,37 +332,35 @@ method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
         normalu = 2.0*paral.pmax.x + paral.pmax.y  
         normalv = 2.0*(paral.pmax.x + paral.pmax.z)
     # I have to understand in which face of the parallelepiped the point is placed and then map it in the correspondent part of the (u,v) plane
-    if point.z.almostEqual(paral.pmax.z) :
+    if point.z.is_close(paral.pmax.z) :  #face number 5
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.x + 2.0*paral.pmax.z + point.x)/normalv
-    if point.y.almostEqual(0.0) :
+        v = point.x/normalv
+    if point.y.is_close(0.0) :  #face number 2
         u = point.x/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.x.almostEqual(paral.pmax.x) :
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
+    if point.x.is_close(paral.pmax.x) :  #face number 6
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.y.almostEqual(paral.pmax.y) :
-        u = (paral.pmax.x + paral.pmax.y + point.x)/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
-    if point.z.almostEqual(0.0) :
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
+    if point.y.is_close(paral.pmax.y) :  #face number 4
+        u = (paral.pmax.x + paral.pmax.y + (paral.pmax.x - point.x))/normalu
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
+    if point.z.is_close(0.0) :  #face number 1
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.z + point.x)/normalv
-    if point.x.almostEqual(0.0) :
+        v = (paral.pmax.x + paral.pmax.z + (paral.pmax.x - point.x))/normalv
+    if point.x.is_close(0.0) :  #face number 3
         u = (paral.pmax.x + point.y)/normalu
-        v = point.z/normalv
+        v = (2.0*paral.pmax.x + paral.pmax.z + point.z)/normalv
     
     return newVec2d(u,v)
 
-func `<=`*(a,b: float32) : bool =
+proc min_close*(a,b: float32) : bool =
     ## to use <= with float avoiding rounding errors
-    if a < b : return true
-    elif almostEqual(a, b) : return true
+    if a < b or is_close(a, b) : return true
     else : return false
 
-func `>=`*(a,b: float32) : bool =
+func max_close*(a,b: float32) : bool =
     ## to use >= with float avoiding rounding errors
-    if a > b : return true
-    elif almostEqual(a, b) : return true
+    if a > b or is_close(a, b) : return true
     else : return false
 
 method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] =
@@ -364,17 +384,17 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
     if tzmin > tzmax : swap(tzmin, tzmax)
 
     #I separatelly check if the ray is parallel to a face of the parallelepiped
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to z
-        if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y):
-            if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z):
+        if (inv_ray.origin.x.max_close(paral.pmin.x) and inv_ray.origin.x.min_close(paral.pmax.x)) and (inv_ray.origin.y.max_close(paral.pmin.y) and inv_ray.origin.y.min_close(paral.pmax.y)):
+            if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tzmin)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tzmin,
                         ray = ray) )
-            elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x) and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y) and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+            elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tzmax)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -384,17 +404,17 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             else :
                 return none(HitRecord)
 
-    if inv_ray.dir.z.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.z.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to x
-        if (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
-            if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+        if (inv_ray.origin.y.max_close(paral.pmin.y) and inv_ray.origin.y.min_close(paral.pmax.y)) and (inv_ray.origin.z.max_close(paral.pmin.z) and inv_ray.origin.z.min_close(paral.pmax.z)) :
+            if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(txmin)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmin,
                         ray = ray) )
-            elif (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y) and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z):
+            elif (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(txmax)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -404,17 +424,17 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
             else :
                 return none(HitRecord) 
 
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.z.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.z.is_close(0.0) :
         #Ray parallel to y
-        if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
-            if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z):
+        if (inv_ray.origin.x.max_close(paral.pmin.x) and inv_ray.origin.x.min_close(paral.pmax.x)) and (inv_ray.origin.z.max_close(paral.pmin.z) and inv_ray.origin.z.min_close(paral.pmax.z)) :
+            if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tymin)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymin,
                         ray = ray) )
-            elif (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x) and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y) and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z):
+            elif (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tymax)
                 return some(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -425,40 +445,40 @@ method ray_intersection*(paral : Parallelepiped, ray : Ray) : Option[HitRecord] 
                 return none(HitRecord) 
 
     #I look at x and y with z fixed, then I check on z
-    if txmin <= tymin and tymin <= txmax:
-        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z) :
+    if txmin.min_close(tymin) and tymin.min_close(txmax):
+        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
             ts.add(tymin)
-        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y) and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z) :
+        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
             ts.add(txmax)
 
-    elif tymin < txmin and txmin <= tymax:  #Works in the same way as the if indented like this elif
-        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+    elif tymin < txmin and txmin.min_close(tymax):  #Works in the same way as the if indented like this elif
+        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
             ts.add(txmin)
-        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x) and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y) and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z):
+        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
             ts.add(tymax)
-
+    
     #Now I fix y at first to look at x,z
-    if txmin <= tzmin :
-        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z) :
+    if txmin.min_close(tzmin) :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
             ts.add(tzmin)
-        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y)  and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z):  #I have to chek also intersections with z to find the nearest hit point
+        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
             ts.add(txmax)
     elif tzmin < txmin :  #Works in the same way as the last if indented like this elif
-        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
             ts.add(txmin)
-        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x)  and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y)  and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
             ts.add(tzmax)
 
     #Now I fix x at first to look at y,z
-    if tymin <= tzmin :
-        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z) :
+    if tymin.min_close(tzmin) :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
             ts.add(tzmin)
-        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x)  and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y)  and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z) : 
+        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
             ts.add(tymax)
     elif tzmin < tymin :  #Works in the same way as the last if indented like this elif
-        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z):
+        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
             ts.add(tymin)
-        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x)and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y)and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
             ts.add(tzmax)
             
     if len(ts) == 0: return none(HitRecord)
@@ -495,17 +515,17 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
     if tzmin > tzmax : swap(tzmin, tzmax)
 
 #I separatelly check if the ray is parallel to a face of the parallelepiped
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to z
-        if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y):
-            if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z):
+        if (inv_ray.origin.x.max_close(paral.pmin.x) and inv_ray.origin.x.min_close(paral.pmax.x)) and (inv_ray.origin.y.max_close(paral.pmin.y) and inv_ray.origin.y.min_close(paral.pmax.y)):
+            if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tzmin)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tzmin,
                         ray = ray) )
-            if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x) and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y) and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+            if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tzmax)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -514,19 +534,19 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         ray = ray) )
             return some(hits)
         else :
-            return none(seq[HitRecord]) 
+            return none(seq[HitRecord])
 
-    if inv_ray.dir.z.almostEqual(0.0) and inv_ray.dir.y.almostEqual(0.0) :
+    if inv_ray.dir.z.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to x
-        if (inv_ray.origin.y >= paral.pmin.y and inv_ray.origin.y <= paral.pmax.y) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
-            if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+        if (inv_ray.origin.y.max_close(paral.pmin.y) and inv_ray.origin.y.min_close(paral.pmax.y)) and (inv_ray.origin.z.max_close(paral.pmin.z) and inv_ray.origin.z.min_close(paral.pmax.z)) :
+            if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(txmin)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmin,
                         ray = ray) )
-            if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y) and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z):
+            if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(txmax)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -537,17 +557,17 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
         else :
             return none(seq[HitRecord]) 
 
-    if inv_ray.dir.x.almostEqual(0.0) and inv_ray.dir.z.almostEqual(0.0) :
+    if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.z.is_close(0.0) :
         #Ray parallel to y
-        if (inv_ray.origin.x >= paral.pmin.x and inv_ray.origin.x <= paral.pmax.x) and (inv_ray.origin.z >= paral.pmin.z and inv_ray.origin.z <= paral.pmax.z) :
-            if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z):
+        if (inv_ray.origin.x.max_close(paral.pmin.x) and inv_ray.origin.x.min_close(paral.pmax.x)) and (inv_ray.origin.z.max_close(paral.pmin.z) and inv_ray.origin.z.min_close(paral.pmax.z)) :
+            if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tymin)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymin,
                         ray = ray) )
-            if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x) and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y) and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z):
+            if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tymax)
                 hits.add(newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -559,40 +579,40 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
             return none(seq[HitRecord]) 
 
     #I look at x and y with z fixed, then I check on z
-    if txmin <= tymin :
-        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z) :
+    if txmin.min_close(tymin) and tymin.min_close(txmax):
+        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
             ts.add(tymin)
-        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y) and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z) :
+        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
             ts.add(txmax)
 
-    elif tymin < txmin :  #Works in the same way as the if indented like this elif
-        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+    elif tymin < txmin and txmin.min_close(tymax):  #Works in the same way as the if indented like this elif
+        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
             ts.add(txmin)
-        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x) and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y) and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z):
-                ts.add(tymax)
-
+        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
+            ts.add(tymax)
+    
     #Now I fix y at first to look at x,z
-    if txmin <= tzmin :
-        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z) :
+    if txmin.min_close(tzmin) :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
             ts.add(tzmin)
-        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x <= paral.pmax.x and inv_ray.at(txmax).x >= paral.pmin.x) and (inv_ray.at(txmax).y <= paral.pmax.y and inv_ray.at(txmax).y >= paral.pmin.y)  and (inv_ray.at(txmax).z <= paral.pmax.z and inv_ray.at(txmax).z >= paral.pmin.z):  #I have to chek also intersections with z to find the nearest hit point
+        if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
             ts.add(txmax)
     elif tzmin < txmin :  #Works in the same way as the last if indented like this elif
-        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x <= paral.pmax.x and inv_ray.at(txmin).x >= paral.pmin.x) and (inv_ray.at(txmin).y <= paral.pmax.y and inv_ray.at(txmin).y >= paral.pmin.y) and (inv_ray.at(txmin).z <= paral.pmax.z and inv_ray.at(txmin).z >= paral.pmin.z):
+        if (txmin > inv_ray.tmin and txmin < inv_ray.tmax) and (inv_ray.at(txmin).x.min_close(paral.pmax.x) and inv_ray.at(txmin).x.max_close(paral.pmin.x)) and (inv_ray.at(txmin).y.min_close(paral.pmax.y) and inv_ray.at(txmin).y.max_close(paral.pmin.y)) and (inv_ray.at(txmin).z.min_close(paral.pmax.z) and inv_ray.at(txmin).z.max_close(paral.pmin.z)):
             ts.add(txmin)
-        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x)  and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y)  and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
             ts.add(tzmax)
 
     #Now I fix x at first to look at y,z
-    if tymin <= tzmin :
-        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x <= paral.pmax.x and inv_ray.at(tzmin).x >= paral.pmin.x) and (inv_ray.at(tzmin).y <= paral.pmax.y and inv_ray.at(tzmin).y >= paral.pmin.y) and (inv_ray.at(tzmin).z <= paral.pmax.z and inv_ray.at(tzmin).z >= paral.pmin.z) :
+    if tymin.min_close(tzmin) :
+        if (tzmin > inv_ray.tmin and tzmin < inv_ray.tmax) and (inv_ray.at(tzmin).x.min_close(paral.pmax.x) and inv_ray.at(tzmin).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmin).y.min_close(paral.pmax.y) and inv_ray.at(tzmin).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmin).z.min_close(paral.pmax.z) and inv_ray.at(tzmin).z.max_close(paral.pmin.z)):
             ts.add(tzmin)
-        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x <= paral.pmax.x and inv_ray.at(tymax).x >= paral.pmin.x)  and (inv_ray.at(tymax).y <= paral.pmax.y and inv_ray.at(tymax).y >= paral.pmin.y)  and (inv_ray.at(tymax).z <= paral.pmax.z and inv_ray.at(tymax).z >= paral.pmin.z) : 
+        if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
             ts.add(tymax)
     elif tzmin < tymin :  #Works in the same way as the last if indented like this elif
-        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x <= paral.pmax.x and inv_ray.at(tymin).x >= paral.pmin.x) and (inv_ray.at(tymin).y <= paral.pmax.y and inv_ray.at(tymin).y >= paral.pmin.y) and (inv_ray.at(tymin).z <= paral.pmax.z and inv_ray.at(tymin).z >= paral.pmin.z):
+        if (tymin > inv_ray.tmin and tymin < inv_ray.tmax) and (inv_ray.at(tymin).x.min_close(paral.pmax.x) and inv_ray.at(tymin).x.max_close(paral.pmin.x)) and (inv_ray.at(tymin).y.min_close(paral.pmax.y) and inv_ray.at(tymin).y.max_close(paral.pmin.y)) and (inv_ray.at(tymin).z.min_close(paral.pmax.z) and inv_ray.at(tymin).z.max_close(paral.pmin.z)):
             ts.add(tymin)
-        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x <= paral.pmax.x and inv_ray.at(tzmax).x >= paral.pmin.x)and (inv_ray.at(tzmax).y <= paral.pmax.y and inv_ray.at(tzmax).y >= paral.pmin.y)and (inv_ray.at(tzmax).z <= paral.pmax.z and inv_ray.at(tzmax).z >= paral.pmin.z):
+        if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax)  and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
             ts.add(tzmax)
 
     if len(ts) == 0: return none(seq[HitRecord])

@@ -219,7 +219,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(0.5,0.5,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(0.5,0.5,1.0)
             teoretical_normal = newNormal(0,0,1.0)
-            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            teoretical_uv_coordinates = newVec2d(0.5,1/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -233,7 +233,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(3.0,0.5,0.5),newVector(-1,0,0))
             teoretical_hit_point = newPoint(1.0,0.5,0.5)
             teoretical_normal = newNormal(1.0,0,0)
-            teoretical_uv_coordinates = newVec2d(1/2,5/8)
+            teoretical_uv_coordinates = newVec2d(1/2,3/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -256,7 +256,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(0.5,0.5,0.5),newVector(1,0,0))
             teoretical_hit_point = newPoint(1.0,0.5,0.5)
             teoretical_normal = newNormal(-1.0,0,0)
-            teoretical_uv_coordinates = newVec2d(1/2,5/8)
+            teoretical_uv_coordinates = newVec2d(1/2,3/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -273,7 +273,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(10.5,0.5,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(10.5,0.5,1.0)
             teoretical_normal = newNormal(0,0,1.0)
-            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            teoretical_uv_coordinates = newVec2d(0.5,1/8)
             hit_point = cube.ray_intersection(ray)
         
         assert hit_point.isSome
@@ -297,13 +297,13 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(-2,0.5,0.5),newVector(1.0,0,0))
             teoretical_hit_point1 = newHitRecord( world_point = newPoint(0,0.5,0.5),
                                                   normal = newNormal(-1.0,0,0),
-                                                  surface_point = newVec2d(1/2,1/8),
+                                                  surface_point = newVec2d(1/2,7/8),
                                                   t = 2.0,
                                                   ray = ray
                                                 )
             teoretical_hit_point2 = newHitRecord( world_point = newPoint(1.0,0.5,0.5),
                                                   normal = newNormal(-1.0,0,0),
-                                                  surface_point = newVec2d(1/2,5/8),
+                                                  surface_point = newVec2d(1/2,3/8),
                                                   t = 3.0,
                                                   ray = ray
                                                 )
