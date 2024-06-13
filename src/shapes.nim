@@ -518,7 +518,7 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         surface_point = paral.point_to_uv(hit_point),
                         t = tzmin,
                         ray = ray) )
-            elif (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
+            if (tzmax > inv_ray.tmin and tzmax < inv_ray.tmax) and (inv_ray.at(tzmax).x.min_close(paral.pmax.x) and inv_ray.at(tzmax).x.max_close(paral.pmin.x)) and (inv_ray.at(tzmax).y.min_close(paral.pmax.y) and inv_ray.at(tzmax).y.max_close(paral.pmin.y)) and (inv_ray.at(tzmax).z.min_close(paral.pmax.z) and inv_ray.at(tzmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tzmax)
                 hits.add(paral.newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -526,8 +526,8 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         t = tzmax,
                         ray = ray) )
             return some(hits)
-            else :
-                return none(seq[HitRecord])
+        else :
+            return none(seq[HitRecord])
 
     if inv_ray.dir.z.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
         #Ray parallel to x
@@ -539,7 +539,7 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         surface_point = paral.point_to_uv(hit_point),
                         t = txmin,
                         ray = ray) )
-            elif (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
+            if (txmax > inv_ray.tmin and txmax < inv_ray.tmax) and (inv_ray.at(txmax).x.min_close(paral.pmax.x) and inv_ray.at(txmax).x.max_close(paral.pmin.x)) and (inv_ray.at(txmax).y.min_close(paral.pmax.y) and inv_ray.at(txmax).y.max_close(paral.pmin.y)) and (inv_ray.at(txmax).z.min_close(paral.pmax.z) and inv_ray.at(txmax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(txmax)
                 hits.add(paral.newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -547,8 +547,8 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         t = txmax,
                         ray = ray) )
             return some(hits)
-            else :
-                return none(seq[HitRecord]) 
+        else :
+            return none(seq[HitRecord]) 
 
     if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.z.is_close(0.0) :
         #Ray parallel to y
@@ -560,7 +560,7 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         surface_point = paral.point_to_uv(hit_point),
                         t = tymin,
                         ray = ray) )
-            elif (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
+            if (tymax > inv_ray.tmin and tymax < inv_ray.tmax) and (inv_ray.at(tymax).x.min_close(paral.pmax.x) and inv_ray.at(tymax).x.max_close(paral.pmin.x)) and (inv_ray.at(tymax).y.min_close(paral.pmax.y) and inv_ray.at(tymax).y.max_close(paral.pmin.y)) and (inv_ray.at(tymax).z.min_close(paral.pmax.z) and inv_ray.at(tymax).z.max_close(paral.pmin.z)):
                 hit_point = inv_ray.at(tymax)
                 hits.add(paral.newHitRecord(world_point = paral.transformation * hit_point , 
                         normal = paral.transformation * paral.shape_normal( hit_point, inv_ray.dir ),
@@ -568,8 +568,8 @@ method all_ray_intersections*(paral : Parallelepiped, ray : Ray) : Option[seq[Hi
                         t = tymax,
                         ray = ray) )
             return some(hits)
-            else :
-                return none(seq[HitRecord]) 
+        else :
+            return none(seq[HitRecord]) 
 
     #I look at x and y with z fixed, then I check on z
     if txmin.min_close(tymin) and tymin.min_close(txmax):
