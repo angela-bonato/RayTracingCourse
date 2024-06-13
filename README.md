@@ -3,7 +3,7 @@
 ![release](https://img.shields.io/github/v/release/angela-bonato/RayTracingCourse)
 ![Top Language](https://img.shields.io/github/languages/top/angela-bonato/RayTracingCourse)
 
-# v0.2.0
+# v0.2.1
 
 With this program, you can read PFM files and convert them to PNG files performing, if necessary, tone mapping and gamma correction. Moreover, form this version on, you can produce a geometric image using a ray-tracing algorithm and save it both as a PFM and PNG file.
 
