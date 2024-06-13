@@ -302,7 +302,7 @@ method shape_normal*(paral : Parallelepiped, point : Point, ray_dir : Vector ) :
 method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     ## Maps the parallelepiped into a 2D plane with coordinates u,v in [0, 1]
     ## 
-    ##      ___________________ _v=1
+    ##      ___________________ _v=0
     ##     |     |      |      |                          ______
     ##     |  // |   5  |  //  |                        /  5   /| 
     ##     |_____|______|______|                       /______/ |-->3
@@ -314,7 +314,7 @@ method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     ##     |_____|______|______|            /              1
     ##     |     |      |      |           /x 
     ##     |  // |   3  |   // |         
-    ##     |_____|______|______|_v=0  
+    ##     |_____|______|______|_v=1  
     ##     |                   |
     ##     u=0                 u=1
     ## 
@@ -327,22 +327,22 @@ method point_to_uv*(paral : Parallelepiped, point: Point ) : Vec2d =
     # I have to understand in which face of the parallelepiped the point is placed and then map it in the correspondent part of the (u,v) plane
     if point.z.is_close(paral.pmax.z) :  #face number 5
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.x + 2.0*paral.pmax.z + point.x)/normalv
+        v = point.x/normalv
     if point.y.is_close(0.0) :  #face number 2
         u = point.x/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
     if point.x.is_close(paral.pmax.x) :  #face number 6
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
     if point.y.is_close(paral.pmax.y) :  #face number 4
-        u = (paral.pmax.x + paral.pmax.y + point.x)/normalu
-        v = (paral.pmax.z + paral.pmax.x + point.z)/normalv
+        u = (paral.pmax.x + paral.pmax.y + (paral.pmax.x - point.x))/normalu
+        v = (paral.pmax.x + (paral.pmax.z - point.z))/normalv
     if point.z.is_close(0.0) :  #face number 1
         u = (paral.pmax.x + point.y)/normalu
-        v = (paral.pmax.z + point.x)/normalv
-    if point.x.is_close(0.0) :  #face number 
+        v = (paral.pmax.x + paral.pmax.z + (paral.pmax.x - point.x))/normalv
+    if point.x.is_close(0.0) :  #face number 3
         u = (paral.pmax.x + point.y)/normalu
-        v = point.z/normalv
+        v = (2.0*paral.pmax.x + paral.pmax.z + point.z)/normalv
     
     return newVec2d(u,v)
 
