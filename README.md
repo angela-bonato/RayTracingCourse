@@ -125,7 +125,7 @@ If you are a skilled user, by properly changing `demo()` proc in [project.nim](.
             <img src="examples/earth.jpeg" alt="Image 2" width="320" height="240">
         </td>
         <td> 
-            <img src="examples/specular_parallelepiped.jpeg" alt="Image 3" width="320" height="240">
+            <img src="examples/mirrors.png" alt="Image 3" width="320" height="240">
         </td>
     </tr>
 </table>
