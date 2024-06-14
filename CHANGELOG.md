@@ -3,9 +3,9 @@
 - Add bash script to parallelize the production of animations
 - Adjurned demo command
 - Add antialiasing option 
-- Add rendering algorithm (FlatRender and PathTracer)
+- Add rendering algorithms (FlatRender and PathTracer)
 - Add pcg random generator to perform ray-tracing
-- Add Material classes and now each Shape have a Material member
+- Add Material classes and now each Shape has a Material member
 - Add Pigment classes (UniformPigment, CheckeredPigment and ImagePigment )
 - Add Brdf classes (SpecularBrdf and DiffuseBrdf)
 
