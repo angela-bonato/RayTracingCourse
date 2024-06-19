@@ -78,24 +78,25 @@ proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height
   im_tracer.fire_all_rays(fire_ray, renderproc_wrapped, scene, toInt(sqrt(float(antial_rays))))
 
   # Creation of the pfm file
-  
-  pfm_stream_write = newFileStream(pfm_filename, fmWrite)
+
+  try:
+    pfm_stream_write = openFileStream(pfm_filename, fmWrite )
+  except IOError as e:
+    raise InvalidPfmFileFormat.newException(e.msg)
+
   im_tracer.image.write_pfm(pfm_stream_write)
   
   echo "File ", pfm_filename, " has been written to disk"
   pfm_stream_write.close()
 
   # Conversion to png file
-  
-  try:
-    pfm_stream_read = newFileStream(pfm_filename, fmRead)
-  except CatchableError as e:
-    echo e.msg
 
   try:
-    output_img = read_pfm_image(pfm_stream_read)
-  except CatchableError as e:
-    echo e.msg
+    pfm_stream_read = openFileStream(pfm_filename, fmRead )
+  except IOError as e:
+    raise InvalidPfmFileFormat.newException(e.msg)
+
+  output_img = read_pfm_image(pfm_stream_read)
 
   output_img.normalize_image(a_factor)
   output_img.clamp_image()
@@ -119,14 +120,11 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
   output_png_filename = args[1]
 
   try:
-    input_stream = newFileStream(input_pfm_filename, fmRead )
-  except CatchableError as e:
-    echo e.msg
+    input_stream = openFileStream(input_pfm_filename, fmRead )
+  except IOError as e:
+    raise InvalidPfmFileFormat.newException(e.msg)
 
-  try:
-    img = read_pfm_image(input_stream)
-  except CatchableError as e:
-    echo e.msg
+  img = read_pfm_image(input_stream)
 
   echo "File ", input_pfm_filename, " has been read from disk."
 
