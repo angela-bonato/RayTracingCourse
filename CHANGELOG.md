@@ -8,6 +8,7 @@
 - Add Material classes and now each Shape has a Material member
 - Add Pigment classes (UniformPigment, CheckeredPigment and ImagePigment )
 - Add Brdf classes (SpecularBrdf and DiffuseBrdf)
+- Fixed exception handling
 
 # v0.2.1
 
