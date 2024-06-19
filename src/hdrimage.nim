@@ -1,6 +1,5 @@
 ## Implementation of the type HdrImage and its methods. This code support the conversion to the pfm format and permits to save the image in a png file
 
-
 import color
 import std/streams
 import std/endians
