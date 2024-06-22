@@ -7,6 +7,11 @@ import std/tables
 import materials
 import world
 import camera
+import vector
+import point
+import color
+import hdrimage
+import transformation
 
 # SourceLocation definition and procs
 
@@ -326,6 +331,7 @@ type Scene* = object
     materials : Table[string, Material]
     world : World
     camera : Option[Camera]
+    fire_proc : Option[FireRayProcs]  #only way to specify camera type in our code
     float_variables : Table[string, float]
     overridden_variables : seq[string]
 
@@ -425,19 +431,19 @@ proc parse_pigment*(istream: var InputStream, scene: Scene) : Pigment =
             result = newUniformPigment(color)
     elif keyword == CHECKERED :
         ##syntax should be checkered(<r_comp1, g_comp1, b_comp1>, <r_comp2, g_comp2, b_comp2>, int, int)
+        var color1 = istream.parse_color(scene)
+        istream.expect_symbol(",")
+        var color2 = istream.parse_color(scene)
+        istream.expect_symbol(",")
+        var div_u = int(istream.expect_number(scene))  #we want this to be optional?
+        istream.expect_symbol(",")
         var 
-            color1 = istream.parse_color(scene)
-            istream.expect_symbol(",")
-            color2 = istream.parse_color(scene)
-            istream.expect_symbol(",")
-            div_u = int(istream.expect_number(scene))  #we want this to be optional?
-            istream.expect_symbol(",")
             div_v = int(istream.expect_number(scene))  #we want this to be optional?
             result = newCheckeredPigment(color1, color2, div_u, div_v)
     elif keyword == IMAGE :
         ##syntax should be image(filename)
         var 
-            filename = istream.expected_string()
+            filename = istream.expect_string()
             fstream = newFileStream(filename, fmRead )
             pigm_image = read_pfm_image(fstream)
             result = newImagePigment(pigm_image) 
@@ -458,7 +464,7 @@ proc parse_brdf*(istream: var InputStream, scene: Scene) : Brdf =
         ##syntax should be diffuse(pigment, float) or diffuse(pigment)
 
         #there is the possibility of specifying the reflectance but is optional so two things can happen
-        var next_kw = input_file.read_token()
+        var next_kw = istream.read_token()
 
         if next_kw.symbol == ",":
             #there is the specification of the reflectance
@@ -475,7 +481,7 @@ proc parse_brdf*(istream: var InputStream, scene: Scene) : Brdf =
         ##syntax should be specular(pigment, float) or specular(pigment)
 
         #there is the possibility of specifying the threshold_angle_rad but is optional so two things can happen
-        var next_kw = input_file.read_token()
+        var next_kw = istream.read_token()
 
         if next_kw.symbol == ",":
             #there is the specification of the threshold_angle_rad
@@ -501,7 +507,7 @@ proc parse_material*(istream: var InputStream, scene: Scene) : (string, Material
     var parsed_rad = istream.parse_pigment(scene)
     istream.expect_symbol(")")
 
-    return (label, newMaterial(brdf = parsed_brdf, emitted_radiance = parsed_rad))
+    return (label, newMaterial(brdf = parsed_brdf, em_rad = parsed_rad))
 
 proc parse_transformation*(istream: var InputStream, scene: Scene) : Transformation =
     ##Read tokens and returns the corresponding transformation
@@ -510,29 +516,29 @@ proc parse_transformation*(istream: var InputStream, scene: Scene) : Transformat
     #transformations can be multiplied many times so we have to implement a proc which can read a single transformation as well as a series of matrix
     #to do this we use the fact that our language is LL(1)
     while true :
-        var keyword = istream.expected_keywords(@[IDENTITY, TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING])
+        var keyword = istream.expect_keywords(@[IDENTITY, TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING])
 
         if keyword == IDENTITY:
             discard
         elif keyword == TRANSLATION:
             ##syntax should be translation(vector)
             istream.expect_symbol("(")
-            result *= translation(istream.parse_vector(scene))
+            result = result * translation(istream.parse_vector(scene))
             istream.expect_symbol(")")
         elif keyword == ROTATION_X:
             ##syntax should be rotation_x(float)
             istream.expect_symbol("(")
-            result *= rotation_x(istream.expected_number(scene))
+            result = result * rotation_x(istream.expect_number(scene))
             istream.expect_symbol(")")
         elif keyword == ROTATION_Y:
             ##syntax should be rotation_y(float)
             istream.expect_symbol("(")
-            result *= rotation_y(istream.expected_number(scene))
+            result = result * rotation_y(istream.expect_number(scene))
             istream.expect_symbol(")")
         elif keyword == ROTATION_Z:
             ##syntax should be rotation_z(float)
             istream.expect_symbol("(")
-            result *= rotation_z(istream.expected_number(scene))
+            result = result * rotation_z(istream.expect_number(scene))
             istream.expect_symbol(")")
         elif keyword == SCALING:
             ##syntax should be scaling(x_factor, y_factor, z_factor)
@@ -543,11 +549,11 @@ proc parse_transformation*(istream: var InputStream, scene: Scene) : Transformat
             istream.expect_symbol(",")
             var z = istream.expect_number(scene)
             istream.expect_symbol(")")
-            result *= scaling(x, y, z)
+            result = result * scaling(x, y, z)
 
         #check if there is another transformation or not
         var next_kw = istream.read_token()
-        if not(isInstantiationOf(next_kw, SymbolToken)) or not(next_kw.symbol == "*") :
+        if not(next_kw.kind == SymbolToken) or not(next_kw.symbol == "*") :
             istream.unread_token(next_kw)
             break
     
@@ -559,14 +565,17 @@ proc parse_sphere*(istream: var InputStream, scene: Scene) : Sphere =
     istream.expect_symbol("(")
     
     var mat_name = istream.expect_identifier()
-    if mat_name not in scene.materials.keys() : #keys?
-        raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
+    if not (scene.materials.hasKey(mat_name)) :
+        raise GrammarError.newException( message = "Unknown material at (" & $istream.location.line_num & "," & $istream.location.col_num & ") of " & istream.location.file_name )
+
+    var parsed_mat : Material
+    parsed_mat = scene.materials[mat_name]
 
     istream.expect_symbol(",")
     var parsed_tr = istream.parse_transformation(scene)
     istream.expect_symbol(")")
 
-    return newSphere(transform = parsed_tr, material = scene.materials[mat_name])
+    return newSphere(transform = parsed_tr, material = parsed_mat)
 
 proc parse_plane*(istream: var InputStream, scene: Scene) : Plane =
     ##Read tokens and returns the corresponding plane
@@ -574,7 +583,7 @@ proc parse_plane*(istream: var InputStream, scene: Scene) : Plane =
     istream.expect_symbol("(")
     
     var mat_name = istream.expect_identifier()
-    if mat_name not in scene.materials.keys() : #keys?
+    if not (scene.materials.hasKey(mat_name)) : 
         raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
 
     istream.expect_symbol(",")
@@ -589,7 +598,7 @@ proc parse_parallelepiped*(istream: var InputStream, scene: Scene) : Parallelepi
     istream.expect_symbol("(")
     
     var mat_name = istream.expect_identifier()
-    if mat_name not in scene.materials.keys() : #keys?
+    if not (scene.materials.hasKey(mat_name)) :
         raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
 
     istream.expect_symbol(",")
