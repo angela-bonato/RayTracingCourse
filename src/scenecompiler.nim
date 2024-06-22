@@ -49,13 +49,12 @@ type GrammarError* = object of CatchableError
 
 type Scene* = object 
     ## Scene class that have to be red from the File
-    materials : Table[string, Material]
-    world : World
-    camera : Option[Camera]
-    fire_proc : Option[FireRayProcs]  #only way to specify camera type in our code
-    float_variables : Table[string, float]
-    overridden_variables : seq[string]
-
+    materials* : Table[string, Material]
+    world* : World
+    camera* : Option[Camera]
+    fire_proc* : Option[FireRayProcs]  #only way to specify camera type in our code
+    float_variables* : Table[string, float]
+    overridden_variables* : seq[string]
 
 # Keywords definition usefull to define KeywordToken
 
@@ -73,7 +72,7 @@ let keywordMap* = {
   "unite": UNITE, "subtract": SUBTRACT, "intersect": INTERSECT,
   "diffuse": DIFFUSE, "specular": SPECULAR,
   "uniform": UNIFORM, "checkered": CHECKERED, "image": IMAGE,
-  "identity": IDENTITY, "traslation": TRANSLATION, "rotation_x": ROTATION_X, "rotation_y": ROTATION_Y, "rotation_z": ROTATION_Z, "scaling": SCALING
+  "identity": IDENTITY, "translation": TRANSLATION, "rotation_x": ROTATION_X, "rotation_y": ROTATION_Y, "rotation_z": ROTATION_Z, "scaling": SCALING
 }.toTable
 
 proc string_to_keyword*( str : string, location : SourceLocation ) : KeywordEnum =
@@ -118,7 +117,7 @@ type InputStream* = object
     saved_char*: char
     saved_location*: SourceLocation
     tab*: int
-    saved_token : Option[Token]
+    saved_token* : Option[Token]
 
 proc newInputStream*(stream: Stream, file_name = "", tab = 4) : InputStream =
     ## constructor for InputStream type
@@ -689,4 +688,57 @@ proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayPro
         parsed_proc = fire_ray_orthogonal
 
     return (parsed_camera, parsed_proc)
+
+proc parse_scene*(istream: var InputStream, variables = initTable[string, float]()) : Scene =  #initialize empty table if variables is not provided as argument
+    ##Read scene description and returns the corresponding Scene object
+    var 
+        scene : Scene
+        vars = variables    
+    scene.float_variables = vars
+    for k in variables.keys:
+        scene.overridden_variables.add(k)
+
+    while true:
+        var what = istream.read_token()
+        if what.kind == StopToken :
+            break
+
+        if not(what.kind == KeywordToken):
+            raise GrammarError.newException(message = "At location (" & $what.location.line_num & "," & $what.location.col_num & ") of " & what.location.file_name & " expected a keyword instead of " & $what)  #correct?
+        if what.keyword == FLOAT :
+            var 
+                variable_name = istream.expect_identifier()
+                variable_loc = istream.location   #for error message
+            istream.expect_symbol("(")
+            var variable_value = istream.expect_number(scene)
+            istream.expect_symbol(")")
+
+            if (variable_name in scene.float_variables) and not(variable_name in scene.overridden_variables):
+                raise GrammarError.newException(message = "At location (" & $variable_loc.line_num & "," & $variable_loc.col_num & ") of " & variable_loc.file_name & " variable " & variable_name & " cannot be redefined.")
+            if not(variable_name in scene.overridden_variables):
+                #define the variable only if it was not defined outside scene file (e.g., from command line)
+                scene.float_variables[variable_name] = variable_value
         
+        elif (what.keyword == SPHERE) or (what.keyword == PLANE) or (what.keyword == PARALLELEPIPED):
+            istream.unread_token(what)  #parse proc will read it again and decide which specific proc to call
+            scene.world.shapes.add(istream.parse_shape(scene))
+
+        elif (what.keyword == UNITE) or (what.keyword == INTERSECT) or (what.keyword == SUBTRACT):
+            istream.unread_token(what)  #parse proc will read it again and decide which specific proc to call
+            scene.world.shapes.add(istream.parse_csg(scene))
+
+        elif what.keyword == CAMERA:
+            if isSome(scene.camera):
+                raise GrammarError.newException(message = "At location (" & $what.location.line_num & "," & $what.location.col_num & ") of " & what.location.file_name & " you cannot define more than a camera")
+            var (camera, fire_proc) = istream.parse_camera(scene)
+            scene.camera = some(camera)
+            scene.fire_proc = some(fire_proc)
+
+        elif what.keyword == MATERIAL:
+            var (name, material) = istream.parse_material(scene)
+            scene.materials[name] = material 
+        
+        else:
+            raise GrammarError.newException(message = "At location (" & $what.location.line_num & "," & $what.location.col_num & ") of " & what.location.file_name & " unexpected token " & $what)  #correct?
+
+    return scene
