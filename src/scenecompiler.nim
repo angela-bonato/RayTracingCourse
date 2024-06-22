@@ -35,7 +35,7 @@ type KeywordEnum* = enum
     UNITE, SUBTRACT, INTERSECT,
     DIFFUSE, SPECULAR,
     UNIFORM, CHECKERED, IMAGE,
-    TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING
+    IDENTITY, TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING
 
 let keywordMap* = {
   "new": NEW, "material": MATERIAL, "camera": CAMERA, "orthogonal": ORTHOGONAL, "perspective": PERSPECTIVE, "float": FLOAT,
@@ -43,7 +43,7 @@ let keywordMap* = {
   "unite": UNITE, "subtract": SUBTRACT, "intersect": INTERSECT,
   "diffuse": DIFFUSE, "specular": SPECULAR,
   "uniform": UNIFORM, "checkered": CHECKERED, "image": IMAGE,
-  "translation": TRANSLATION, "rotation_x": ROTATION_X, "rotation_y": ROTATION_Y, "rotation_z": ROTATION_Z, "scaling": SCALING
+  "identity": IDENTITY, "traslation": TRANSLATION, "rotation_x": ROTATION_X, "rotation_y": ROTATION_Y, "rotation_z": ROTATION_Z, "scaling": SCALING
 }.toTable
 
 proc string_to_keyword*( str : string, location : SourceLocation ) : KeywordEnum =
@@ -371,3 +371,315 @@ proc expect_identifier*( istream: var InputStream ) : string =
         raise GrammarError.newException( message = "Missing identifier at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
     return token.ident
 
+#Parsing the scene
+
+proc parse_vector*(istream: var InputStream, scene: Scene) : Vector =
+    ##Read tokens and returns the corresponding vector
+    ##syntax should be [x_component, y_component, z_component]
+    istream.expect_symbol("[")
+    var x = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var y = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var z = istream.expect_number(scene)
+    istream.expect_symbol("]")
+
+    return newVector(x, y, z)
+
+proc parse_point*(istream: var InputStream, scene: Scene) : Point =
+    ##Read tokens and returns the corresponding point
+    ##syntax should be (x_component, y_component, z_component)
+    istream.expect_symbol("(")
+    var x = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var y = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var z = istream.expect_number(scene)
+    istream.expect_symbol(")")
+
+    return newPoint(x, y, z)
+
+proc parse_color*(istream: var InputStream, scene: Scene) : Color =
+    ##Read tokens and returns the corresponding color
+    ##syntax should be <r_component, g_component, b_component>
+    istream.expect_symbol("<")
+    var red = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var green = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var blue = istream.expect_number(scene)
+    istream.expect_symbol(">")
+
+    return newColor(red, green, blue)
+
+proc parse_pigment*(istream: var InputStream, scene: Scene) : Pigment =
+    ##Read tokens and returns the corresponding pigment
+    var keyword = istream.expect_keywords(@[UNIFORM, CHECKERED, IMAGE])
+    istream.expect_symbol("(")
+    
+    #different pigments are initialized in different ways so I have to study all possible cases
+    if keyword == UNIFORM :
+        ##syntax should be uniform(<r_component, g_component, b_component>)
+        var 
+            color = istream.parse_color(scene)
+            result = newUniformPigment(color)
+    elif keyword == CHECKERED :
+        ##syntax should be checkered(<r_comp1, g_comp1, b_comp1>, <r_comp2, g_comp2, b_comp2>, int, int)
+        var 
+            color1 = istream.parse_color(scene)
+            istream.expect_symbol(",")
+            color2 = istream.parse_color(scene)
+            istream.expect_symbol(",")
+            div_u = int(istream.expect_number(scene))  #we want this to be optional?
+            istream.expect_symbol(",")
+            div_v = int(istream.expect_number(scene))  #we want this to be optional?
+            result = newCheckeredPigment(color1, color2, div_u, div_v)
+    elif keyword == IMAGE :
+        ##syntax should be image(filename)
+        var 
+            filename = istream.expected_string()
+            fstream = newFileStream(filename, fmRead )
+            pigm_image = read_pfm_image(fstream)
+            result = newImagePigment(pigm_image) 
+    else :
+        assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA
+
+    istream.expect_symbol(")")
+    return result
+
+proc parse_brdf*(istream: var InputStream, scene: Scene) : Brdf =
+    ##Read tokens and returns the corresponding brdf
+    var keyword = istream.expect_keywords(@[DIFFUSE, SPECULAR])
+    istream.expect_symbol("(")
+    var parsed_pig = istream.parse_pigment(scene)
+
+    #different kinds of brdf 
+    if keyword == DIFFUSE :
+        ##syntax should be diffuse(pigment, float) or diffuse(pigment)
+
+        #there is the possibility of specifying the reflectance but is optional so two things can happen
+        var next_kw = input_file.read_token()
+
+        if next_kw.symbol == ",":
+            #there is the specification of the reflectance
+            var parsed_refl = istream.expect_number(scene)
+            istream.expect_symbol(")")
+            return newDiffuseBrdf(pigment = parsed_pig, refl = parsed_refl)
+        elif next_kw.symbol == ")":
+            #use default reflectance
+            return newDiffuseBrdf(pigment = parsed_pig)
+        else:  #there is an error but should I raise it here?
+            istream.unread_token(next_kw)
+    
+    elif keyword == SPECULAR :
+        ##syntax should be specular(pigment, float) or specular(pigment)
+
+        #there is the possibility of specifying the threshold_angle_rad but is optional so two things can happen
+        var next_kw = input_file.read_token()
+
+        if next_kw.symbol == ",":
+            #there is the specification of the threshold_angle_rad
+            var parsed_ang = istream.expect_number(scene)
+            istream.expect_symbol(")")
+            return newSpecularBrdf(pigment = parsed_pig, ta_rad = parsed_ang)
+        elif next_kw.symbol == ")":
+            #use default threshold_angle_rad
+            return newSpecularBrdf(pigment = parsed_pig)
+        else:  #there is an error but should I raise it here?
+            istream.unread_token(next_kw)        
+    
+    else:  #there is an error but should I raise it here?
+        assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA
+
+proc parse_material*(istream: var InputStream, scene: Scene) : (string, Material) =
+    ##Read tokens and returns the corresponding material
+    ##syntax should be material name(brdf, pigment)
+    var label = istream.expect_identifier()
+    istream.expect_symbol("(")
+    var parsed_brdf = istream.parse_brdf(scene)
+    istream.expect_symbol(",")
+    var parsed_rad = istream.parse_pigment(scene)
+    istream.expect_symbol(")")
+
+    return (label, newMaterial(brdf = parsed_brdf, emitted_radiance = parsed_rad))
+
+proc parse_transformation*(istream: var InputStream, scene: Scene) : Transformation =
+    ##Read tokens and returns the corresponding transformation
+    var result = newTransformation()
+
+    #transformations can be multiplied many times so we have to implement a proc which can read a single transformation as well as a series of matrix
+    #to do this we use the fact that our language is LL(1)
+    while true :
+        var keyword = istream.expected_keywords(@[IDENTITY, TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING])
+
+        if keyword == IDENTITY:
+            discard
+        elif keyword == TRANSLATION:
+            ##syntax should be translation(vector)
+            istream.expect_symbol("(")
+            result *= translation(istream.parse_vector(scene))
+            istream.expect_symbol(")")
+        elif keyword == ROTATION_X:
+            ##syntax should be rotation_x(float)
+            istream.expect_symbol("(")
+            result *= rotation_x(istream.expected_number(scene))
+            istream.expect_symbol(")")
+        elif keyword == ROTATION_Y:
+            ##syntax should be rotation_y(float)
+            istream.expect_symbol("(")
+            result *= rotation_y(istream.expected_number(scene))
+            istream.expect_symbol(")")
+        elif keyword == ROTATION_Z:
+            ##syntax should be rotation_z(float)
+            istream.expect_symbol("(")
+            result *= rotation_z(istream.expected_number(scene))
+            istream.expect_symbol(")")
+        elif keyword == SCALING:
+            ##syntax should be scaling(x_factor, y_factor, z_factor)
+            istream.expect_symbol("(")
+            var x = istream.expect_number(scene)
+            istream.expect_symbol(",")
+            var y = istream.expect_number(scene)
+            istream.expect_symbol(",")
+            var z = istream.expect_number(scene)
+            istream.expect_symbol(")")
+            result *= scaling(x, y, z)
+
+        #check if there is another transformation or not
+        var next_kw = istream.read_token()
+        if not(isInstantiationOf(next_kw, SymbolToken)) or not(next_kw.symbol == "*") :
+            istream.unread_token(next_kw)
+            break
+    
+    return result
+
+proc parse_sphere*(istream: var InputStream, scene: Scene) : Sphere =
+    ##Read tokens and returns the corresponding sphere
+    ##syntax should be sphere(material, transformation*transformation*ecc)
+    istream.expect_symbol("(")
+    
+    var mat_name = istream.expect_identifier()
+    if mat_name not in scene.materials.keys() : #keys?
+        raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
+
+    istream.expect_symbol(",")
+    var parsed_tr = istream.parse_transformation(scene)
+    istream.expect_symbol(")")
+
+    return newSphere(transform = parsed_tr, material = scene.materials[mat_name])
+
+proc parse_plane*(istream: var InputStream, scene: Scene) : Plane =
+    ##Read tokens and returns the corresponding plane
+    ##syntax should be plane(material, transformation*transformation*ecc)
+    istream.expect_symbol("(")
+    
+    var mat_name = istream.expect_identifier()
+    if mat_name not in scene.materials.keys() : #keys?
+        raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
+
+    istream.expect_symbol(",")
+    var parsed_tr = istream.parse_transformation(scene)
+    istream.expect_symbol(")")
+
+    return newPlane(transform = parsed_tr, material = scene.materials[mat_name])
+
+proc parse_parallelepiped*(istream: var InputStream, scene: Scene) : Parallelepiped =
+    ##Read tokens and returns the corresponding parallelepiped
+    ##syntax should be parallelepiped(material, transformation, point)
+    istream.expect_symbol("(")
+    
+    var mat_name = istream.expect_identifier()
+    if mat_name not in scene.materials.keys() : #keys?
+        raise GrammarError.newException( message = "Unknown material at (" & $token.location.line_num & "," & $token.location.col_num & ") of " & token.location.file_name )
+
+    istream.expect_symbol(",")
+    var parsed_tr = istream.parse_transformation(scene)
+    istream.expect_symbol(",")
+    var parsed_pmax = istream.parse_point(scene)
+    istream.expect_symbol(")")
+
+    return newParallelepiped(transform = parsed_tr, material = scene.materials[mat_name], p_max = parsed_pmax)
+
+proc parse_shape*(istream: var InputStream, scene: Scene) : Shape =
+    ##Wrap sphere or plane or parallelepiped to be used in csg parsing
+    var keyword = istream.expect_keywords(@[SPHERE, PLANE, PARALLELEPIPED])
+    
+    if keyword == SPHERE :
+        return istream.parse_sphere(scene)
+    elif keyword == PLANE :
+        return istream.parse_plane(scene)
+    elif keyword == PARALLELEPIPED :
+        return istream.parse_parallelepiped(scene)
+    else:  #there is an error but should I raise it here?
+        assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA    
+
+proc parse_union*(istream: var InputStream, scene: Scene) : Shapes_Union =
+    ##Read tokens and returns the corresponding csg union
+    ##syntax should be unite(shape, shape)
+    var keyword = istream.expect_keywords(@[UNITE])
+    istream.expect_symbol("(")
+    var parsed_sh1 = istream.parse_shape(scene)
+    istream.expect_symbol(",")
+    var parsed_sh2 = istream.parse_shape(scene)
+    istream.expect_symbol(")")
+
+    return unite(parsed_sh1, parsed_sh2)
+
+proc parse_intersection*(istream: var InputStream, scene: Scene) : Shapes_Intersection =
+    ##Read tokens and returns the corresponding csg intersection
+    ##syntax should be intersect(shape, shape)
+    var keyword = istream.expect_keywords(@[INTERSECT])
+    istream.expect_symbol("(")
+    var parsed_sh1 = istream.parse_shape(scene)
+    istream.expect_symbol(",")
+    var parsed_sh2 = istream.parse_shape(scene)
+    istream.expect_symbol(")")
+
+    return intersect(parsed_sh1, parsed_sh2)
+
+proc parse_difference*(istream: var InputStream, scene: Scene) : Shapes_Difference =
+    ##Read tokens and returns the corresponding csg difference
+    ##syntax should be subtract(shape, shape)
+    var keyword = istream.expect_keywords(@[SUBTRACT])
+    istream.expect_symbol("(")
+    var parsed_sh1 = istream.parse_shape(scene)
+    istream.expect_symbol(",")
+    var parsed_sh2 = istream.parse_shape(scene)
+    istream.expect_symbol(")")
+
+    return subtract(parsed_sh1, parsed_sh2)
+
+proc parse_csg*(istream: var InputStream, scene: Scene) : Shape =
+    ##Read tokens and returns the corresponding csg operation
+    ##warning: for now it is NOT possible to define recoursive csg operation (e.g, unite(shape, subtract(shape, shape)))
+    #PROBLEMA RICORSIONE ANDREBBE RISOLTO
+    var keyword = istream.expect_keywords(@[UNITE, INTERSECT, SUBTRACT])
+    
+    if keyword == UNITE :
+        return istream.parse_union(scene)
+    elif keyword == SUBTRACT :
+        return istream.parse_difference(scene)
+    elif keyword == INTERSECT :
+        return istream.parse_intersection(scene)
+    else:  #there is an error but should I raise it here?
+        assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA    
+
+proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayProcs) =  #I don't know if it is right but it is the only way to define the camera type
+    ##Read tokens and returns the corresponding camera
+    ##syntax should be camera(type, transformation, float)
+    istream.expect_symbol("(")
+    var type_kw = istream.expected_keywords(@[PERSPECTIVE, ORTHOGONAL])
+    istream.expect_symbol(",")
+    var parsed_tr = istream.parse_transformation(scene)
+    istream.expect_symbol(",")
+    var axp_ratio = istream.expect_number(scene)
+    istream.expect_symbol(")")
+    var parsed_camera = newCamera(aspect_ratio = axp_ratio, transform = parsed_tr)
+
+    if type_kw == PERSPECTIVE:
+        var fire_proc = fire_ray_perspective
+    elif type_kw == ORTHOGONAL:
+        var fire_proc = fire_ray_orthogonal
+
+    return (parsed_camera, fire_proc)
+        
