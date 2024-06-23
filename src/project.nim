@@ -18,7 +18,7 @@ import std/math
 proc demo(kind_of_camera = 'p', a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = 0.0, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 3, lim_depth = 2, args : seq[string]) : void =
   ## Command to produce our "triangolo nero" in pfm format and then convert it in a png file
   var 
-    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*traslation(newVector(-2, 0, 2))) 
+    cam = newCamera(aspect_ratio = width/height , transform = rotation_z( angle/360.0 * 2 * PI  )*traslation(newVector(-1, 0, 1))) 
     fire_ray : FireRayProcs
     img = newHdrImage(width, height)  
     im_tracer = newImageTracer(img, cam)
