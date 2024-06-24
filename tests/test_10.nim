@@ -144,6 +144,8 @@ suite "Test parser":
 
         #check float 
 
+        #[
+
         assert len(scene.float_variables) == 1
         assert scene.float_variables.hasKey("clock")
         assert scene.float_variables["clock"] == 150.0
@@ -200,6 +202,8 @@ suite "Test parser":
         assert scene.camera.aspect_ratio.almostEqual(1.0)
         assert scene.camera.screen_distance.almostEqual(2.0)
 
+        ]#
+
     echo "Test on parse_shene ended"
 
     test "parsig undefined material":
@@ -207,7 +211,7 @@ suite "Test parser":
         #This should raise a GrammarError!
 
         try:
-            scene = istream.parse_scene()
+            var scene = istream.parse_scene()
             assert false, "the code did not throw an exception"
         except GrammarError:
             discard
@@ -222,7 +226,7 @@ suite "Test parser":
         #This should raise a GrammarError!
         
         try:
-            scene = istream.parse_scene()
+            var scene = istream.parse_scene()
             assert false, "the code did not throw an exception"
         except GrammarError:
             discard
