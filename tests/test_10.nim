@@ -2,6 +2,7 @@
 
 import ../src/scenecompiler
 import ../src/materials
+import ../src/color
 import std/unittest
 import std/streams
 import std/tables
@@ -144,8 +145,7 @@ suite "Test parser":
 
         #check float 
 
-
-#[        assert len(scene.float_variables) == 1
+        assert len(scene.float_variables) == 1
         assert scene.float_variables.hasKey("clock")
         assert scene.float_variables["clock"] == 150.0
 
@@ -165,7 +165,7 @@ suite "Test parser":
 #        assert type(sky_material.brdf) == DiffuseBrdf  #wrong syntax but I don't know what to do...
 #        assert type(sky_material.brdf.pigment) == UniformPigment  #wrong syntax but I don't know what to do...
         assert sky_material.brdf.pigment.color.is_close(newColor(0, 0, 0))
-
+#[
 #        assert type(ground_material.brdf) == DiffuseBrdf   #wrong syntax but I don't know what to do...
 #        assert type(ground_material.brdf.pigment) == CheckeredPigment  #wrong syntax but I don't know what to do...
         assert ground_material.brdf.pigment.col_even.is_close(newColor(0.3, 0.5, 0.1))
@@ -200,9 +200,7 @@ suite "Test parser":
         assert scene.camera.transformation.is_close(rotation_z(30) * translation(newVector(-4, 0, 1)))
         assert scene.camera.aspect_ratio.almostEqual(1.0)
         assert scene.camera.screen_distance.almostEqual(2.0)
-
-        ]#
-
+]#
     echo "Test on parse_shene ended"
 
     test "parsig undefined material":
@@ -234,7 +232,6 @@ suite "Test parser":
 
     echo "Parsing tests ended" 
 
-]#
 
 #I think that the parsing has problems handling ref object of something 
 #(e.g., it sees all the pigments as pigments, all the shapes as shapes, 
