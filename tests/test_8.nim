@@ -4,8 +4,7 @@ import ../src/color
 import ../src/materials
 import ../src/world
 import ../src/ray
-import ../src/vector
-import ../src/point
+import ../src/geometry
 import ../src/renderprocs
 
 suite "Test Pigment":

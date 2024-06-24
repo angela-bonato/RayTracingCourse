@@ -2,10 +2,7 @@
 
 import hdrimage
 import color
-import geometryalgebra
-import normal
-import vector
-import point
+import geometry
 import ray
 import pcg
 import std/math

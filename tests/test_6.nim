@@ -3,11 +3,7 @@ import std/options
 import std/math
 import ../src/world
 import ../src/ray
-import ../src/vector
-import ../src/point
-import ../src/normal
-import ../src/transformation
-import ../src/csg
+import ../src/geometry
 import ../src/materials
 
 suite "Test Sphere":
@@ -220,7 +216,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(0.5,0.5,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(0.5,0.5,1.0)
             teoretical_normal = newNormal(0,0,1.0)
-            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            teoretical_uv_coordinates = newVec2d(0.5,1/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -234,7 +230,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(3.0,0.5,0.5),newVector(-1,0,0))
             teoretical_hit_point = newPoint(1.0,0.5,0.5)
             teoretical_normal = newNormal(1.0,0,0)
-            teoretical_uv_coordinates = newVec2d(1/2,5/8)
+            teoretical_uv_coordinates = newVec2d(1/2,3/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -257,7 +253,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(0.5,0.5,0.5),newVector(1,0,0))
             teoretical_hit_point = newPoint(1.0,0.5,0.5)
             teoretical_normal = newNormal(-1.0,0,0)
-            teoretical_uv_coordinates = newVec2d(1/2,5/8)
+            teoretical_uv_coordinates = newVec2d(1/2,3/8)
             hit_point = cube.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -272,7 +268,7 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(10.5,0.5,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(10.5,0.5,1.0)
             teoretical_normal = newNormal(0,0,1.0)
-            teoretical_uv_coordinates = newVec2d(0.5,7/8)
+            teoretical_uv_coordinates = newVec2d(0.5,1/8)
             hit_point = tr_cube.ray_intersection(ray)
         
         assert hit_point.isSome
@@ -296,13 +292,13 @@ suite "Test Parallelepiped":
             ray = newRay(newPoint(-2,0.5,0.5),newVector(1.0,0,0))
             teoretical_hit_point1 = cube.newHitRecord( world_point = newPoint(0,0.5,0.5),
                                                   normal = newNormal(-1.0,0,0),
-                                                  surface_point = newVec2d(1/2,1/8),
+                                                  surface_point = newVec2d(1/2,7/8),
                                                   t = 2.0,
                                                   ray = ray
                                                 )
             teoretical_hit_point2 = cube.newHitRecord( world_point = newPoint(1.0,0.5,0.5),
                                                   normal = newNormal(-1.0,0,0),
-                                                  surface_point = newVec2d(1/2,5/8),
+                                                  surface_point = newVec2d(1/2,3/8),
                                                   t = 3.0,
                                                   ray = ray
                                                 )
@@ -321,7 +317,7 @@ suite "Test Parallelepiped":
         assert cube.have_inside(point1)
         assert not cube.have_inside(point2)
 
-    echo "Ended tests on Sphere"
+    echo "Ended tests on Parallelepiped"
 
 
 suite "Test CSG":

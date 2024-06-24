@@ -1,8 +1,6 @@
 import ../src/color
 import ../src/hdrimage
-import ../src/point
-import ../src/vector
-import ../src/transformation
+import ../src/geometry
 import ../src/ray
 import ../src/camera
 import ../src/imagetracer

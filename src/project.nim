@@ -1,7 +1,6 @@
 ## This is the main of our programme. It is possible to use it with different commands, thanks to cligen library.
 import hdrimage
-import vector
-import transformation
+import geometry
 import imagetracer
 import camera
 import world

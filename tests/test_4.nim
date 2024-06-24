@@ -1,9 +1,5 @@
-import ../src/point
-import ../src/vector
-import ../src/normal
-import ../src/hommatrix
-import ../src/transformation
-import ../src/geometryalgebra
+
+import ../src/geometry
 import std/math
 
 ##Tests on functions related to geometry classes (point, vector, normal, transformation)##

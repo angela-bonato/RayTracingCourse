@@ -4,10 +4,8 @@ import ../src/color
 import ../src/renderprocs
 import ../src/pcg
 import ../src/materials
-import ../src/normal
-import ../src/vector
 import ../src/world
-import ../src/point
+import ../src/geometry
 import std/unittest
 import std/math
 

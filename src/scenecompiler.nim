@@ -7,11 +7,9 @@ import std/tables
 import materials
 import world
 import camera
-import vector
-import point
+import geometry
 import color
 import hdrimage
-import transformation
 
 # SourceLocation definition and procs
 
@@ -683,9 +681,11 @@ proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayPro
     var parsed_tr = istream.parse_transformation(scene)
     istream.expect_symbol(",")
     var axp_ratio = istream.expect_number(scene)
+    istream.expect_symbol(",")
+    var dist = istream.expect_number(scene)
     istream.expect_symbol(")")
     var 
-        parsed_camera = newCamera(aspect_ratio = axp_ratio, transform = parsed_tr)
+        parsed_camera = newCamera(aspect_ratio = axp_ratio, transform = parsed_tr, distance = dist)
         parsed_proc : FireRayProcs
 
     if type_kw == PERSPECTIVE:

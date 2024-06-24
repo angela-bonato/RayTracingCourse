@@ -1,10 +1,6 @@
 ## Implementation of different Shapes that our code can render. Implement also some useful types to perform the rendering.
 
-import transformation
-import point
-import vector
-import normal
-import geometryalgebra
+import geometry
 import ray
 import materials
 import std/algorithm

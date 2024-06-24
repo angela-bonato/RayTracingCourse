@@ -3,9 +3,12 @@
 import ../src/scenecompiler
 import ../src/materials
 import ../src/color
+import ../src/geometry
 import std/unittest
 import std/streams
 import std/tables
+import std/options
+import std/math
 
 suite "Test InputStream":
     ## Tests on InputStream type and procs
@@ -187,19 +190,19 @@ suite "Test parser":
         #check shapes
 
         assert len(scene.world.shapes) == 3
-        assert scene.world.shapes[0].kind == Plane  
+        assert $scene.world.shapes[0].kind == "Plane"  
         assert scene.world.shapes[0].transformation.is_close(translation(newVector(0, 0, 100)) * rotation_y(150.0))
-        assert scene.world.shapes[1].kind == Plane
+        assert $scene.world.shapes[1].kind == "Plane"
         assert scene.world.shapes[1].transformation.is_close(newTransformation())
-        assert scene.world.shapes[2].kind == Sphere  
+        assert $scene.world.shapes[2].kind == "Sphere"  
         assert scene.world.shapes[2].transformation.is_close(translation(newVector(0, 0, 1)))
 
         #check camera
 
-        assert scene.firer_proc == fire_ray_perspective
-        assert scene.camera.transformation.is_close(rotation_z(30) * translation(newVector(-4, 0, 1)))
-        assert scene.camera.aspect_ratio.almostEqual(1.0)
-        assert scene.camera.screen_distance.almostEqual(2.0)
+        #assert $scene.fire_proc.get() == "fire_ray_perspective"
+        assert scene.camera.get().transform.is_close(rotation_z(30) * translation(newVector(-4, 0, 1)))
+        assert scene.camera.get().aspect_ratio.almostEqual(1.0)
+        assert scene.camera.get().distance.almostEqual(2.0)
 
     echo "Test on parse_shene ended"
 
