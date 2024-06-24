@@ -12,7 +12,6 @@ import point
 import color
 import hdrimage
 import transformation
-import csg
 
 # SourceLocation definition and procs
 
