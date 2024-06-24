@@ -7,6 +7,7 @@ import normal
 import geometryalgebra
 import ray
 import materials
+import std/algorithm
 import std/math
 import std/options
 
@@ -226,7 +227,7 @@ proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
     if shape.kind == Sphere: 
         ## Compute the intersection between a ray and a sphere
         var 
-            inv_ray = ray.transform(shspe.transformation.inverse())
+            inv_ray = ray.transform(shape.transformation.inverse())
             reduced_delta =  (inv_ray.dir.dot( inv_ray.origin.point_to_vec() ))^2 - inv_ray.dir.squared_norm() * ( inv_ray.origin.point_to_vec.squared_norm() - 1.0 ) 
             t_1 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) - sqrt( reduced_delta )) / inv_ray.dir.squared_norm()  # compute the two intersection with the sphere
             t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
@@ -594,19 +595,6 @@ proc all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] =
                             ray = ray))
         return some(hits)
 
-
-
-
-
-
-
-
-    
-    
-    
-    
-    
-
 method have_inside*( shape : Shape, point : Point) : bool {.base.} =
     ## Check if a point is inside a shape
     quit "Called have_inside of Shape, it is a virtual method!"
@@ -624,15 +612,7 @@ method have_inside*( sphere : Sphere, point : Point ) : bool =
         return false
 
 # Plane declaration and procs
-
-<<<<<<< HEAD
-  
-
-=======
->>>>>>> e526f3bddab6fe22952ee54ca6d313f681c15483
-method all_ray_intersections*(plane : Plane, ray : Ray) : Option[seq[HitRecord]] =
    
-
 method have_inside*( plane : Plane, point : Point) : bool =
     ## Check if a point is inside a plane -> mean that the point z is negative
     var inv_point = plane.transformation.inverse() * point
