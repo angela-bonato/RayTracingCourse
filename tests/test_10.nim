@@ -145,7 +145,7 @@ suite "Test parser":
         #check float 
 
 
-#[        assert len(scene.float_variables) == 1
+        assert len(scene.float_variables) == 1
         assert scene.float_variables.hasKey("clock")
         assert scene.float_variables["clock"] == 150.0
 
@@ -162,36 +162,36 @@ suite "Test parser":
             ground_material = scene.materials["ground_material"]
 
         #the asserts which try to assess the type of an object don't work, I don't know what to do
-#        assert type(sky_material.brdf) == DiffuseBrdf  #wrong syntax but I don't know what to do...
-#        assert type(sky_material.brdf.pigment) == UniformPigment  #wrong syntax but I don't know what to do...
+        assert $(sky_material.brdf.typeof) == "DiffuseBrdf" 
+        assert $(sky_material.brdf.pigment.typeof) == "UniformPigment"  
         assert sky_material.brdf.pigment.color.is_close(newColor(0, 0, 0))
 
-#        assert type(ground_material.brdf) == DiffuseBrdf   #wrong syntax but I don't know what to do...
-#        assert type(ground_material.brdf.pigment) == CheckeredPigment  #wrong syntax but I don't know what to do...
+        assert $(ground_material.brdf.typeof) == "DiffuseBrdf"   
+        assert $(ground_material.brdf.pigment) == "CheckeredPigment" 
         assert ground_material.brdf.pigment.col_even.is_close(newColor(0.3, 0.5, 0.1))
         assert ground_material.brdf.pigment.col_odd.is_close(newColor(0.1, 0.2, 0.5))
         assert ground_material.brdf.pigment.div_u == 4
         assert ground_material.brdf.pigment.div_v == 4
         
-#        assert type(sphere_material.brdf) == SpecularBrdf  #wrong syntax but I don't know what to do...
-#        assert type(sphere_material.brdf.pigment) == UniformPigment  #wrong syntax but I don't know what to do...
+        assert $(sphere_material.brdf.typeof) == "SpecularBrdf" 
+        assert $(sphere_material.brdf.pigment) == "UniformPigment"  
         assert sphere_material.brdf.pigment.color.is_close(newColor(0.5, 0.5, 0.5))
 
-#        assert type(sky_material.emitted_radiance) == UniformPigment  #wrong syntax but I don't know what to do...
+        assert $(sky_material.emitted_radiance.typeof) == "UniformPigment"  
         assert sky_material.emitted_radiance.color.is_close(newColor(0.7, 0.5, 1.0))
-#        assert type(ground_material.emitted_radiance) == UniformPigment  #wrong syntax but I don't know what to do...
+        assert $(ground_material.emitted_radiance.typeof) == "UniformPigment"  
         assert ground_material.emitted_radiance.color.is_close(newColor(0, 0, 0))
-#        assert type(sphere_material.emitted_radiance) == UniformPigment  #wrong syntax but I don't know what to do...
+        assert $(sphere_material.emitted_radiance.typeof) == "UniformPigment"  
         assert sphere_material.emitted_radiance.color.is_close(newColor(0, 0, 0))
 
         #check shapes
 
         assert len(scene.world.shapes) == 3
-#        assert type(scene.world.shapes[0]) == Plane  #wrong syntax but I don't know what to do...
+        assert $(scene.world.shapes[0].typeof) == "Plane"  
         assert scene.world.shapes[0].transformation.is_close(translation(newVector(0, 0, 100)) * rotation_y(150.0))
-#        assert type(scene.world.shapes[1]) == Plane  #wrong syntax but I don't know what to do...
+        assert $(scene.world.shapes[1].typeof) == "Plane"
         assert scene.world.shapes[1].transformation.is_close(newTransformation())
-#        assert type(scene.world.shapes[2]) == Sphere  #wrong syntax but I don't know what to do...
+        assert $(scene.world.shapes[2].typeof) == "Sphere"  
         assert scene.world.shapes[2].transformation.is_close(translation(newVector(0, 0, 1)))
 
         #check camera
@@ -201,7 +201,7 @@ suite "Test parser":
         assert scene.camera.aspect_ratio.almostEqual(1.0)
         assert scene.camera.screen_distance.almostEqual(2.0)
 
-        ]#
+        
 
     echo "Test on parse_shene ended"
 
@@ -234,7 +234,7 @@ suite "Test parser":
 
     echo "Parsing tests ended" 
 
-]#
+
 
 #I think that the parsing has problems handling ref object of something 
 #(e.g., it sees all the pigments as pigments, all the shapes as shapes, 

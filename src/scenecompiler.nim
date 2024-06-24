@@ -677,18 +677,16 @@ proc parse_csg*(istream: var InputStream, scene: Scene) : Shape =
 
 proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayProcs) =  #I don't know if it is right but it is the only way to define the camera type
     ##Read tokens and returns the corresponding camera
-    ##syntax should be camera(type, transformation, float, float)
+    ##syntax should be camera(type, transformation, float)
     istream.expect_symbol("(")
     var type_kw = istream.expect_keywords(@[PERSPECTIVE, ORTHOGONAL])
     istream.expect_symbol(",")
     var parsed_tr = istream.parse_transformation(scene)
     istream.expect_symbol(",")
     var axp_ratio = istream.expect_number(scene)
-    istream.expect_symbol(",")
-    var dist = istream.expect_number(scene)
     istream.expect_symbol(")")
     var 
-        parsed_camera = newCamera(aspect_ratio = axp_ratio, transform = parsed_tr, distance = dist)
+        parsed_camera = newCamera(aspect_ratio = axp_ratio, transform = parsed_tr)
         parsed_proc : FireRayProcs
 
     if type_kw == PERSPECTIVE:
@@ -704,7 +702,6 @@ proc parse_scene*(istream: var InputStream, variables = initTable[string, float]
         scene = newScene()
         vars = variables    
     scene.float_variables = vars
-    scene.world = newWorld()
     for k in variables.keys:
         scene.overridden_variables.add(k)
 
