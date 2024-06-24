@@ -15,9 +15,11 @@ import std/options
 type 
     ShapeKind* = enum
         ## All possible kinds of shapes
-        Sphere, Plane, Parallelepiped
+        Sphere, Plane, Parallelepiped, ShapesUnion, ShapesIntersection, ShapesDifference
 
-    Shape* = object
+    Shape* = ref ShapeObj
+
+    ShapeObj* = object
         transformation* : Transformation
         material* : Material
         case kind*: ShapeKind
@@ -30,6 +32,15 @@ type
             of Parallelepiped:
                 ## It defines an axis-aligned box
                 pmin*, pmax*: Point   #points that define the value of each dimension of the shape, along with its position in space
+            of ShapesUnion:
+                ## It represent the union of two shapes
+                u_shape1*, u_shape2* : Shape
+            of ShapesIntersection:
+                ## It represent the intesection of two shapes
+                i_shape1*, i_shape2* : Shape
+            of ShapesDifference:
+                ## It represent the difference between two shapes (shape1 - shape2)
+                d_shape1*, d_shape2* : Shape
 
 # Shapes constructors
 
@@ -165,7 +176,7 @@ proc point_to_uv*(shape : Shape, point : Point) : Vec2d =
             u, v : float #these are the output coordinates
             # normalization constants to define u,v in [0,1]. Thanks to the way newParallelepiped is defined, shape.pmax.x,y,z are the lengths of the three dimensions of the parallelepiped
             normalu = 2.0*shape.pmax.x + shape.pmax.y  
-            normalv = 2.0*(ahape.pmax.x + shape.pmax.z)
+            normalv = 2.0*(shape.pmax.x + shape.pmax.z)
         # I have to understand in which face of the parallelepiped the point is placed and then map it in the correspondent part of the (u,v) plane
         if point.z.is_close(shape.pmax.z) :  #face number 5
             u = (shape.pmax.x + point.y)/normalu
@@ -198,19 +209,19 @@ proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
             t_1 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) - sqrt( reduced_delta )) / inv_ray.dir.squared_norm()  # compute the two intersection with the sphere
             t_2 = (-inv_ray.dir.dot( inv_ray.origin.point_to_vec() ) + sqrt( reduced_delta )) / inv_ray.dir.squared_norm()
             first_hit : float
-                if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
+        if t_1 > inv_ray.tmin and t_1 < inv_ray.tmax :
             first_hit = t_1
         elif t_2 > inv_ray.tmin and t_2 < inv_ray.tmax :
             first_hit = t_2
         else:
             return none(HitRecord) # the ray missed the sphere
-                var hit_point = inv_ray.at(first_hit)
-                return some( shape.newHitRecord( world_point = shape.transformation * hit_point , 
-                                   normal = shape.transformation * shape.shape_normal( hit_point, inv_ray.dir ),
-                                   surface_point = shape.point_to_uv(hit_point),
-                                   t = first_hit,
-                                   ray = ray    
-                                   ) )
+        var hit_point = inv_ray.at(first_hit)
+        return some( shape.newHitRecord( world_point = shape.transformation * hit_point , 
+                     normal = shape.transformation * shape.shape_normal( hit_point, inv_ray.dir ),
+                     surface_point = shape.point_to_uv(hit_point),
+                     t = first_hit,
+                     ray = ray    
+                     ) )
 
     elif shape.kind == Plane: 
         ## Compute the intersection between a ray and a plane
@@ -359,18 +370,6 @@ proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
                             t = ts[0],
                             ray = ray))
     
-    
-    
-    
-
-
-
-
-
-
-
-
-
 method all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] {.base.} =
     ## Virtual all_ray_intersections method
     quit "Called all_ray_intersections of Shape, it is a virtual method!"
@@ -450,9 +449,6 @@ method have_inside*( sphere : Sphere, point : Point ) : bool =
         return false
 
 # Plane declaration and procs
-
-method ray_intersection*( plane: Plane, ray : Ray) : Option[HitRecord] =
-    
 
 method all_ray_intersections*(plane : Plane, ray : Ray) : Option[seq[HitRecord]] =
     ## Compute all the intersections between a ray and a plane
