@@ -59,6 +59,14 @@ type
 
 # Shapes constructors
 
+proc check_validity(p_max : Point) : Point =
+    ## check if pmax for Parallelepiped is valid
+    var pmax = p_max
+    if p_max.x < 0.0 or p_max.y < 0.0 or p_max.z < 0.0 :
+        echo "Invalid p_max argument in newParallelepiped(): a negative p_max it is not allowed, you have to define it positive and then use transform on it. The default constructor will be called now."
+        pmax = newPoint(1.0, 1.0, 1.0)
+    return pmax
+
 proc newSphere*( transform = newTransformation(), material = newMaterial() ) : Shape {.inline.} =
     ## Sphere constructor
     Shape( transformation: transform, material: material, kind: Sphere )
@@ -67,20 +75,9 @@ proc newPlane*( transform = newTransformation(), material = newMaterial() ) : Sh
     ## Plane constructor
     Shape( transformation: transform, material: material, kind: Plane)
 
-proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 1.0, 1.0), material = newMaterial() ) : Shape =
+proc newParallelepiped*( transform = newTransformation(), p_max = newPoint(1.0, 1.0, 1.0), material = newMaterial() ) : Shape {.inline.} =
     ## Parallelepiped constructor, default is unitary cube defined from the origin, to change the default you can change pmax but as long as it is positive
-    
-    var 
-        pmin = newPoint()
-        pmax : Point
-    
-    if p_max.x < 0.0 or p_max.y < 0.0 or p_max.z < 0.0 :
-        echo "Invalid p_max argument in newParallelepiped(): a negative p_max it is not allowed, you have to define it positive and then use transform on it. The default constructor will be called now."
-        pmax = newPoint(1.0, 1.0, 1.0)
-    else:
-        pmax = p_max
-    
-    return Shape( transformation: transform, material: material, kind: Parallelepiped, pmin: pmin, pmax: pmax)
+    Shape( transformation: transform, material: material, kind: Parallelepiped, pmin: newPoint(), pmax: check_validity(p_max) )
 
 proc unite*(shape1, shape2 : Shape) : Shape {.inline.} =
     ## ShapeUnion constructor
@@ -405,6 +402,7 @@ proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
                             surface_point = shape.point_to_uv(hit_point),
                             t = ts[0],
                             ray = ray))
+
     elif shape.kind == ShapesUnion:
         ## Ray intersection for a union of two shapes
     
