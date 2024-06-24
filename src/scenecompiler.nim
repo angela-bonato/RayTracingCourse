@@ -56,6 +56,13 @@ type Scene* = object
     float_variables* : Table[string, float]
     overridden_variables* : seq[string]
 
+proc newScene*() : Scene =
+    ## Scene class constructor
+    result.materials = initTable[string, Material]()
+    result.world = newWorld()
+    result.float_variables = initTable[string, float]()
+    result.overridden_variables = @[]
+
 # Keywords definition usefull to define KeywordToken
 
 type KeywordEnum* = enum
@@ -694,7 +701,7 @@ proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayPro
 proc parse_scene*(istream: var InputStream, variables = initTable[string, float]()) : Scene =  #initialize empty table if variables is not provided as argument
     ##Read scene description and returns the corresponding Scene object
     var 
-        scene : Scene
+        scene = newScene()
         vars = variables    
     scene.float_variables = vars
     scene.world = newWorld()
