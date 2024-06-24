@@ -115,6 +115,42 @@ type
             of SymbolToken:
                 symbol*: string
 
+## Token constructors
+
+proc newStopToken*(location: SourceLocation): Token {.inline.} =
+    Token(location: location, kind: StopToken)
+
+proc newKeywordToken*(location: SourceLocation, keyword: KeywordEnum): Token {.inline.} =
+    Token(location: location, kind: KeywordToken, keyword: keyword)
+
+proc newIdentifierToken*(location: SourceLocation, ident: string): Token {.inline.} =
+    Token(location: location, kind: IdentifierToken, ident: ident)
+
+proc newStringToken*(location: SourceLocation, str: string): Token {.inline.} =
+    Token(location: location, kind: StringToken, str: str)
+
+proc newLiteralNumberToken*(location: SourceLocation, value: float): Token {.inline.} =
+    Token(location: location, kind: LiteralNumberToken, value: value)
+
+proc newSymbolToken*(location: SourceLocation, symbol: string): Token {.inline.} =
+    Token(location: location, kind: SymbolToken, symbol: symbol)
+
+proc to_string*(token: Token): string =
+    ## returns the argument of a token as a string
+    case token.kind:
+        of StopToken:
+            discard
+        of KeywordToken:
+            return $(token.keyword)
+        of IdentifierToken:
+            return token.ident    #already string type
+        of StringToken:
+            return token.str    #already string type
+        of LiteralNumberToken:
+            return $(token.value)
+        of SymbolToken:
+            return token.symbol    #already string type
+
 # InputStream definition
 
 type InputStream* = object
@@ -180,42 +216,6 @@ proc skip_whites_comms*(istream: var InputStream): void =
         if ch == '\0':
             return
     istream.unread_char(ch)  #I put back at its place the first character non whitespace or comment
-
-## Token constructors
-
-proc newStopToken*(location: SourceLocation): Token {.inline.} =
-    Token(location: location, kind: StopToken)
-
-proc newKeywordToken*(location: SourceLocation, keyword: KeywordEnum): Token {.inline.} =
-    Token(location: location, kind: KeywordToken, keyword: keyword)
-
-proc newIdentifierToken*(location: SourceLocation, ident: string): Token {.inline.} =
-    Token(location: location, kind: IdentifierToken, ident: ident)
-
-proc newStringToken*(location: SourceLocation, str: string): Token {.inline.} =
-    Token(location: location, kind: StringToken, str: str)
-
-proc newLiteralNumberToken*(location: SourceLocation, value: float): Token {.inline.} =
-    Token(location: location, kind: LiteralNumberToken, value: value)
-
-proc newSymbolToken*(location: SourceLocation, symbol: string): Token {.inline.} =
-    Token(location: location, kind: SymbolToken, symbol: symbol)
-
-proc to_string*(token: Token): string =
-    ## returns the argument of a token as a string
-    case token.kind:
-        of StopToken:
-            discard
-        of KeywordToken:
-            return $(token.keyword)
-        of IdentifierToken:
-            return token.ident    #already string type
-        of StringToken:
-            return token.str    #already string type
-        of LiteralNumberToken:
-            return $(token.value)
-        of SymbolToken:
-            return token.symbol    #already string type
 
 # Token parsing procs 
 
