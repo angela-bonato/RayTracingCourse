@@ -4,6 +4,7 @@ import ../src/scenecompiler
 import ../src/materials
 import ../src/color
 import ../src/geometry
+import ../src/camera
 import std/unittest
 import std/streams
 import std/tables
@@ -198,8 +199,9 @@ suite "Test parser":
         assert scene.world.shapes[2].transformation.is_close(translation(newVector(0, 0, 1)))
 
         #check camera
-
-        #assert $scene.fire_proc.get() == "fire_ray_perspective"
+        
+        assert scene.fire_proc.isSome()
+        assert scene.fire_proc.unsafeGet() == fire_ray_perspective
         assert scene.camera.get().transform.is_close(rotation_z(30) * translation(newVector(-4, 0, 1)))
         assert scene.camera.get().aspect_ratio.almostEqual(1.0)
         assert scene.camera.get().distance.almostEqual(2.0)
@@ -234,8 +236,3 @@ suite "Test parser":
     echo "Test on double camera ended"
 
     echo "Parsing tests ended" 
-
-
-#I think that the parsing has problems handling ref object of something 
-#(e.g., it sees all the pigments as pigments, all the shapes as shapes, 
-#without all the members of the specific classes such as CheckeredPigment or Sphere)
