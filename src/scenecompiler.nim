@@ -608,9 +608,13 @@ proc parse_parallelepiped*(istream: var InputStream, scene: Scene) : Shape =
 
     return newParallelepiped(transform = parsed_tr, material = scene.materials[mat_name], p_max = parsed_pmax)
 
+proc parse_union*(istream: var InputStream, scene: Scene) : Shape
+proc parse_intersection*(istream: var InputStream, scene: Scene) : Shape
+proc parse_difference*(istream: var InputStream, scene: Scene) : Shape 
+
 proc parse_shape*(istream: var InputStream, scene: Scene) : Shape =
     ##Wrap sphere or plane or parallelepiped to be used in csg parsing
-    var keyword = istream.expect_keywords(@[SPHERE, PLANE, PARALLELEPIPED])
+    var keyword = istream.expect_keywords(@[SPHERE, PLANE, PARALLELEPIPED, UNITE, INTERSECT, SUBTRACT])
     
     if keyword == SPHERE :
         return istream.parse_sphere(scene)
@@ -618,13 +622,18 @@ proc parse_shape*(istream: var InputStream, scene: Scene) : Shape =
         return istream.parse_plane(scene)
     elif keyword == PARALLELEPIPED :
         return istream.parse_parallelepiped(scene)
+    elif keyword == UNITE :
+        return istream.parse_union(scene)
+    elif keyword == INTERSECT :
+        return istream.parse_intersection(scene)
+    elif keyword == SUBTRACT :
+        return istream.parse_difference(scene)
     else:  #there is an error but should I raise it here?
         assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA    
 
 proc parse_union*(istream: var InputStream, scene: Scene) : Shape =
     ##Read tokens and returns the corresponding csg union
     ##syntax should be unite(shape, shape)
-    var keyword = istream.expect_keywords(@[UNITE])
     istream.expect_symbol("(")
     var parsed_sh1 = istream.parse_shape(scene)
     istream.expect_symbol(",")
@@ -636,7 +645,6 @@ proc parse_union*(istream: var InputStream, scene: Scene) : Shape =
 proc parse_intersection*(istream: var InputStream, scene: Scene) : Shape =
     ##Read tokens and returns the corresponding csg intersection
     ##syntax should be intersect(shape, shape)
-    var keyword = istream.expect_keywords(@[INTERSECT])
     istream.expect_symbol("(")
     var parsed_sh1 = istream.parse_shape(scene)
     istream.expect_symbol(",")
@@ -648,7 +656,6 @@ proc parse_intersection*(istream: var InputStream, scene: Scene) : Shape =
 proc parse_difference*(istream: var InputStream, scene: Scene) : Shape =
     ##Read tokens and returns the corresponding csg difference
     ##syntax should be subtract(shape, shape)
-    var keyword = istream.expect_keywords(@[SUBTRACT])
     istream.expect_symbol("(")
     var parsed_sh1 = istream.parse_shape(scene)
     istream.expect_symbol(",")
@@ -656,21 +663,6 @@ proc parse_difference*(istream: var InputStream, scene: Scene) : Shape =
     istream.expect_symbol(")")
 
     return subtract(parsed_sh1, parsed_sh2)
-
-proc parse_csg*(istream: var InputStream, scene: Scene) : Shape =
-    ##Read tokens and returns the corresponding csg operation
-    ##warning: for now it is NOT possible to define recoursive csg operation (e.g, unite(shape, subtract(shape, shape)))
-    #PROBLEMA RICORSIONE ANDREBBE RISOLTO
-    var keyword = istream.expect_keywords(@[UNITE, INTERSECT, SUBTRACT])
-    
-    if keyword == UNITE :
-        return istream.parse_union(scene)
-    elif keyword == SUBTRACT :
-        return istream.parse_difference(scene)
-    elif keyword == INTERSECT :
-        return istream.parse_intersection(scene)
-    else:  #there is an error but should I raise it here?
-        assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA    
 
 proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayProcs) =  #I don't know if it is right but it is the only way to define the camera type
     ##Read tokens and returns the corresponding camera
@@ -725,13 +717,9 @@ proc parse_scene*(istream: var InputStream, variables = initTable[string, float]
                 #define the variable only if it was not defined outside scene file (e.g., from command line)
                 scene.float_variables[variable_name] = variable_value
         
-        elif (what.keyword == SPHERE) or (what.keyword == PLANE) or (what.keyword == PARALLELEPIPED):
+        elif (what.keyword == SPHERE) or (what.keyword == PLANE) or (what.keyword == PARALLELEPIPED) or (what.keyword == UNITE) or (what.keyword == INTERSECT) or (what.keyword == SUBTRACT) :
             istream.unread_token(what)  #parse proc will read it again and decide which specific proc to call
             scene.world.add(istream.parse_shape(scene))
-
-        elif (what.keyword == UNITE) or (what.keyword == INTERSECT) or (what.keyword == SUBTRACT):
-            istream.unread_token(what)  #parse proc will read it again and decide which specific proc to call
-            scene.world.add(istream.parse_csg(scene))
 
         elif what.keyword == CAMERA:
             if isSome(scene.camera):

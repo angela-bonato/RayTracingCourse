@@ -5,6 +5,7 @@ import ../src/materials
 import ../src/color
 import ../src/geometry
 import ../src/camera
+import ../src/world
 import std/unittest
 import std/streams
 import std/tables
@@ -141,11 +142,15 @@ suite "Test parser":
               plane (ground_material, identity)
           
               sphere(sphere_material, translation([0, 0, 1]))
+
+              unite ( intersect ( sphere( sphere_material, translation([0,0.5,0]) ), sphere( sphere_material, translation([0,-0.5,0]) ) ) , subtract( sphere( sphere_material, translation([0,0.5,0]) ), sphere( sphere_material, translation([0,-0.5,0]) ) ) )
           
+              parallelepiped ( sky_material, rotation_y(clock), (1.0,1.0,1.0))
+
               camera(perspective, rotation_z(30) * translation([-4, 0, 1]), 1.0, 2.0)
             """))
 
-            scene = istream.parse_scene()  #error in line 724 of scenecompiler but I don't see the problem
+            scene = istream.parse_scene()  
 
         #check float 
 
@@ -190,13 +195,22 @@ suite "Test parser":
 
         #check shapes
 
-        assert len(scene.world.shapes) == 3
+        assert len(scene.world.shapes) == 5
         assert $scene.world.shapes[0].kind == "Plane"  
         assert scene.world.shapes[0].transformation.is_close(translation(newVector(0, 0, 100)) * rotation_y(150.0))
         assert $scene.world.shapes[1].kind == "Plane"
         assert scene.world.shapes[1].transformation.is_close(newTransformation())
         assert $scene.world.shapes[2].kind == "Sphere"  
         assert scene.world.shapes[2].transformation.is_close(translation(newVector(0, 0, 1)))
+        assert $scene.world.shapes[3].kind == "ShapesUnion"
+        assert $scene.world.shapes[3].u_shape1.kind == "ShapesIntersection"
+        assert scene.world.shapes[3].u_shape1.i_shape1.is_close( newSphere( transform = translation( newVector(0,0.5,0) ), material = sphere_material ) )
+        assert scene.world.shapes[3].u_shape1.i_shape2.is_close( newSphere( transform = translation( newVector(0,-0.5,0) ), material = sphere_material ) )
+        assert $scene.world.shapes[3].u_shape2.kind == "ShapesDifference"
+        assert scene.world.shapes[3].u_shape2.d_shape1.is_close( newSphere( transform = translation( newVector(0,0.5,0) ), material = sphere_material ) )
+        assert scene.world.shapes[3].u_shape2.d_shape2.is_close( newSphere( transform = translation( newVector(0,-0.5,0) ), material = sphere_material ) )
+        assert $scene.world.shapes[4].kind == "Parallelepiped"
+        assert scene.world.shapes[4].is_close( newParallelepiped( transform = rotation_y(150), material = sky_material, p_max = newPoint(1.0,1.0,1.0) ) )
 
         #check camera
         

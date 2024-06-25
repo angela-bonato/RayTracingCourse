@@ -827,3 +827,15 @@ proc have_inside*( shape : Shape, point : Point) : bool =
     else:
         assert false, "Invalid Shape.kind found"
 
+proc is_close*(shape1, shape2 : Shape) : bool =
+    ## is_close proc for shapes
+    if shape1.kind != shape2.kind :
+        return false
+    elif shape1.kind == Sphere:
+        return (shape1.transformation.is_close(shape2.transformation) and shape1.material.is_close(shape2.material) )
+    elif shape1.kind == Plane:
+        return (shape1.transformation.is_close(shape2.transformation) and shape1.material.is_close(shape2.material) )
+    elif shape1.kind == Parallelepiped:
+        return (shape1.transformation.is_close(shape2.transformation) and shape1.material.is_close(shape2.material) and shape1.pmin.is_close(shape2.pmin) and shape1.pmax.is_close(shape2.pmax))
+ 
+

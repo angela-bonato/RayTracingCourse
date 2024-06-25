@@ -225,3 +225,24 @@ proc newMaterial*(brdf = newDiffuseBrdf(), em_rad = newUniformPigment(newColor(0
     result.brdf = brdf
     result.emitted_radiance = em_rad
     return result
+
+proc is_close*(pigment1, pigment2 : Pigment) : bool =
+    if pigment1.kind != pigment2.kind :
+        return false
+    elif pigment1.kind == UniformPigment:
+        return  pigment1.color.is_close(pigment2.color) 
+    elif pigment1.kind == CheckeredPigment:
+        return ( pigment1.col_even.is_close(pigment2.col_even) and pigment1.col_odd.is_close(pigment2.col_odd) and (pigment1.div_u == pigment2.div_u) and (pigment1.div_v == pigment2.div_v) )
+    elif pigment1.kind == ImagePigment:
+        return pigment1.image.is_close(pigment2.image)
+
+proc is_close*(brdf1, brdf2 : Brdf) : bool =
+    if brdf1.kind != brdf2.kind :
+        return false
+    elif brdf1.kind == DiffuseBrdf:
+        return ( brdf1.pigment.is_close(brdf2.pigment) and brdf1.reflectance.almostEqual(brdf2.reflectance) )
+    elif brdf1.kind == SpecularBrdf:
+        return ( brdf1.pigment.is_close(brdf2.pigment) and brdf1.threshold_angle_rad.almostEqual(brdf2.threshold_angle_rad) )
+
+proc is_close*(mat1, mat2 : Material) : bool =
+    return ( mat1.brdf.is_close(mat2.brdf) and mat1.emitted_radiance.is_close(mat2.emitted_radiance) )
