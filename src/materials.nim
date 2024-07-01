@@ -90,11 +90,11 @@ proc newImagePigment*(image : HdrImage): Pigment {.inline.} =
     ## Constructor of ImagePigment
     Pigment(kind: ImagePigment, image: image)
 
-#method
+#methods
 
 proc get_color*(pig : Pigment, coord : Vec2d) : Color =
     ##Each type of pigment has it's own definition
-    
+   
     if pig.kind == UniformPigment:
         ## Definition of get_color proc specific for UniformPigment
         return pig.color

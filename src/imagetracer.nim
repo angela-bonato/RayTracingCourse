@@ -55,6 +55,7 @@ proc MC_fire_ray_pixel*(img_tracer: ImageTracer, col,row : int, fire_ray_image: 
 proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solve_rendering: SolveRenderingProc, scene: World, antial: int) : void =
     ## fire_all_rays 
     if antial == 0 :
+        echo "Called fire_all_rays without antialiasing"
         ## antialiasing turned off
         for row in countup(0,img_tracer.image.height-1):
             for col in countup(0,img_tracer.image.width-1):
@@ -76,6 +77,7 @@ proc fire_all_rays*(img_tracer: ImageTracer, fire_ray_image : FireRayProcs, solv
 
     else:
         ## antialiasing turned on
+        echo "Called fire_all_rays with antialiasing"
         var 
             pcg_a = newPcg()
             square = 1.0/float(antial)

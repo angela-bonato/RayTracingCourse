@@ -24,7 +24,6 @@ test_10
 
 ### Useless .png and .pfm files ###
 demo_animation/*.pfm
-demo_animation/*.png
 demo_animation/*.mp4 
 
 ### VisualStudioCode ###

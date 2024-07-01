@@ -1,3 +1,18 @@
+# HEAD
+
+- Add bash script to parallelize the production of animations
+- Adjurned demo command
+- Add antialiasing option 
+- Add rendering algorithm (FlatRender and PathTracer)
+- Add pcg random generator to perform ray-tracing
+- Add Material classes and now each Shape have a Material member
+- Add Pigment classes (UniformPigment, CheckeredPigment and ImagePigment )
+- Add Brdf classes (SpecularBrdf and DiffuseBrdf)
+
+# v0.2.1
+
+- Fixed bugs in Parallelepiped class
+
 # v0.2.0
 
 - Add geometry classes (vectors, points, matrixes ecc) used for rendering

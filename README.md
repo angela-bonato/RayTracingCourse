@@ -3,7 +3,7 @@
 ![release](https://img.shields.io/github/v/release/angela-bonato/RayTracingCourse)
 ![Top Language](https://img.shields.io/github/languages/top/angela-bonato/RayTracingCourse)
 
-# v0.2.0
+# v0.3.0
 
 With this program, you can read PFM files and convert them to PNG files performing, if necessary, tone mapping and gamma correction. Moreover, form this version on, you can produce a geometric image using a ray-tracing algorithm and save it both as a PFM and PNG file.
 
@@ -33,7 +33,7 @@ and then run it via
 
 Two commands are available: `pfm2png` and `demo`. Keep reading to learn about them or run
 
-    nimble run project <COMMAND> -h
+    ./project <COMMAND> -h
 
 for a quick guide.
 
@@ -41,11 +41,11 @@ for a quick guide.
 
 To use this program to convert an `INPUT_PFM_FILE` to an `OUTPUT_PNG_FILE` run  
 
-    nimble run project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
     
 To perform tone mapping and/or gamma correction during the conversion, you can specify `<GAMMA>` and/or `<A_VALUE>` using
 
-    nimble run project pfm2png -a=<A_VALUE> -g=<GAMMA> <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project pfm2png -a=<A_VALUE> -g=<GAMMA> <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
 
 These are optional arguments so you can either specify them both, just one of them or none of them as in the previous case.
 
@@ -81,13 +81,12 @@ Here are some example of the conversion of the file `memorial.pfm` using differe
 
 To use this program as a ray-tracer and produce a demo image run
 
-    nimble run project demo <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project demo <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
 
 As in the previous case, it is possible to add some optional arguments to the command to adjust some aspects of the generated image. 
-- `-a=<A_VALUE>` and `-g=<GAMMA>` can be used as explained above;
-- `-k='o'` changes the camera used to generate the image from a perspective one (default or `-k='p'`) to an orthogonal one;
-- `-w=<WIDTH>` and `--height=<HEIGHT>` allows you to decide the dimension of the generated image using an integer number of pixells for each length, default values are 640 and 480 respectively;
-- `--angle=<ANGLE>` set the angle (expressed in degrees) from which the camera looks at the scene, default is 0.
+To learn about the optional parameters run:
+
+    ./project demo -h
 
 Here is the default demo image produced:
 
@@ -96,30 +95,37 @@ Here is the default demo image produced:
 
 ### Production of demo animation
 
-With this code it is also possible to produce an animation which shows the demo image as if the camera rotates around the scene. For this, just run the bash script that you find in the present directory using
+With this code it is also possible to produce an animation which shows the demo image as if the camera rotates around the scene. 
+To do this you have to generate the frames running the bash script in the demo_animation directory
 
-    sh demo_animation.sh
+    ./generate_image.sh
 
-All the images used as frames for the animation will be saved in the `demo_animation` directory, together with an mp4 version of this:
+You can also parallelize this process runnig (it requires to have *parallel* installed)
+
+    parallel -j <NUM_CORES> ./generate_image.sh '{}' ::: $(seq 0 359)
+
+All the images used as frames for the animation will be saved in the `demo_animation` directory, to create the animation run
+
+    ./generate_animation.sh
 
 <p align="center">
-<img  style="center" src="examples/spheres-perspective.gif" width="320" height="240">
+<img  style="center" src="examples/demo_animation.gif" width="320" height="240">
 
 ## Advanced usage
 
-If you are a skilled user, by properly changing `demo()` and `OnOffTracer()` procs in [project.nim](./src/project.nim), you can produce many other images. To give you an idea about what is feasible with this program, here is a selection to inspire you.
+If you are a skilled user, by properly changing `demo()` proc in [project.nim](./src/project.nim), you can produce many other images. To give you an idea about what is feasible with this program, here is a selection to inspire you.
 
 <div style="text-align: center;">
 <table style="margin: 0px auto;">
     <tr>
         <td> 
-            <img src="examples/csg.png" alt="Image 1" width="320" height="240">
+            <img src="examples/csg.jpeg" alt="Image 1" width="320" height="240">
         </td>
         <td> 
-            <img src="examples/parallelepiped.png" alt="Image 2" width="320" height="240">
+            <img src="examples/earth.jpeg" alt="Image 2" width="320" height="240">
         </td>
         <td> 
-            <img src="examples/plane.png" alt="Image 3" width="320" height="240">
+            <img src="examples/mirrors.png" alt="Image 3" width="320" height="240">
         </td>
     </tr>
 </table>

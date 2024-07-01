@@ -29,8 +29,8 @@ proc newHdrImage*(): HdrImage =
 proc newHdrImage*(width,height : int): HdrImage = 
     ## Constructor with elements, initialize the variables to given values
     new(result)
-    result.height = height
     result.width = width
+    result.height = height
     result.pixels = newSeq[Color](height*width)
     return result
 
