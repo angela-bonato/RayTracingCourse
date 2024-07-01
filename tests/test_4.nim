@@ -139,14 +139,14 @@ proc test_translation() : void =
 
     var 
         vec = newVector(1.0, 2.0, 3.0)
-        trasl = translation(vec)
+        transl = translation(vec)
         mat = newHomMatrix([ 1.0, 0.0, 0.0, 1.0,
                              0.0, 1.0, 0.0, 2.0, 
                              0.0, 0.0, 1.0, 3.0,
                              0.0, 0.0, 0.0, 1.0 ])
 
-    assert trasl.is_consistent()
-    assert mat.is_close(trasl.matrix)
+    assert transl.is_consistent()
+    assert mat.is_close(transl.matrix)
     
 proc test_rotation() : void =
     ## test rotation creation
@@ -181,17 +181,21 @@ proc test_rotation() : void =
 
 proc test_translation_application() : void =
     var
+<<<<<<< HEAD
         trasl = translation(newVector(1.0, 2.0, 3.0))
+=======
+        transl = translation(newVector(1.0, 2.0, 3.0))
+>>>>>>> master
         vec = newVector(4.0, 5.0, 6.0)
         point = newPoint(4.0, 5.0, 6.0)
         norm = newNormal(4.0, 5.0, 6.0)
-        test_vec = trasl*vec
-        test_point = trasl*point
-        test_norm = trasl*norm
+        test_vec = transl*vec
+        test_point = transl*point
+        test_norm = transl*norm
 
-    assert vec.is_close(trasl*vec)
-    assert newPoint(5.0,7.0,9.0).is_close(trasl*point)
-    assert norm.is_close(trasl*norm)
+    assert vec.is_close(transl*vec)
+    assert newPoint(5.0,7.0,9.0).is_close(transl*point)
+    assert norm.is_close(transl*norm)
 
 proc test_rotation_application() : void =
     var 

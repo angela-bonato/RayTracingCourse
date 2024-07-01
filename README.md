@@ -124,6 +124,11 @@ If you are a skilled user, by properly changing `demo()` proc in [project.nim](.
         <td> 
             <img src="examples/earth.jpeg" alt="Image 2" width="320" height="240">
         </td>
+    </tr>
+    <tr>
+        <td> 
+            <img src="examples/demo_a_flat.png" alt="Image 2" width="320" height="240">
+        </td>
         <td> 
             <img src="examples/mirrors.png" alt="Image 3" width="320" height="240">
         </td>

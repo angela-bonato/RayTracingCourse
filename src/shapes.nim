@@ -582,7 +582,7 @@ proc all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] =
         if tzmin > tzmax : swap(tzmin, tzmax)
 
     #I separatelly check if the ray is parallel to a face of the parallelepiped
-    
+
         if inv_ray.dir.x.is_close(0.0) and inv_ray.dir.y.is_close(0.0) :
             #Ray parallel to z
             if (inv_ray.origin.x.max_close(shape.pmin.x) and inv_ray.origin.x.min_close(shape.pmax.x)) and (inv_ray.origin.y.max_close(shape.pmin.y) and inv_ray.origin.y.min_close(shape.pmax.y)):
@@ -838,5 +838,9 @@ proc is_close*(shape1, shape2 : Shape) : bool =
         return (shape1.transformation.is_close(shape2.transformation) and shape1.material.is_close(shape2.material) )
     elif shape1.kind == Parallelepiped:
         return (shape1.transformation.is_close(shape2.transformation) and shape1.material.is_close(shape2.material) and shape1.pmin.is_close(shape2.pmin) and shape1.pmax.is_close(shape2.pmax))
+<<<<<<< HEAD
  
 
+=======
+ 
+>>>>>>> master

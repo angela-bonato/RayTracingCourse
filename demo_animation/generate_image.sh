@@ -10,5 +10,5 @@ readonly angleNNN=$(printf "%03d" $angle)
 readonly pfmfile=image$angleNNN.pfm
 readonly pngfile=image$angleNNN.png
 
-time ./../project demo --antial_rays=0 --algorith=flat --angle=$angle $pfmfile $pngfile
+time ./../project demo --angle=$angle $pfmfile $pngfile
 
