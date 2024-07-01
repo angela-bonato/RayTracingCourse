@@ -1,4 +1,8 @@
-# HEAD
+# v1.0.0
+
+- Implement a compiler to allow the user to describe the scene in a .txt file
+
+# v0.3.0
 
 - Add bash script to parallelize the production of animations
 - Adjurned demo command

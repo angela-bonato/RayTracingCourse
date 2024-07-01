@@ -14,7 +14,7 @@ import std/strutils
 import std/streams
 import std/math
 
-proc render(a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = NaN, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 3, lim_depth = 2, args : seq[string]) : void =
+proc render(a_factor = 0.5, gamma = 2.0, width = 640, angle = NaN, antial_rays = 9, algorithm = "path_tracer", num_rays = 10, max_depth = 3, lim_depth = 2, args : seq[string]) : void =
   ## Command to produce an image from a file that describe the scene
   
   # check input file 
@@ -25,7 +25,8 @@ proc render(a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = NaN,
     quit "Usage:\n  render [optional-params] <IN_TXT_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
   var n = args[0].find(".txt")
   input_file = args[0]
-  filename = args[0][0 .. ^n]
+  filename = input_file
+  filename.removeSuffix(".txt")
 
   # create and initialize variables
 
@@ -34,7 +35,7 @@ proc render(a_factor = 0.5, gamma = 2.0, width = 640, height = 480, angle = NaN,
     scene = parse_scene(instream)
     cam = get(scene.camera)
     fire_ray = get(scene.fire_proc)
-    img = newHdrImage(width, height)
+    img = newHdrImage(width, int(float(width)/cam.aspect_ratio) )
     im_tracer = newImageTracer( img, cam )
     world = scene.world
     output_img : HdrImage 
@@ -145,7 +146,6 @@ when isMainModule:
                                [render, help={"args":"<INPUT TXT FILE> ",
                                               "angle":"set the angle of view, in 360°",
                                               "width":"set the width of the generated image",
-                                              "height":"set the height of the generated image",
                                               "algorithm":"set the algorithm used to solve the rendering, it can be: \n  'onoff': give a hit color if the ray hits the shape and a background color if it doesn't \n  'flat': compute the rendering neglecting any contibution of the light, it just uses the pigment of each surface\n  'path_tracer': a real raytracing algorithm",
                                               "antial_rays":"set the number of rays used to perform antialiasing, it must be a perfect square. if==0 antialising is turned off",
                                               "num_rays":"set the number of diffused rays to perform MC integration in the path_tracer algorithm",

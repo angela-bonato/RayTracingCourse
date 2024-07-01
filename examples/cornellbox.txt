@@ -1,0 +1,37 @@
+material right_wall_mat(
+    diffuse(uniform(<1,0,0>)),
+    uniform(<0,0,0>)
+)
+
+material left_wall_mat(
+    diffuse(uniform(<0,1,0>)),
+    uniform(<0,0,0>)
+)
+
+material walls_mat(
+    diffuse(uniform(<1,1,1>)),
+    uniform(<0,0,0>)
+)
+
+material paral_mat(
+    diffuse(uniform(<0.6,0.6,0.6>)),
+    uniform(<0,0,0>)
+)
+
+material light_mat(
+    diffuse(uniform(<0,0,0>)),
+    uniform(<0.5,0.5,0.5>)
+)
+
+plane( right_wall_mat, translation([0,2.5,0])*rotation_x(1.57))
+plane( left_wall_mat, translation([0,-2.5,0])*rotation_x(1.57))
+plane( walls_mat, translation([4,0,0])*rotation_y(1.57) )
+plane( walls_mat, translation([0,0,4]) )
+plane(walls_mat, identity)
+
+parallelepiped( light_mat, translation([2,-0.3,3.9]), (0.6,0.6,0.6))
+
+parallelepiped( paral_mat, translation([2.5,0.9,0])*rotation_z(0.6)*translation([-0.6,-0.4,0]), (1.2,0.8,1.5) )
+parallelepiped( paral_mat, translation([2.5,-0.9,0])*rotation_z(-0.6)*translation([-0.6,-0.4,0]), (1.2,0.8,2) )
+
+camera( perspective, translation([0,0, 2]), 1.25 , 1.2 )

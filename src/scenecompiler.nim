@@ -666,7 +666,7 @@ proc parse_difference*(istream: var InputStream, scene: Scene) : Shape =
 
 proc parse_camera*(istream: var InputStream, scene: Scene) : (Camera, FireRayProcs) =  #I don't know if it is right but it is the only way to define the camera type
     ##Read tokens and returns the corresponding camera
-    ##syntax should be camera(type, transformation, float)
+    ##syntax should be camera(type, transformation, float, float)
     istream.expect_symbol("(")
     var type_kw = istream.expect_keywords(@[PERSPECTIVE, ORTHOGONAL])
     istream.expect_symbol(",")

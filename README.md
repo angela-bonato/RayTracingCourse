@@ -56,21 +56,21 @@ Here are some example of the conversion of the file `memorial.pfm` using differe
 <table style="margin: 0px auto;">
     <tr>
         <td> 
-            <img src="examples/memorial_1_0.15.png" alt="Image 1" width="154" height="231">
+            <img src="readme_images/memorial_1_0.15.png" alt="Image 1" width="154" height="231">
             <p>A_VALUE=0.15  GAMMA=1.0</p> 
         </td>
         <td> 
-            <img src="examples/memorial_1_0.25.png" alt="Image 2" width="154" height="231">
+            <img src="readme_images/memorial_1_0.25.png" alt="Image 2" width="154" height="231">
             <p>A_VALUE=0.25  GAMMA=1.0</p>
         </td>
     </tr>
     <tr>
         <td> 
-            <img src="examples/memorial_2_0.15.png" alt="Image 3" width="154" height="231">
+            <img src="readme_images/memorial_2_0.15.png" alt="Image 3" width="154" height="231">
             <p>A_VALUE=0.15  GAMMA=2.0</p>
         </td>
         <td> 
-            <img src="examples/memorial_2_0.25.png" alt="Image 4" width="154" height="231">
+            <img src="readme_images/memorial_2_0.25.png" alt="Image 4" width="154" height="231">
             <p>A_VALUE=0.25  GAMMA=2.0</p>
         </td>
     </tr>
@@ -91,7 +91,7 @@ To learn about the optional parameters run:
 Here is the default demo image produced:
 
 <p align="center">
-<img  style="center" src="examples/demo.png" width="320" height="240">
+<img  style="center" src="readme_images/demo.png" width="320" height="240">
 
 ### Production of demo animation
 
@@ -109,7 +109,7 @@ All the images used as frames for the animation will be saved in the `demo_anima
     ./generate_animation.sh
 
 <p align="center">
-<img  style="center" src="examples/demo_animation.gif" width="320" height="240">
+<img  style="center" src="readme_images/demo_animation.gif" width="320" height="240">
 
 ## Advanced usage
 
@@ -119,18 +119,18 @@ If you are a skilled user, by properly changing `demo()` proc in [project.nim](.
 <table style="margin: 0px auto;">
     <tr>
         <td> 
-            <img src="examples/csg.jpeg" alt="Image 1" width="320" height="240">
+            <img src="readme_images/csg.jpeg" alt="Image 1" width="320" height="240">
         </td>
         <td> 
-            <img src="examples/earth.jpeg" alt="Image 2" width="320" height="240">
+            <img src="readme_images/earth.jpeg" alt="Image 2" width="320" height="240">
         </td>
     </tr>
     <tr>
         <td> 
-            <img src="examples/demo_a_flat.png" alt="Image 2" width="320" height="240">
+            <img src="readme_images/demo_a_flat.png" alt="Image 2" width="320" height="240">
         </td>
         <td> 
-            <img src="examples/mirrors.png" alt="Image 3" width="320" height="240">
+            <img src="readme_images/mirrors.png" alt="Image 3" width="320" height="240">
         </td>
     </tr>
 </table>
