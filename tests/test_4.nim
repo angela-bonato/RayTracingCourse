@@ -181,11 +181,7 @@ proc test_rotation() : void =
 
 proc test_translation_application() : void =
     var
-<<<<<<< HEAD
-        trasl = translation(newVector(1.0, 2.0, 3.0))
-=======
         transl = translation(newVector(1.0, 2.0, 3.0))
->>>>>>> master
         vec = newVector(4.0, 5.0, 6.0)
         point = newPoint(4.0, 5.0, 6.0)
         norm = newNormal(4.0, 5.0, 6.0)
