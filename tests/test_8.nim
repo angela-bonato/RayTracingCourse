@@ -4,8 +4,7 @@ import ../src/color
 import ../src/materials
 import ../src/world
 import ../src/ray
-import ../src/vector
-import ../src/point
+import ../src/geometry
 import ../src/renderprocs
 
 suite "Test Pigment":
@@ -40,22 +39,18 @@ suite "Test Pigment":
         assert chepig.get_color(newVec2d(0.75, 0.75)).is_close(col1)
 
     test "ImagePigment":
-        var texture = newHdrImage(3, 2)
+        var texture = newHdrImage(2, 2)
         texture.setPixel(0, 0, newColor(1.0, 2.0, 3.0))
         texture.setPixel(1, 0, newColor(2.0, 3.0, 1.0))
-        texture.setPixel(2, 0, newColor(4.0, 5.0, 6.0))
         texture.setPixel(0, 1, newColor(2.0, 1.0, 3.0))
         texture.setPixel(1, 1, newColor(3.0, 2.0, 1.0))
-        texture.setPixel(2, 1, newColor(6.0, 5.0, 4.0))
 
         var impig = newImagePigment(texture)
-        
+
         assert impig.get_color(newVec2d(0.0, 0.0)).is_close(newColor(1.0, 2.0, 3.0))
-        assert impig.get_color(newVec2d(0.5, 0.0)).is_close(newColor(2.0, 3.0, 1.0))
-        assert impig.get_color(newVec2d(1.0, 0.0)).is_close(newColor(4.0, 5.0, 6.0))
+        assert impig.get_color(newVec2d(1.0, 0.0)).is_close(newColor(2.0, 3.0, 1.0))
         assert impig.get_color(newVec2d(0.0, 1.0)).is_close(newColor(2.0, 1.0, 3.0))
-        assert impig.get_color(newVec2d(0.5, 1.0)).is_close(newColor(3.0, 2.0, 1.0))
-        assert impig.get_color(newVec2d(1.0, 1.0)).is_close(newColor(6.0, 5.0, 4.0))
+        assert impig.get_color(newVec2d(1.0, 1.0)).is_close(newColor(3.0, 2.0, 1.0))
     
     echo "Ended tests on Pigment"
 

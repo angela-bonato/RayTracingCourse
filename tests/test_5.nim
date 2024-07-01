@@ -1,8 +1,6 @@
 import ../src/color
 import ../src/hdrimage
-import ../src/point
-import ../src/vector
-import ../src/transformation
+import ../src/geometry
 import ../src/ray
 import ../src/camera
 import ../src/imagetracer
@@ -39,7 +37,7 @@ proc test_ray_transform(): void =
     ## Test on the action of a transformation on a ray object
     var
         ray = newRay(newPoint(1.0, 2.0, 3.0), newVector(6.0, 5.0, 4.0))
-        transformation = traslation(newVector(10.0, 11.0, 12.0)) * rotation_x(PI/2.0)
+        transformation = translation(newVector(10.0, 11.0, 12.0)) * rotation_x(PI/2.0)
         transformed = ray.transform(transformation)
 
     assert transformed.origin.is_close(newPoint(11.0, 8.0, 14.0))
@@ -71,7 +69,7 @@ proc test_orthogonal_camera(): void =
 proc test_orthogonal_camera_transform(): void =
     ##Tests the action of a transformation on an orthogonal camera
     var 
-        cam = newCamera(transform = (traslation(newVector(0.0, -1.0, 0.0) * 2.0) * rotation_z(PI/2.0)))    #Uses default aspect_ratio and distance
+        cam = newCamera(transform = (translation(newVector(0.0, -1.0, 0.0) * 2.0) * rotation_z(PI/2.0)))    #Uses default aspect_ratio and distance
         fire_ray = fire_ray_orthogonal  #cam is now an orthogonal camera
         ray = cam.fire_ray(0.5, 0.5)
 

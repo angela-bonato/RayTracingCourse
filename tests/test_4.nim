@@ -1,9 +1,5 @@
-import ../src/point
-import ../src/vector
-import ../src/normal
-import ../src/hommatrix
-import ../src/transformation
-import ../src/geometryalgebra
+
+import ../src/geometry
 import std/math
 
 ##Tests on functions related to geometry classes (point, vector, normal, transformation)##
@@ -138,19 +134,19 @@ proc test_trans_creation() : void =
     assert transform2.is_consistent()
     assert transform2.matrix.is_close(id)
 
-proc test_traslation() : void =
-    ## test traslation creation
+proc test_translation() : void =
+    ## test translation creation
 
     var 
         vec = newVector(1.0, 2.0, 3.0)
-        trasl = traslation(vec)
+        transl = translation(vec)
         mat = newHomMatrix([ 1.0, 0.0, 0.0, 1.0,
                              0.0, 1.0, 0.0, 2.0, 
                              0.0, 0.0, 1.0, 3.0,
                              0.0, 0.0, 0.0, 1.0 ])
 
-    assert trasl.is_consistent()
-    assert mat.is_close(trasl.matrix)
+    assert transl.is_consistent()
+    assert mat.is_close(transl.matrix)
     
 proc test_rotation() : void =
     ## test rotation creation
@@ -183,19 +179,19 @@ proc test_rotation() : void =
     assert mat_y.is_close(rot_y.matrix)
     assert mat_z.is_close(rot_z.matrix)
 
-proc test_traslation_application() : void =
+proc test_translation_application() : void =
     var
-        trasl = traslation(newVector(1.0, 2.0, 3.0))
+        transl = translation(newVector(1.0, 2.0, 3.0))
         vec = newVector(4.0, 5.0, 6.0)
         point = newPoint(4.0, 5.0, 6.0)
         norm = newNormal(4.0, 5.0, 6.0)
-        test_vec = trasl*vec
-        test_point = trasl*point
-        test_norm = trasl*norm
+        test_vec = transl*vec
+        test_point = transl*point
+        test_norm = transl*norm
 
-    assert vec.is_close(trasl*vec)
-    assert newPoint(5.0,7.0,9.0).is_close(trasl*point)
-    assert norm.is_close(trasl*norm)
+    assert vec.is_close(transl*vec)
+    assert newPoint(5.0,7.0,9.0).is_close(transl*point)
+    assert norm.is_close(transl*norm)
 
 proc test_rotation_application() : void =
     var 
@@ -230,7 +226,7 @@ test_mat_creation()
 test_element_access()
 test_matrix_product()
 test_trans_creation()
-test_traslation()
+test_translation()
 test_rotation()
-test_traslation_application()
+test_translation_application()
 test_rotation_application()

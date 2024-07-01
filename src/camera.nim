@@ -1,9 +1,7 @@
 ## Implementation of the Camera type and its metods. It represent the camera size and orientation, using both Ortogonal and Perspective way to see the scene.
 
-import transformation
+import geometry
 import ray
-import vector
-import point
 
 # Camera type declaration
 

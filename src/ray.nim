@@ -1,9 +1,6 @@
 ## Definition of Ray type and its methods. In a backword ray-tracing prospective, each ray object represents a light ray that the camera sends onto the screen (i.e., the image).
 
-import point
-import vector
-import geometryalgebra
-import transformation
+import geometry
 
 #Ray type declaration
 
