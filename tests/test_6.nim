@@ -13,7 +13,7 @@ suite "Test Sphere":
     setup:
         var
             unitary_sphere = newSphere()
-            traslated_sphere = newSphere(translation( newVector(10.0,0,0)))
+            translated_sphere = newSphere(translation( newVector(10.0,0,0)))
         echo "New test started"
 
     teardown:
@@ -61,13 +61,13 @@ suite "Test Sphere":
         assert hit_point.get().t.almostEqual(1.0)
         assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
 
-    test "Traslated sphere intersection 1":
+    test "Translated sphere intersection 1":
         var
             ray = newRay(newPoint(10.0,0,2.0),newVector(0,0,-1.0))
             teoretical_hit_point = newPoint(10.0,0,1.0)
             teoretical_normal = newNormal(0,0,1.0)
             teoretical_uv_coordinates = newVec2d(0,0)
-            hit_point = traslated_sphere.ray_intersection(ray)
+            hit_point = translated_sphere.ray_intersection(ray)
             hit_point_2 = unitary_sphere.ray_intersection(ray)
 
         assert hit_point.isSome
@@ -77,13 +77,13 @@ suite "Test Sphere":
         assert hit_point.get().t.almostEqual(1.0)
         assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
 
-    test "Traslated sphere intersection 2":
+    test "Translated sphere intersection 2":
         var
             ray = newRay(newPoint(13.0,0,0),newVector(-1,0,0))
             teoretical_hit_point = newPoint(11.0,0,0)
             teoretical_normal = newNormal(1.0,0,0)
             teoretical_uv_coordinates = newVec2d(0,0.5)
-            hit_point = traslated_sphere.ray_intersection(ray)
+            hit_point = translated_sphere.ray_intersection(ray)
 
         assert hit_point.isSome
         assert hit_point.get().world_point.is_close( teoretical_hit_point )
@@ -262,7 +262,7 @@ suite "Test Parallelepiped":
         assert hit_point.get().t.almostEqual(0.5)
         assert hit_point.get().surface_point.is_close( teoretical_uv_coordinates )
 
-    test "Traslated cube intersection":
+    test "Translated cube intersection":
         var
             tr_cube = newParallelepiped(transform = translation(newVector(10.0,0,0)))
             ray = newRay(newPoint(10.5,0.5,2.0),newVector(0,0,-1.0))
