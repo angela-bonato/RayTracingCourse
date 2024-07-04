@@ -1,0 +1,30 @@
+
+material wall_mat(
+    diffuse( image("examples/brick_texture.pfm")),
+    uniform(<0,0,0>)
+)
+
+material table_mat(
+    diffuse( image("examples/wood_texture.pfm")),
+    uniform(<0,0,0>)
+)
+
+material sky_mat(
+    diffuse( uniform(<0,0,0>)),
+    uniform(<0.2, 0.2, 0.2>)
+)
+
+material sphere_mat(
+    diffuse( image("examples/flower_texture.pfm")),
+    uniform(<0,0,0>)
+)
+
+plane( wall_mat, translation([4,0,0])*rotation_y(1.57)*scaling(2,2,2) )
+plane( table_mat, scaling(5,5,5))
+
+#sphere( sky_mat, translation([0,0,50])*scaling(2,2,2) )
+sphere(sky_mat, scaling(100,100,100))
+
+subtract( intersect( sphere( sphere_mat, translation([2,0,1.5])*scaling(1.5,1.5,1.5)), plane(sphere_mat, translation([0,0,1.5])) ), sphere( sphere_mat, translation([2,0,1.5])*scaling(1.4,1.4,1.4) )) 
+
+camera( perspective, translation([0,0, 2]) , 1.333 , 1 )

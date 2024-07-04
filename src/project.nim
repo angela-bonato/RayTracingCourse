@@ -117,6 +117,8 @@ proc pfm2png(a_factor = 0.18, gamma = 2.0, args : seq[string]) : void =
 
   if len(args) != 2:
     quit "Usage:\n  demo [optional-params] <IN_PFM_FILENAME> <OUT_PNG_FILENAME> \n\nTo show a better usage explanation use the optional parameter -h, --help "
+  input_pfm_filename = args[0]
+  output_png_filename = args[1]
 
   try:
     input_stream = newFileStream(input_pfm_filename, fmRead )

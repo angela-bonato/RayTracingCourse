@@ -466,7 +466,7 @@ proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
 
         if hit1.isNone : return none(HitRecord)
 
-        elif (hit1.isSome and hit2.isNone) or (hit1.get().t <= hit2.get().t) : return hit1
+        #elif (hit1.isSome and hit2.isNone) or (hit1.get().t <= hit2.get().t) : return hit1
 
         else :
             var  

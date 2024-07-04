@@ -66,7 +66,7 @@ type KeywordEnum* = enum
     NEW, MATERIAL, CAMERA, ORTHOGONAL, PERSPECTIVE, FLOAT,
     PLANE, SPHERE, PARALLELEPIPED,
     UNITE, SUBTRACT, INTERSECT,
-    DIFFUSE, SPECULAR,
+    DIFFUSE, SPECULAR, MIXED,
     UNIFORM, CHECKERED, IMAGE,
     IDENTITY, TRANSLATION, ROTATION_X, ROTATION_Y, ROTATION_Z, SCALING
 
@@ -74,7 +74,7 @@ let keywordMap* = {
   "new": NEW, "material": MATERIAL, "camera": CAMERA, "orthogonal": ORTHOGONAL, "perspective": PERSPECTIVE, "float": FLOAT,
   "plane": PLANE, "sphere": SPHERE, "parallelepiped": PARALLELEPIPED,
   "unite": UNITE, "subtract": SUBTRACT, "intersect": INTERSECT,
-  "diffuse": DIFFUSE, "specular": SPECULAR,
+  "diffuse": DIFFUSE, "specular": SPECULAR, "mixed": MIXED,
   "uniform": UNIFORM, "checkered": CHECKERED, "image": IMAGE,
   "identity": IDENTITY, "translation": TRANSLATION, "rotation_x": ROTATION_X, "rotation_y": ROTATION_Y, "rotation_z": ROTATION_Z, "scaling": SCALING
 }.toTable
@@ -457,7 +457,7 @@ proc parse_pigment*(istream: var InputStream, scene: Scene) : Pigment =
 
 proc parse_brdf*(istream: var InputStream, scene: Scene) : Brdf =
     ##Read tokens and returns the corresponding brdf
-    var keyword = istream.expect_keywords(@[DIFFUSE, SPECULAR])
+    var keyword = istream.expect_keywords(@[DIFFUSE, SPECULAR, MIXED])
     istream.expect_symbol("(")
     var parsed_pig = istream.parse_pigment(scene)
 
@@ -494,7 +494,35 @@ proc parse_brdf*(istream: var InputStream, scene: Scene) : Brdf =
             #use default threshold_angle_rad
             return newSpecularBrdf(pigment = parsed_pig)
         else:  #there is an error but should I raise it here?
-            istream.unread_token(next_kw)        
+            istream.unread_token(next_kw)     
+    
+    elif keyword == MIXED :
+        ## syntax should be mixed(pigment, float, float, float)
+        # the first float is the value of mixing: 0 is a DiffusiveBrdf and 1 is a SpecularBrdf
+        # the last two floats are respectively the threshold_angle_rad and the reflectance, they are optional
+
+        istream.expect_symbol(",")
+        var 
+            parsed_p = istream.expect_number(scene)
+            next_kw = istream.read_token()
+
+        if next_kw.symbol == ",":
+            # there is the specification of the threshold_angle_rad
+            var parsed_ang = istream.expect_number(scene)
+            next_kw = istream.read_token()
+            if next_kw.symbol == ",":
+                # there is the specification of the reflectance
+                var parsed_refl = istream.expect_number(scene)
+                istream.expect_symbol(")")
+                return newMixedBrdf(pigment= parsed_pig, ta_rad = parsed_ang, refl = parsed_refl, prob = parsed_p)
+            elif next_kw.symbol == ")":
+                # use default reflectance
+                return newMixedBrdf( pigment = parsed_pig, ta_rad = parsed_ang, prob = parsed_p )
+        elif next_kw.symbol == ")":
+            # use default reflectance and threshold_angle_rad
+            return newMixedBrdf( pigment = parsed_pig, prob = parsed_p )
+        else:
+            istream.unread_token(next_kw)
     
     else:  #there is an error but should I raise it here?
         assert false, "This line should be unreachable"  ###CONTROLLA STA COSAA

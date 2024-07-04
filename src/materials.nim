@@ -135,7 +135,7 @@ type
 
     BrdfKind* = enum 
         ##All possible kinds of brdf
-        SpecularBrdf, DiffuseBrdf
+        SpecularBrdf, DiffuseBrdf, MixedBrdf
     
     Brdf* = object 
         ## Actual definition
@@ -148,6 +148,11 @@ type
             of DiffuseBrdf:
                 ## Definition of the DiffuseBrdf type, it is constant for the shape on which it is called.
                 reflectance* : float
+            of MixedBrdf:
+                ## Definition of MixedBrdf, it could reflect a ray with probability p otherwise it will diffuse it
+                p* : float # higer the value, more it works as SpecularBrdf
+                th_angle_rad* : float
+                reflec* : float
 
 #Constructors
 
@@ -158,6 +163,10 @@ proc newDiffuseBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), refl 
 proc newSpecularBrdf*(pigment = newUniformPigment(newColor(255, 255, 255)), ta_rad = PI/1800.0 ) : Brdf {.inline.} =
     ## Constructor of SpecularBrdf
     Brdf(pigment: pigment, kind: SpecularBrdf, threshold_angle_rad: ta_rad)
+
+proc newMixedBrdf*(pigment = newUniformPigment(newColor(255,255,255)), ta_rad = PI/1800.0, refl = 1.0, prob = 0.5 ) : Brdf {.inline.} =
+    ## Contructor of MixedBrdf
+    Brdf(pigment: pigment, kind: MixedBrdf, th_angle_rad: ta_rad, reflec: refl, p: prob)
     
 #methods
 
@@ -208,7 +217,34 @@ proc scatter_ray*(brdf: Brdf, pcg: var Pcg, incoming_dir: Vector, interaction_po
                    tmin=1e-3,
                    tmax=Inf,
                    depth=depth)
-    
+
+    elif brdf.kind == MixedBrdf:
+        ## scatter_ray method for a MixedBrdf
+        if pcg.random_float() > brdf.p:
+            # work as DiffuseBrdf
+            var
+                onb = create_onb_from_z(normal)
+                cos_theta_sq = pcg.random_float()
+                cos_theta = sqrt(cos_theta_sq)
+                sin_theta = sqrt(1.0 - cos_theta_sq)
+                phi = 2 * PI * pcg.random_float()
+
+            return newRay( origin = interaction_point, 
+                           dir = onb.e1 * cos(phi) * cos_theta + onb.e2 * sin(phi) * cos_theta + onb.e3 * sin_theta,
+                           t_min = 10e-3,
+                           depth = depth )
+
+        else:
+            # work as SpecularBrdf
+            var
+                ray_dir = newVector(incoming_dir.x, incoming_dir.y, incoming_dir.z).normalized()
+                normal = newVector(normal.x, normal.y, normal.z).normalized()
+
+            return newRay(origin=interaction_point,
+                          dir=ray_dir - normal * 2 * normal.dot(ray_dir),
+                          tmin=1e-3,
+                          tmax=Inf,
+                          depth=depth)
     else:
         assert false, "Invalid Brdf.kind found"
     
