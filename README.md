@@ -109,7 +109,7 @@ All the images used as frames for the animation will be saved in the `demo_anima
     ./generate_animation.sh
 
 <p align="center">
-<img  style="center" src="readme_images/demo_animation.gif" width="320" height="240">
+<img  style="center" src="readme_images/demo.gif" width="320" height="240">
 
 ## Advanced usage
 
