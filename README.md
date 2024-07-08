@@ -3,11 +3,23 @@
 ![release](https://img.shields.io/github/v/release/angela-bonato/RayTracingCourse)
 ![Top Language](https://img.shields.io/github/languages/top/angela-bonato/RayTracingCourse)
 
-# v0.3.0
+# v1.0.0
 
-With this program, you can read PFM files and convert them to PNG files performing, if necessary, tone mapping and gamma correction. Moreover, form this version on, you can produce a geometric image using a ray-tracing algorithm and save it both as a PFM and PNG file.
+This program is a first step in rendering. It can produce images using different rendering algorithms, like the path tracer. Since the program output is a PNG image and a PFM file, it can also works as a PFM to PNG converter, performing tone mapping and gamma correction if necessary.
 
-## Installation
+This code is written in Nim and developed during the course "Numeric calculation for photorealistic images generation" held by professor [Maurizio Tomasi](https://github.com/ziotom78) at Unimi.
+
+## Table of Content
+
+- [Getting started](#getting-started)
+- [Basic usage with examples](#basic-usage-with-examples)
+    - [pfm2png](#pfm2png)
+    - [render](#render)
+- [Animation](#animation)
+- [Gallery](#gallery)
+- [License](#license)
+
+## Getting started
 
 The code is written in Nim, it has been tested with stable and devel Nim versions from 2.0.2 on with Ubuntu 22.04.4 or higher.
 
@@ -17,13 +29,7 @@ To use it, the installation of the [nim-simplepng](https://github.com/jrenner/ni
 
 ## Basic usage with examples
 
-### General indications
-
-To run the program you can either compile and run it in a single line using
-
-    nimble run project <COMMAND> <ARGUMENTS>
-
-or compile it with
+To use this program you have to compile it using:
 
     nimble build
 
@@ -31,15 +37,16 @@ and then run it via
 
     ./project <COMMAND> <ARGUMENTS>
 
-Two commands are available: `pfm2png` and `demo`. Keep reading to learn about them or run
+Two commands are available: `pfm2png` and `render`. Keep reading to learn about them or run
 
     ./project <COMMAND> -h
 
 for a quick guide.
 
-### Converter
+### pfm2png
 
-To use this program to convert an `INPUT_PFM_FILE` to an `OUTPUT_PNG_FILE` run  
+Use this option to convert an `INPUT_PFM_FILE` to an `OUTPUT_PNG_FILE`.
+To use it run
 
     ./project pfm2png <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
     
@@ -77,60 +84,68 @@ Here are some example of the conversion of the file `memorial.pfm` using differe
 </table>
 </div>
 
-### Production of demo image
+### render
+
+Use this option to create an image. The scene disposition has to be written in a txt file, using an easy lenguage we created and which basic syntax is explained in [this file](syntax_doc.md). 
+
+All the txt files in `examples` are written in that lenguage, so you can see them as references.
 
 To use this program as a ray-tracer and produce a demo image run
 
-    ./project demo <INPUT_PFM_FILE> <OUTPUT_PNG_FILE>
+    ./project render examples/demo.txt
 
 As in the previous case, it is possible to add some optional arguments to the command to adjust some aspects of the generated image. 
 To learn about the optional parameters run:
 
-    ./project demo -h
+    ./project render -h
 
 Here is the default demo image produced:
 
 <p align="center">
 <img  style="center" src="readme_images/demo.png" width="320" height="240">
 
-### Production of demo animation
+## Animation
 
-With this code it is also possible to produce an animation which shows the demo image as if the camera rotates around the scene. 
-To do this you have to generate the frames running the bash script in the demo_animation directory
+With this code it is also possible to produce an animation with the camera rotates around the scene. 
 
-    ./generate_image.sh
+You can create the frames runnig (it requires to have *parallel* installed)
 
-You can also parallelize this process runnig (it requires to have *parallel* installed)
+    parallel -j <NUM_CORES> ./generate_image.sh '{}' ::: $(seq 0 359) <txt_scene_description>
 
-    parallel -j <NUM_CORES> ./generate_image.sh '{}' ::: $(seq 0 359)
+All the images used as frames for the animation will be saved in the `animation` directory.
 
-All the images used as frames for the animation will be saved in the `demo_animation` directory, to create the animation run
+To create the animation run
 
     ./generate_animation.sh
 
 <p align="center">
 <img  style="center" src="readme_images/demo.gif" width="320" height="240">
 
-## Advanced usage
+## Gallery
 
-If you are a skilled user, by properly changing `demo()` proc in [project.nim](./src/project.nim), you can produce many other images. To give you an idea about what is feasible with this program, here is a selection to inspire you.
+Some examples of what can be done with our code are shown below. All the txt scene description are in the `examples` directory.
 
 <div style="text-align: center;">
 <table style="margin: 0px auto;">
     <tr>
         <td> 
-            <img src="readme_images/csg.jpeg" alt="Image 1" width="320" height="240">
+            <img src="readme_images/bowl.png" alt="Image 1" width="320" height="240">
         </td>
         <td> 
-            <img src="readme_images/earth.jpeg" alt="Image 2" width="320" height="240">
+            <img src="readme_images/complete.png" alt="Image 2" width="320" height="240">
         </td>
     </tr>
     <tr>
         <td> 
-            <img src="readme_images/demo_a_flat.png" alt="Image 2" width="320" height="240">
+            <img src="readme_images/cornellbox.png" alt="Image 2" width="320" height="240">
         </td>
         <td> 
-            <img src="readme_images/mirrors.png" alt="Image 3" width="320" height="240">
+            <img src="readme_images/spheres.png" alt="Image 3" width="320" height="240">
+        </td>
+    </tr>
+    <tr>
+        <td> 
+            <img src="readme_images/table.png" alt="Image 2" width="320" height="240">
         </td>
     </tr>
 </table>
