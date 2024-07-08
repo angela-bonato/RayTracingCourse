@@ -1,11 +1,11 @@
 
 material wall_mat(
-    diffuse( image("examples/brick_texture.pfm")),
+    diffuse( image("examples/textures/brick_texture.pfm")),
     uniform(<0,0,0>)
 )
 
 material table_mat(
-    diffuse( image("examples/wood_texture.pfm")),
+    diffuse( image("examples/textures/wood_texture.pfm")),
     uniform(<0,0,0>)
 )
 
@@ -15,7 +15,7 @@ material sky_mat(
 )
 
 material sphere_mat(
-    diffuse( image("examples/flower_texture.pfm")),
+    diffuse( image("examples/textures/flower_texture.pfm")),
     uniform(<0,0,0>)
 )
 

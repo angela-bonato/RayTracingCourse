@@ -1,15 +1,15 @@
 material table_mat(
-    diffuse( image("examples/wood_texture.pfm")),
+    diffuse( image("examples/textures/wood_texture.pfm")),
     uniform(<0,0,0>)
 )
 
 material fridge_mat(
     mixed( image("examples/fridge_texture.pfm"), 0.4 ),
-    uniform(<0,0,0>)
+    uniform(<0,0,0>)textures/
 )
 
 material orange_mat(
-    diffuse( image("examples/orange_texture.pfm") ),
+    diffuse( image("examples/textures/orange_texture.pfm") ),
     uniform(<0,0,0>)
 )
 
@@ -19,12 +19,12 @@ material floor_mat(
 )
 
 material backwall_mat(
-    diffuse( image("examples/wall_texture.pfm") ),
+    diffuse( image("examples/textures/wall_texture.pfm") ),
     uniform(<0,0,0>)
 )
 
 material sidewall_mat(
-    diffuse( image("examples/brick_texture.pfm") ),
+    diffuse( image("examples/textures/brick_texture.pfm") ),
     uniform(<0,0,0>)
 )
 
@@ -34,12 +34,12 @@ material light_mat(
 )
 
 material floor_mat(
-    diffuse( image("examples/moquette_texture.pfm") ),
+    diffuse( image("examples/textures/moquette_texture.pfm") ),
     uniform(<0,0,0>)
 )
 
 material bowl_mat(
-    diffuse( image("examples/flower_texture.pfm")),
+    diffuse( image("examples/textures/flower_texture.pfm")),
     uniform(<0,0,0>)
 )
 

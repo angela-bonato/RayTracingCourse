@@ -1,34 +1,33 @@
-material sky_material(
-    diffuse(uniform(<0, 0, 0>)),
-    uniform(<0.7, 0.5, 1>)
+material sky_mat(
+    diffuse( uniform(<0,0,0>) ),
+    uniform(<1.0, 0.9, 0.5>)
 )
 
-material ground_material(
-    diffuse(checkered(<0.3, 0.5, 0.1>,
-                      <0.1, 0.2, 0.5>, 
-                      4, 4)),
-    uniform(<0, 0, 0>)
+material ground_mat(
+    diffuse( checkered( <0.3,0.5,0.1>,
+                        <0.1,0.2,0.5>,
+                        4,4 )),
+    uniform(<0,0,0>)
 )
 
-material sphere_material1(
-    specular(uniform(<0.25, 0.75, 0.25>)),
-    uniform(<0, 0, 0>)
+material sph1_mat(
+    diffuse( uniform(<0.3,0.4,0.8>) ),
+    uniform(<0,0,0>)
 )
 
-material sphere_material2(
-    specular(uniform(<0.75, 0.25, 0.25>)),
-    uniform(<0, 0, 0>)
+material sph2_mat(
+    specular( uniform(<0.6,0.2,0.3>) ),
+    uniform(<0,0,0>)
 )
 
-material sphere_material3(
-    specular(uniform(<0.25, 0.25, 0.75>)),
-    uniform(<0, 0, 0>)
-)
+sphere( sky_mat, scaling(200,200,200) )
+sphere( sph1_mat, translation([0,0,1]) )
+sphere( sph2_mat, translation([1,2.5,0]) )
+plane( ground_mat, identity)
 
-sphere( sky_material, scaling(100,100,100) )
-sphere( sphere_material1, translation([1,0,0.5]) )
-sphere( sphere_material2, translation([2,3,0.5]) )
-sphere( sphere_material3, translation([2,-3,0.5]) )
-plane( ground_material, identity)
+camera( perspective, translation([-5,0.5,3])*rotation_y(0.2), 1.3333, 1 )
 
-camera(perspective, translation([ -1, 0, 1 ]), 1.3333, 1)
+
+
+
+
