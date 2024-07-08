@@ -129,23 +129,26 @@ Some examples of what can be done with our code are shown below. All the txt sce
 <table style="margin: 0px auto;">
     <tr>
         <td> 
-            <img src="readme_images/bowl.png" alt="Image 1" width="320" height="240">
+            <img src="readme_images/bowl.png" alt="Image 2" width="320" height="240">
         </td>
         <td> 
-            <img src="readme_images/complete.png" alt="Image 2" width="320" height="240">
+            <img src="readme_images/table.png" alt="Image 3" width="320" height="240">
         </td>
     </tr>
     <tr>
+        <td> 
+            <img src="readme_images/complete.png" alt="Image 1" width="320" height="240">
+        </td>
         <td> 
             <img src="readme_images/cornellbox.png" alt="Image 2" width="320" height="240">
         </td>
-        <td> 
-            <img src="readme_images/spheres.png" alt="Image 3" width="320" height="240">
-        </td>
     </tr>
     <tr>
         <td> 
-            <img src="readme_images/table.png" alt="Image 2" width="320" height="240">
+            <img src="readme_images/spheres_path.png" alt="Image 1" width="320" height="240">
+        </td>
+        <td> 
+            <img src="readme_images/spheres_flat.png" alt="Image 2" width="320" height="240">
         </td>
     </tr>
 </table>
