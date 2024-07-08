@@ -1,0 +1,57 @@
+#this is a comment
+
+#materials definitions
+#each material should be introduced with "material" keyword and then a name with which we can identify it
+
+material sky_material(                  
+    diffuse(uniform(<0, 0, 0>)),                                     #this is the BRDF, a uniform pigment in this case
+    uniform(<0.6, 0.8, 1>)                                           #this is the emitted radiance, a uniform pigment
+)                   
+
+material ground_material(                   
+    diffuse(checkered(<0.17, 0.79, 0.19>,                            #here the BRDF is given by a checkered pigment
+                      <1, 0.8, 0.89>,               
+                      5, 5)),               
+    uniform(<0, 0, 0>)                                               #this means that the material does not emit
+)       
+
+material paral_material1(                                        
+    specular(uniform(<0.4, 0.4, 1>)),                                #specular BRDF reflects like a mirror
+    uniform(<0, 0, 0>)                                               
+)                   
+
+material paral_material2(                                             
+    diffuse(image("sassi.pfm")),                                     #this pigment is a texture saved as a pfm image
+    uniform(<0, 0, 0>)                                      
+)                   
+
+material sphere_material1(      
+    specular(uniform(<1, 0.4, 0.4>)),        
+    uniform(<0, 0, 0>)      
+)       
+
+material sphere_material2(      
+    diffuse(uniform(<1, 0.69, 0.4>)),                                     
+    uniform(<0, 0, 0>)      
+)       
+
+#shapes definitions                 
+
+sphere(sky_material, scaling(100,100,100))                           #a sphere with radius 100 centered in the origin
+
+plane(ground_material, identity)                                     #an horizontal plane at z=0
+
+unite(                                                               #union of two shapes realized via CSG
+    parallelepiped(paral_material1, 
+        translation([0, -2, 0])*rotation_z(0.65),                  
+        (1.2, 1.2, 2.5)),                                            #this the maximum point of the parallelepiped (minimum is always the origin)
+    parallelepiped(paral_material2, 
+        translation([0, -3, 2])*rotation_x(0.57), (1, 1, 1))) 
+
+sphere(sphere_material1, translation([0, 2, 0.5]))
+
+sphere(sphere_material2, translation([0, 2, 2.2])*scaling(0.7, 0.7, 0.7))
+
+#camera definition
+
+camera(perspective, translation([-3, 0, 1.7]), 1.3333, 1)             #a perspective camera
