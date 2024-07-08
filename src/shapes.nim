@@ -230,7 +230,50 @@ proc point_to_uv*(shape : Shape, point : Point) : Vec2d =
         assert false, "Invalid Shape.kind found"
 
 proc all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]]
-proc have_inside*( shape : Shape, point : Point) : bool
+
+proc have_inside*( shape : Shape, point : Point) : bool =
+    if shape.kind == Sphere :
+        ## Check if a point is inside a sphere
+        var inv_point = point_to_vec( shape.transformation.inverse() * point )
+
+        if inv_point.squared_norm() < 1:
+            return true
+        else:
+            return false
+    elif shape.kind == Plane :
+        ## Check if a point is inside a plane -> mean that the point z is negative
+        var inv_point = shape.transformation.inverse() * point
+        if inv_point.z < 0 :
+            return true
+        else: 
+            return false
+    elif shape.kind == Parallelepiped :
+        ## Check if a point is inside a parallelepiped 
+        var inv_point = shape.transformation.inverse() * point
+        if (inv_point.x > shape.pmin.x and inv_point.x < shape.pmax.x) and (inv_point.y > shape.pmin.y and inv_point.y < shape.pmax.y) and (inv_point.z > shape.pmin.z and inv_point.z < shape.pmax.z) :
+            return true
+        else:
+            return false
+    elif shape.kind == ShapesUnion:
+        ## Compute if an union of shapes have inside a point
+        if shape.u_shape1.have_inside(point) or shape.u_shape2.have_inside(point):  # simple logic operation
+            return true
+        else:
+            return false
+    elif shape.kind == ShapesIntersection:
+        ## Check if a point is inside an intersection of shapes
+        if shape.i_shape1.have_inside(point) and shape.i_shape2.have_inside(point):        # simple logic operation 
+            return true
+        else:
+            return false
+    elif shape.kind == ShapesDifference:
+        ## Check if a point is inside a difference between shape1 and shape2
+        if shape.d_shape1.have_inside(point) and not shape.d_shape2.have_inside(point):        # simple logic operation 
+            return true
+        else:
+            return false
+    else:
+        assert false, "Invalid Shape.kind found"
 
 proc ray_intersection*(shape : Shape, ray : Ray) : Option[HitRecord] =
 
@@ -692,12 +735,15 @@ proc all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] =
                             surface_point = shape.point_to_uv(hit_point),
                             t = ts[0],
                             ray = ray))
-        hit_point = inv_ray.at(ts[1])
-        hits.add(shape.newHitRecord(world_point = shape.transformation * hit_point , 
-                            normal = shape.transformation * shape.shape_normal( hit_point, inv_ray.dir ),
-                            surface_point = shape.point_to_uv(hit_point),
-                            t = ts[1],
-                            ray = ray))
+
+        if len(ts)>1 :
+            hit_point = inv_ray.at(ts[1])
+            hits.add(shape.newHitRecord(world_point = shape.transformation * hit_point , 
+                                normal = shape.transformation * shape.shape_normal( hit_point, inv_ray.dir ),
+                                surface_point = shape.point_to_uv(hit_point),
+                                t = ts[1],
+                                ray = ray))
+
         return some(hits)
 
     elif shape.kind == ShapesUnion:
@@ -781,50 +827,6 @@ proc all_ray_intersections*(shape : Shape, ray : Ray) : Option[seq[HitRecord]] =
             if len(diff_intersections) == 0: return none(seq[HitRecord]) 
             return some(diff_intersections)
 
-    else:
-        assert false, "Invalid Shape.kind found"
-        
-proc have_inside*( shape : Shape, point : Point) : bool =
-    if shape.kind == Sphere :
-        ## Check if a point is inside a sphere
-        var inv_point = point_to_vec( shape.transformation.inverse() * point )
-
-        if inv_point.squared_norm() < 1:
-            return true
-        else:
-            return false
-    elif shape.kind == Plane :
-        ## Check if a point is inside a plane -> mean that the point z is negative
-        var inv_point = shape.transformation.inverse() * point
-        if inv_point.z < 0 :
-            return true
-        else: 
-            return false
-    elif shape.kind == Parallelepiped :
-        ## Check if a point is inside a parallelepiped 
-        var inv_point = shape.transformation.inverse() * point
-        if (inv_point.x > shape.pmin.x and inv_point.x < shape.pmax.x) and (inv_point.y > shape.pmin.y and inv_point.y < shape.pmax.y) and (inv_point.z > shape.pmin.z and inv_point.z < shape.pmax.z) :
-            return true
-        else:
-            return false
-    elif shape.kind == ShapesUnion:
-        ## Compute if an union of shapes have inside a point
-        if shape.u_shape1.have_inside(point) or shape.u_shape2.have_inside(point):  # simple logic operation
-            return true
-        else:
-            return false
-    elif shape.kind == ShapesIntersection:
-        ## Check if a point is inside an intersection of shapes
-        if shape.i_shape1.have_inside(point) and shape.i_shape2.have_inside(point):        # simple logic operation 
-            return true
-        else:
-            return false
-    elif shape.kind == ShapesDifference:
-        ## Check if a point is inside a difference between shape1 and shape2
-        if shape.d_shape1.have_inside(point) and not shape.d_shape2.have_inside(point):        # simple logic operation 
-            return true
-        else:
-            return false
     else:
         assert false, "Invalid Shape.kind found"
 
