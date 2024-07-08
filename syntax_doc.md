@@ -4,15 +4,15 @@
 
 ### vector
 
-A vector can be expressed as [x,y,z],
+A vector can be expressed as `[x,y,z]` .
 
 ### point
 
-A point can be expressed as (x,y,z)
+A point can be expressed as `(x,y,z)` .
 
 ### color
 
-A color can be expressed as <r,g,b>
+A color can be expressed as `<r,g,b>` .
 
 ### transformation
 
@@ -98,7 +98,7 @@ It creates a parallelepiped with vertices in 'origin' and in 'point'.
 
 ### csg
 
-Csg (Constructive Solid Geometry ) allows you to create complicated shapes with simple operation between shapes, the allowed operations are:
+CSG (Constructive Solid Geometry ) allows you to create complicated shapes with simple operation between shapes, the implemented operations are:
 
 - union &emsp;&emsp;&emsp;&emsp;&nbsp; -> unite shape1 and shape2
 - intersection &emsp;&ensp; -> intersect shape1 and shape2
@@ -117,7 +117,7 @@ Camera syntax is:
 
       camera( kind_of_camera, transformation, aspect_ratio, distance)
 
-Where kind_of_camera could be:
+Where 'kind_of_camera' can be:
 - perspective
 - orthogonal
 
