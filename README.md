@@ -88,7 +88,7 @@ Here are some example of the conversion of the file `memorial.pfm` using differe
 
 Use this option to create an image. The scene disposition has to be written in a txt file, using an easy lenguage we created and which basic syntax is explained in [this file](syntax_doc.md). 
 
-All the txt files in `examples` are written in that lenguage, so you can see them as references.
+All the txt files in `examples/` are written in that lenguage, so you can see them as references.
 
 To use this program as a ray-tracer and produce a demo image run
 
@@ -112,7 +112,7 @@ You can create the frames runnig (it requires to have *parallel* installed)
 
     parallel -j <NUM_CORES> ./generate_image.sh '{}' ::: $(seq 0 359) <txt_scene_description>
 
-All the images used as frames for the animation will be saved in the `animation` directory.
+All the images used as frames for the animation will be saved in the `animation/` directory.
 
 To create the animation run
 
@@ -123,7 +123,7 @@ To create the animation run
 
 ## Gallery
 
-Some examples of what can be done with our code are shown below. All the txt scene description are in the `examples` directory.
+Some examples of what can be done with our code are shown below. All the txt scene description are in the `examples/` directory.
 
 <div style="text-align: center;">
 <table style="margin: 0px auto;">
