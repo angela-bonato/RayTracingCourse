@@ -1,6 +1,7 @@
 # v1.0.0
 
 - Implement a compiler to allow the user to describe the scene in a .txt file
+- Fixed bug in cgs
 
 # v0.3.0
 
